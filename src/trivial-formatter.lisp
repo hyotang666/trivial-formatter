@@ -15,3 +15,9 @@
 (defstruct dot)
 (defmethod print-object ((dot dot) stream)
   (princ #\. stream))
+
+(defstruct line-comment
+  content)
+(defmethod print-object ((line line-comment) stream)
+  (format stream ";~@[~A~]~%"
+          (line-comment-content line)))
