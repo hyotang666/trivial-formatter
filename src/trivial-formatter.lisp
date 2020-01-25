@@ -21,3 +21,8 @@
 (defmethod print-object ((line line-comment) stream)
   (format stream ";~@[~A~]~%"
           (line-comment-content line)))
+
+(defstruct block-comment
+  content)
+(defmethod print-object ((comment block-comment) stream)
+  (write-line (block-comment-content comment)))
