@@ -15,27 +15,11 @@
                       (eof-error-p T)
                       (eof-value nil)
                       (recursive-p nil))
-  (flet ((may-peek ()
-           (let ((return
-                   (peek-char (null recursive-p)
-                              nil
-                              eof-error-p
-                              eof-value
-                              recursive-p)))
-             (if (eq return eof-value)
-               (return-from read-as-code eof-value)
-               return))))
-    (let* ((*readtable*
-             (named-readtables:find-readtable 'as-code))
-           (*standard-input*
-             (or stream *standard-input*))
-           (char
-             (may-peek)))
-      (if (get-macro-character (if recursive-p
-                                 (may-peek)
-                                 char))
-        (read *standard-input* eof-error-p eof-value recursive-p)
-        (read)))))
+  (let* ((*readtable*
+           (named-readtables:find-readtable 'as-code))
+         (*standard-input*
+           (or stream *standard-input*)))
+    (read *standard-input* eof-error-p eof-value recursive-p)))
 
 ;;;; META-OBJECT
 ;;; DOT
