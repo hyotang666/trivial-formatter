@@ -47,3 +47,7 @@
         :and :do (loop-finish)
         ;; The default.
         :else :collect (read-as-code stream t t t)))
+
+(defun |line-comment-reader| (stream character)
+  (declare (ignore character))
+  (make-line-comment :content (read-line stream)))
