@@ -86,8 +86,8 @@
   (with-open-file(input (asdf:component-pathname component))
     (loop :with tag = '#:end
           :for exp = (read-as-code input nil tag)
-          :do (format t "~%~:[~(~S~)~%~;~S~]"
           :until (eq exp tag)
+          :do (format t "~:[~&~(~S~)~2%~;~S~]"
                       (or (stringp exp)
                           (comment-p exp))
                       exp))))
