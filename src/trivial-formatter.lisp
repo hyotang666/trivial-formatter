@@ -43,16 +43,16 @@
 (defmethod print-object ((dot dot) stream)
   (princ #\. stream))
 
-(defstruct line-comment
-  content)
+(defstruct comment content)
+
+(defstruct (line-comment (:include comment)))
 (defmethod print-object ((line line-comment) stream)
   (format stream ";~@[~A~]~%"
-          (line-comment-content line)))
+          (comment-content line)))
 
-(defstruct block-comment
-  content)
+(defstruct (block-comment (:include comment)))
 (defmethod print-object ((comment block-comment) stream)
-  (write-line (block-comment-content comment)))
+  (write-line (comment-content comment)))
 
 (defstruct conditional
   char)
