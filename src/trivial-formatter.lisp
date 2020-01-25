@@ -26,3 +26,9 @@
   content)
 (defmethod print-object ((comment block-comment) stream)
   (write-line (block-comment-content comment)))
+
+(defstruct conditional
+  char)
+(defmethod print-object ((c conditional) stream)
+  (format stream "#~A"
+          (conditional-char c)))
