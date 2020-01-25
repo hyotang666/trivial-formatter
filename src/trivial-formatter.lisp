@@ -10,3 +10,11 @@
   (dolist (component (asdf:component-children (asdf:find-system system)))
     (funcall *output-hook* component)))
 
+(defun component-codes (component)
+  (let ((pathname
+          (asdf:component-pathname component)))
+    (with-open-file(input pathname)
+      (loop :for code = (read-as-string:read-as-string input nil nil)
+            :while code
+            :collect code))))
+
