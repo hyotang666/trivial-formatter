@@ -51,3 +51,6 @@
 (defun |line-comment-reader| (stream character)
   (declare (ignore character))
   (make-line-comment :content (read-line stream)))
+
+(defun |block-comment-reader| (stream number character)
+  (make-block-comment :content (funcall #'read-as-string::|#\|reader| stream number character)))

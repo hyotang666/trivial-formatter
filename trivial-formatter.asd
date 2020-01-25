@@ -2,9 +2,11 @@
 (in-package :asdf)
 (defsystem "trivial-formatter"
   :version
-  "0.9.0"
+  "0.10.0"
   :depends-on
-  nil
+  (
+   "read-as-string" ; Read S-Expression as string.
+   )
   :pathname
   "src/"
   :components
