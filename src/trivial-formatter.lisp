@@ -60,3 +60,13 @@
   (warn "A numeric argument is ignored in #~A~A."
         number character)
   (make-conditional :char character))
+
+(named-readtables:defreadtable as-code
+  (:merge :common-lisp)
+  (:macro-char #\( '|paren-reader|)
+  (:macro-char #\. '|dot-reader| t)
+  (:macro-char #\; '|line-comment-reader|)
+  (:dispatch-macro-char #\# #\| '|block-comment-reader|)
+  (:dispatch-macro-char #\# #\+ '|#+-reader|)
+  (:dispatch-macro-char #\# #\- '|#+-reader|)
+  )
