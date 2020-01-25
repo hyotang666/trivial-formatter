@@ -47,7 +47,7 @@
 
 (defstruct (line-comment (:include comment)))
 (defmethod print-object ((line line-comment) stream)
-  (format stream ";~@[~A~]~%"
+  (format stream ";~@[~A~]"
           (comment-content line)))
 
 (defstruct (block-comment (:include comment)))
