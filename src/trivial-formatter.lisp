@@ -67,7 +67,7 @@
 
 (defun |paren-reader|(stream character)
   (declare(ignore character))
-  (loop :for char = (peek-char nil stream)
+  (loop :for char = (peek-char t stream)
         ;; end check.
         :if (char= #\) char)
         :do (read-char stream)
