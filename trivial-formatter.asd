@@ -2,7 +2,7 @@
 (in-package :asdf)
 (defsystem "trivial-formatter"
   :version
-  "0.6.0"
+  "0.7.0"
   :depends-on
   nil
   :pathname

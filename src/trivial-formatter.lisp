@@ -32,3 +32,8 @@
 (defmethod print-object ((c conditional) stream)
   (format stream "#~A"
           (conditional-char c)))
+
+;;;; MACRO CHARS
+(defun |dot-reader| (stream character)
+  (declare(ignore stream character))
+  (make-dot))
