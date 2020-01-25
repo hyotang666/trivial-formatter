@@ -97,3 +97,14 @@
   (:dispatch-macro-char #\# #\+ '|#+-reader|)
   (:dispatch-macro-char #\# #\- '|#+-reader|)
   )
+
+(defun debug-printer (component)
+  (with-open-file(input (asdf:component-pathname component))
+    (loop :with tag = '#:end
+          :for exp = (read-as-code input nil tag)
+          :unless (eq exp tag)
+          :do (format t "~%~:[~(~S~)~%~;~S~]"
+                      (or (stringp exp)
+                          (comment-p exp))
+                      exp))))
+
