@@ -70,8 +70,8 @@
   (loop :for char = (peek-char nil stream)
         ;; end check.
         :if (char= #\) char)
-        :collect (read-char stream)
-        :and :do (loop-finish)
+        :do (read-char stream)
+        (loop-finish)
         ;; The default.
         :else :collect (read-as-code stream t t t)))
 
