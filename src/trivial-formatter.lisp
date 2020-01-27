@@ -89,3 +89,7 @@
                           (comment-p exp))
                       exp))))
 
+(defun initialize-pprint-dispatch()
+  (set-pprint-dispatch '(eql #\space)
+                       (lambda(stream object)
+                         (format stream "#\\~:C" object))))
