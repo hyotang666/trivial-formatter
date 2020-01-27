@@ -93,3 +93,81 @@
   (set-pprint-dispatch '(eql #\space)
                        (lambda(stream object)
                          (format stream "#\\~:C" object))))
+
+(defun print-as-code (exp)
+  (let((*print-case*
+         :downcase)
+       (*print-pprint-dispatch*
+         (copy-pprint-dispatch)))
+    (initialize-pprint-dispatch)
+    (typecase exp
+      (comment
+        (format t "~A" (comment-content exp)))
+      (t
+        (let((comments
+               (remove-if-not #'comment-p
+                              (alexandria:flatten exp) ; NIY sbcl backquote.
+                              )))
+          (if(null comments)
+            (format t "~&~S~2%" exp)
+            (let*((code(format nil "~&~S~2%" exp))
+                  (lines (uiop:split-string code :separator '(#\newline))))
+              (loop :for (first . rest) :on lines
+                    :with previous
+                    :do
+                    (let((count (count #\null first)))
+                      (case count ; how many comment in line?
+                        (0 (format t "~&~A" first))
+                        (1 (let((comment
+                                  (pop comments)))
+                             (typecase comment
+                               (line-comment
+                                 (if (char= #\; (char (comment-content comment) 1)) ; i.e. ;; or ;;; etc.
+                                   (format t "~%~A~&~VT~A"
+                                           (string-right-trim '(#\null #\space)
+                                                              first)
+                                           (position-if-not (lambda(char)
+                                                              (char= #\space char))
+                                                            (car rest))
+                                           (comment-content comment))
+                                   ;; Comment as '; hoge'.
+                                   (cond
+                                     ((let((position
+                                             (position #\null first)))
+                                        (and (array-in-bounds-p first (1+ position))
+                                             (char= #\) (char first (1+ position)))))
+                                      (if (loop :for index :upfrom 0
+                                                :until (char= #\null (char first index))
+                                                :always (char= #\space (char first index)))
+                                        (format t " ~A~A"
+                                                (comment-content comment)
+                                                (remove #\null first))
+                                        (progn
+                                          (fresh-line)
+                                          (write-string first nil
+                                                        :end (position #\null first))
+                                          (format t "~A" (comment-content comment))
+                                          (format t "~VT"
+                                                  (1+ (position
+                                                        #\space first
+                                                        :start (1+ (position-if
+                                                                     (lambda(char)
+                                                                       (not (char= #\space char)))
+                                                                     first)))))
+                                          (write-string first nil :start (1+ (position #\null first))))))
+                                     ((string= "" (string-trim '(#\null #\space)
+                                                               first))
+                                      (format t " ~A" (comment-content comment)))
+                                     (t
+                                       (format t "~A ~A"
+                                               (string-right-trim '(#\null)
+                                                                  first)
+                                               (comment-content comment))))))
+                               (block-comment
+                                 (write-string (string-right-trim '(#\null #\space)
+                                                                  first))
+                                 (format t " ~A" (comment-content comment))))))
+                        (otherwise
+                          (error "NIY"))))
+                    (setf previous first))
+              (terpri))))))))
