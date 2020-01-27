@@ -28,15 +28,12 @@
   (princ #\. stream))
 
 (defstruct comment content)
+(defmethod print-object ((object comment) stream)
+  (write-char #\Null stream) ; as place holder.
+  )
 
 (defstruct (line-comment (:include comment)))
-(defmethod print-object ((line line-comment) stream)
-  (format stream ";~@[~A~]~%"
-          (comment-content line)))
-
 (defstruct (block-comment (:include comment)))
-(defmethod print-object ((comment block-comment) stream)
-  (write-line (comment-content comment)))
 
 (defstruct conditional
   char)
