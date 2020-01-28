@@ -42,6 +42,11 @@
   (format stream "#~A"
           (conditional-char c)))
 
+(defstruct broken-symbol
+  notation)
+(defmethod print-object ((symbol broken-symbol)stream)
+  (write-string (broken-symbol-notation symbol) stream))
+
 ;;;; MACRO CHARS
 (defun |dot-reader| (stream character)
   (declare(ignore stream character))
