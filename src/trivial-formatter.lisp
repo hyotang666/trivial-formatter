@@ -20,7 +20,17 @@
            (named-readtables:find-readtable 'as-code))
          (*standard-input*
            (or stream *standard-input*)))
-    (read *standard-input* eof-error-p eof-value recursive-p)))
+    (if(get-macro-character(peek-char t))
+      (read *standard-input* eof-error-p eof-value recursive-p)
+      (let((notation
+             (read-as-string:read-as-string nil eof-error-p eof-value recursive-p)))
+        (handler-case(read-from-string notation)
+          (package-error(c)
+            (let((package
+                   (package-error-package c)))
+              (if (stringp package) ; No such package exists.
+                (make-broken-symbol :notation notation)
+                (error c)))))))))
 
 ;;;; META-OBJECT
 ;;; DOT
