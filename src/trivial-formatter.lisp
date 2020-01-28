@@ -135,6 +135,11 @@
                      (char= #\space char))
                    string))
 
+(defun always-space-till-null-p(string)
+  (loop :for index :upfrom 0
+        :until (char= #\null (char string index))
+        :always (char= #\space (char string index))))
+
 (defun print-as-code (exp)
   (let((*print-case*
          :downcase)
@@ -172,9 +177,7 @@
                                              (position #\null first)))
                                         (and (array-in-bounds-p first (1+ position))
                                              (char= #\) (char first (1+ position)))))
-                                      (if (loop :for index :upfrom 0
-                                                :until (char= #\null (char first index))
-                                                :always (char= #\space (char first index)))
+                                      (if (always-space-till-null-p first)
                                         (format t " ~A~A"
                                                 (comment-content comment)
                                                 (remove #\null first))
