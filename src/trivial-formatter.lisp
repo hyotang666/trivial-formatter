@@ -146,6 +146,44 @@
     (and (array-in-bounds-p string (1+ position))
          (char= #\) (char string (1+ position))))))
 
+(defun print-commented-line(comment first rest)
+  (typecase comment
+    (line-comment
+      (if (char= #\; (char (comment-content comment) 1)) ; i.e. ;; or ;;; etc.
+        (format t "~%~A~&~VT~A"
+                (string-right-trim '(#\null #\space)
+                                   first)
+                (position-of-not-space-char (car rest))
+                (comment-content comment))
+        ;; Comment as '; hoge'.
+        (cond
+          ((close-paren-after-comment-p first)
+           (if (always-space-till-null-p first)
+             (format t " ~A~A"
+                     (comment-content comment)
+                     (remove #\null first))
+             (progn
+               (fresh-line)
+               (write-string first nil
+                             :end (position #\null first))
+               (format t "~A" (comment-content comment))
+               (format t "~VT"
+                       (1+ (position #\space first
+                                     :start (1+ (position-of-not-space-char first)))))
+               (write-string first nil :start (1+ (position #\null first))))))
+          ((string= "" (string-trim '(#\null #\space)
+                                    first))
+           (format t " ~A" (comment-content comment)))
+          (t
+            (format t "~A ~A"
+                    (string-right-trim '(#\null)
+                                       first)
+                    (comment-content comment))))))
+    (block-comment
+      (write-string (string-right-trim '(#\null #\space)
+                                       first))
+      (format t " ~A" (comment-content comment)))))
+
 (defun print-as-code (exp)
   (let((*print-case*
          :downcase)
@@ -166,45 +204,7 @@
                     (let((count (count #\null first)))
                       (case count ; how many comment in line?
                         (0 (format t "~&~A" first))
-                        (1 (let((comment
-                                  (pop comments)))
-                             (typecase comment
-                               (line-comment
-                                 (if (char= #\; (char (comment-content comment) 1)) ; i.e. ;; or ;;; etc.
-                                   (format t "~%~A~&~VT~A"
-                                           (string-right-trim '(#\null #\space)
-                                                              first)
-                                           (position-of-not-space-char (car rest))
-                                           (comment-content comment))
-                                   ;; Comment as '; hoge'.
-                                   (cond
-                                     ((close-paren-after-comment-p first)
-                                      (if (always-space-till-null-p first)
-                                        (format t " ~A~A"
-                                                (comment-content comment)
-                                                (remove #\null first))
-                                        (progn
-                                          (fresh-line)
-                                          (write-string first nil
-                                                        :end (position #\null first))
-                                          (format t "~A" (comment-content comment))
-                                          (format t "~VT"
-                                                  (1+ (position
-                                                        #\space first
-                                                        :start (1+ (position-of-not-space-char first)))))
-                                          (write-string first nil :start (1+ (position #\null first))))))
-                                     ((string= "" (string-trim '(#\null #\space)
-                                                               first))
-                                      (format t " ~A" (comment-content comment)))
-                                     (t
-                                       (format t "~A ~A"
-                                               (string-right-trim '(#\null)
-                                                                  first)
-                                               (comment-content comment))))))
-                               (block-comment
-                                 (write-string (string-right-trim '(#\null #\space)
-                                                                  first))
-                                 (format t " ~A" (comment-content comment))))))
+                        (1 (print-commented-line (pop comments) first rest))
                         (otherwise
                           (error "NIY"))))
                     (setf previous first))
