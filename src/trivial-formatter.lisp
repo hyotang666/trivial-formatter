@@ -7,6 +7,7 @@
 (defparameter *output-hook* 'debug-printer)
 
 (defun fmt (system)
+  (asdf:load-system system)
   (dolist (component (asdf:component-children (asdf:find-system system)))
     (funcall *output-hook* component)))
 
