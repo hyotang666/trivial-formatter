@@ -86,6 +86,12 @@
           :until (eq exp tag)
           :do (print-as-code exp))))
 
+(defun shortest-package-name (package)
+  (car (sort (cons (package-name package)
+                   (copy-list(package-nicknames package)))
+             #'<
+             :key #'length)))
+
 (defparameter *pprint-dispatch*
   (let((*print-pprint-dispatch*
          (copy-pprint-dispatch)))
