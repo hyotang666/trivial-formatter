@@ -121,6 +121,8 @@
                          (lambda(stream object)
                            (format stream "#\\~:C" object)))
 
+    (set-pprint-dispatch 'symbol 'symbol-printer)
+
     *print-pprint-dispatch*))
 
 (defun collect-comments (exp)
