@@ -107,6 +107,13 @@
               (format out "~2,,,'0@A" num)))
     :defaults pathname))
 
+(defun call-with-file-exp(pathname callback)
+  (with-open-file(input pathname)
+    (loop :with tag = '#:end
+          :for exp = (read-as-code input nil tag)
+          :until (eq exp tag)
+          :do (funcall callback exp))))
+
 (defun renamer(component)
   (let*((pathname
           (asdf:component-pathname component))
