@@ -96,6 +96,11 @@
 
     *print-pprint-dispatch*))
 
+(defun collect-comments (exp)
+  (remove-if-not #'comment-p
+                 (alexandria:flatten exp) ; NIY sbcl backquote.
+                 ))
+
 (defun print-as-code (exp)
   (let((*print-case*
          :downcase)
@@ -106,9 +111,7 @@
         (format t "~A" (comment-content exp)))
       (t
         (let((comments
-               (remove-if-not #'comment-p
-                              (alexandria:flatten exp) ; NIY sbcl backquote.
-                              )))
+               (collect-comments exp)))
           (if(null comments)
             (format t "~&~S~2%" exp)
             (let*((code(format nil "~&~S~2%" exp))
