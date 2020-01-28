@@ -99,6 +99,14 @@
   (:dispatch-macro-char #\# #\- '|#+-reader|)
   )
 
+(defun renamed-pathname(pathname)
+  (make-pathname
+    :name (with-output-to-string(out)
+            (princ (pathname-name pathname)out)
+            (dolist(num (cdddr (nreverse(multiple-value-list (get-decoded-time)))))
+              (format out "~2,,,'0@A" num)))
+    :defaults pathname))
+
 (defun debug-printer (component)
   (with-open-file(input (asdf:component-pathname component))
     (loop :with tag = '#:end
