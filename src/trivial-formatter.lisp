@@ -1,7 +1,20 @@
 (in-package :cl-user)
 (defpackage :trivial-formatter
   (:use :cl)
-  (:export))
+  (:export
+    ;; Variable
+    #:*output-hook*
+    ;; Main api
+    #:fmt
+    ;; Useful helpers
+    #:read-as-code
+    #:print-as-code
+    ;; Hooker
+    #:debug-printer
+    #:renamer
+    #:appender
+    #:replacer
+    ))
 (in-package :trivial-formatter)
 
 (defparameter *output-hook* 'debug-printer)
