@@ -159,9 +159,8 @@
                (collect-comments exp)))
           (if(null comments)
             (format t "~&~S~2%" exp)
-            (let*((code(format nil "~&~S~2%" exp))
-                  (lines (uiop:split-string code :separator '(#\newline))))
-              (loop :for (first . rest) :on lines
+            (let((code(format nil "~&~S~2%" exp)))
+              (loop :for (first . rest) :on (uiop:split-string code :separator '(#\newline))
                     :with previous
                     :do
                     (let((count (count #\null first)))
