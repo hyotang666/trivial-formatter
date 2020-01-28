@@ -208,5 +208,5 @@
                         (1 (print-commented-line (pop comments) first rest))
                         (otherwise
                           (error "NIY"))))
-                    (setf previous first))
-              (terpri))))))))
+                    (setf previous first)
+                    :finally (terpri)))))))))
