@@ -18,15 +18,26 @@
 (in-package :trivial-formatter)
 
 ;;;; Variables.
+(declaim (type (or symbol function) *output-hook*))
 (defparameter *output-hook* 'debug-printer)
 
 ;;;; FMT
+(declaim (ftype (function ((or symbol string asdf:system))
+                          (values null &optional))
+                fmt))
 (defun fmt (system)
   (asdf:load-system system)
   (dolist (component (asdf:component-children (asdf:find-system system)))
     (funcall *output-hook* component)))
 
 ;;;; READ-AS-CODE
+(declaim (ftype (function (&optional
+                            (or null stream)
+                            boolean
+                            T
+                            boolean)
+                          (values t &optional))
+                read-as-code))
 (defun read-as-code (&optional
                       stream
                       (eof-error-p T)
@@ -117,6 +128,13 @@
   )
 
 ;;;; Hookers
+(declaim (ftype (function (asdf:component)
+                          (values null &optional))
+                debug-printer
+                renamer
+                appender
+                replacer))
+
 (defun renamed-pathname(pathname)
   (make-pathname
     :name (with-output-to-string(out)
@@ -144,11 +162,11 @@
                      (renamed-pathname pathname)
                      :direction :output
                      :if-does-not-exist :create)
-      (mapc #'write-line old))
+      (map nil #'write-line old))
     (with-open-file(*standard-output* pathname
                                       :direction :output
                                       :if-exists :supersede)
-      (mapc #'print-as-code new))))
+      (map nil #'print-as-code new))))
 
 (defun replacer(component)
   (let*((pathname
@@ -157,7 +175,7 @@
           (uiop:while-collecting(acc)
             (call-with-file-exp pathname #'acc))))
     (with-open-file(*standard-output* pathname :direction :output :if-exists :supersede)
-      (mapc #'print-as-code new))))
+      (map nil #'print-as-code new))))
 
 (defun appender(component)
   (let*((pathname
@@ -166,7 +184,7 @@
           (uiop:while-collecting(acc)
             (call-with-file-exp pathname #'acc))))
     (with-open-file(*standard-output* pathname :direction :output :if-exists :append)
-      (mapc #'print-as-code new))))
+      (map nil #'print-as-code new))))
 
 (defun debug-printer (component)
   (call-with-file-exp (asdf:component-pathname component)
@@ -275,6 +293,9 @@
                                        first))
       (format t " ~A" (comment-content comment)))))
 
+(declaim (ftype (function (T)
+                          (values null &optional))
+                print-as-code))
 (defun print-as-code (exp)
   (let((*print-case*
          :downcase)
