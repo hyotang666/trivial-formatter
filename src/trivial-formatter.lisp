@@ -120,11 +120,8 @@
         (old
           (uiop:read-file-string pathname))
         (new
-          (with-open-file(input pathname)
-            (loop :with tag = '#:end
-                  :for exp = (read-as-code input nil tag)
-                  :until (eq exp tag)
-                  :collect exp))))
+          (uiop:while-collecting(acc)
+            (call-with-file-exp pathname #'acc))))
     (with-open-file(*standard-output*
                      (renamed-pathname pathname)
                      :direction :output
@@ -136,11 +133,8 @@
       (mapc #'print-as-code new))))
 
 (defun debug-printer (component)
-  (with-open-file(input (asdf:component-pathname component))
-    (loop :with tag = '#:end
-          :for exp = (read-as-code input nil tag)
-          :until (eq exp tag)
-          :do (print-as-code exp))))
+  (call-with-file-exp (asdf:component-pathname component)
+                      #'print-as-code))
 
 (defun shortest-package-name (package)
   (reduce (lambda(chanpion challenger)
