@@ -17,13 +17,16 @@
     ))
 (in-package :trivial-formatter)
 
+;;;; Variables.
 (defparameter *output-hook* 'debug-printer)
 
+;;;; FMT
 (defun fmt (system)
   (asdf:load-system system)
   (dolist (component (asdf:component-children (asdf:find-system system)))
     (funcall *output-hook* component)))
 
+;;;; READ-AS-CODE
 (defun read-as-code (&optional
                       stream
                       (eof-error-p T)
@@ -102,6 +105,7 @@
         number character)
   (make-conditional :char character))
 
+;;;; NAMED-READTABLE
 (named-readtables:defreadtable as-code
   (:merge :common-lisp)
   (:macro-char #\( '|paren-reader|)
@@ -112,6 +116,7 @@
   (:dispatch-macro-char #\# #\- '|#+-reader|)
   )
 
+;;;; Hookers
 (defun renamed-pathname(pathname)
   (make-pathname
     :name (with-output-to-string(out)
@@ -167,6 +172,7 @@
   (call-with-file-exp (asdf:component-pathname component)
                       #'print-as-code))
 
+;;;; PRINT-AS-CODE
 (defun shortest-package-name (package)
   (reduce (lambda(chanpion challenger)
             (if(< (length chanpion)
