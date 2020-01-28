@@ -132,6 +132,15 @@
                                       :if-exists :supersede)
       (mapc #'print-as-code new))))
 
+(defun replacer(component)
+  (let*((pathname
+          (asdf:component-pathname component))
+        (new
+          (uiop:while-collecting(acc)
+            (call-with-file-exp pathname #'acc))))
+    (with-open-file(*standard-output* pathname :direction :output :if-exists :supersede)
+      (mapc #'print-as-code new))))
+
 (defun debug-printer (component)
   (call-with-file-exp (asdf:component-pathname component)
                       #'print-as-code))
