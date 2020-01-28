@@ -107,6 +107,27 @@
               (format out "~2,,,'0@A" num)))
     :defaults pathname))
 
+(defun renamer(component)
+  (let*((pathname
+          (asdf:component-pathname component))
+        (old
+          (uiop:read-file-string pathname))
+        (new
+          (with-open-file(input pathname)
+            (loop :with tag = '#:end
+                  :for exp = (read-as-code input nil tag)
+                  :until (eq exp tag)
+                  :collect exp))))
+    (with-open-file(*standard-output*
+                     (renamed-pathname pathname)
+                     :direction :output
+                     :if-does-not-exist :create)
+      (mapc #'write-line old))
+    (with-open-file(*standard-output* pathname
+                                      :direction :output
+                                      :if-exists :supersede)
+      (mapc #'print-as-code new))))
+
 (defun debug-printer (component)
   (with-open-file(input (asdf:component-pathname component))
     (loop :with tag = '#:end
