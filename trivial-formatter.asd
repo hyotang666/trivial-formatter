@@ -2,7 +2,7 @@
 (in-package :asdf)
 (defsystem "trivial-formatter"
   :version
-  "0.26.1"
+  "0.26.2"
   :depends-on
   (
    "read-as-string" ; Read S-Expression as string.

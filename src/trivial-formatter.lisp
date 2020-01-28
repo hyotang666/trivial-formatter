@@ -150,7 +150,8 @@
   (typecase comment
     (line-comment
       (cond
-        ((char= #\; (char (comment-content comment) 1)) ; i.e. ;; or ;;; etc.
+        ((char= #\; (char (comment-content comment) 1))
+         ;; Comment as ";; hoge" or ";;; hoge" etc..
          (format t "~%~A~&~VT~A"
                  (string-right-trim '(#\null #\space)
                                     first)
