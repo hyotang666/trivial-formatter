@@ -86,17 +86,21 @@
           :until (eq exp tag)
           :do (print-as-code exp))))
 
-(defun initialize-pprint-dispatch()
-  (set-pprint-dispatch '(eql #\space)
-                       (lambda(stream object)
-                         (format stream "#\\~:C" object))))
+(defparameter *pprint-dispatch*
+  (let((*print-pprint-dispatch*
+         (copy-pprint-dispatch)))
+
+    (set-pprint-dispatch '(eql #\space)
+                         (lambda(stream object)
+                           (format stream "#\\~:C" object)))
+
+    *print-pprint-dispatch*))
 
 (defun print-as-code (exp)
   (let((*print-case*
          :downcase)
        (*print-pprint-dispatch*
-         (copy-pprint-dispatch)))
-    (initialize-pprint-dispatch)
+         *pprint-dispatch*))
     (typecase exp
       (comment
         (format t "~A" (comment-content exp)))
