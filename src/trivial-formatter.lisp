@@ -130,6 +130,11 @@
                  (alexandria:flatten exp) ; NIY sbcl backquote.
                  ))
 
+(defun position-of-not-space-char(string)
+  (position-if-not (lambda(char)
+                     (char= #\space char))
+                   string))
+
 (defun print-as-code (exp)
   (let((*print-case*
          :downcase)
@@ -159,9 +164,7 @@
                                    (format t "~%~A~&~VT~A"
                                            (string-right-trim '(#\null #\space)
                                                               first)
-                                           (position-if-not (lambda(char)
-                                                              (char= #\space char))
-                                                            (car rest))
+                                           (position-of-not-space-char (car rest))
                                            (comment-content comment))
                                    ;; Comment as '; hoge'.
                                    (cond
@@ -183,10 +186,7 @@
                                           (format t "~VT"
                                                   (1+ (position
                                                         #\space first
-                                                        :start (1+ (position-if
-                                                                     (lambda(char)
-                                                                       (not (char= #\space char)))
-                                                                     first)))))
+                                                        :start (1+ (position-of-not-space-char first)))))
                                           (write-string first nil :start (1+ (position #\null first))))))
                                      ((string= "" (string-trim '(#\null #\space)
                                                                first))
