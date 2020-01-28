@@ -149,36 +149,36 @@
 (defun print-commented-line(comment first rest)
   (typecase comment
     (line-comment
-      (if (char= #\; (char (comment-content comment) 1)) ; i.e. ;; or ;;; etc.
-        (format t "~%~A~&~VT~A"
-                (string-right-trim '(#\null #\space)
-                                   first)
-                (position-of-not-space-char (car rest))
-                (comment-content comment))
+      (cond
+        ((char= #\; (char (comment-content comment) 1)) ; i.e. ;; or ;;; etc.
+         (format t "~%~A~&~VT~A"
+                 (string-right-trim '(#\null #\space)
+                                    first)
+                 (position-of-not-space-char (car rest))
+                 (comment-content comment)))
         ;; Comment as '; hoge'.
-        (cond
-          ((close-paren-after-comment-p first)
-           (if (always-space-till-null-p first)
-             (format t " ~A~A"
-                     (comment-content comment)
-                     (remove #\null first))
-             (progn
-               (fresh-line)
-               (write-string first nil
-                             :end (position #\null first))
-               (format t "~A" (comment-content comment))
-               (format t "~VT"
-                       (1+ (position #\space first
-                                     :start (1+ (position-of-not-space-char first)))))
-               (write-string first nil :start (1+ (position #\null first))))))
-          ((string= "" (string-trim '(#\null #\space)
-                                    first))
-           (format t " ~A" (comment-content comment)))
-          (t
-            (format t "~A ~A"
-                    (string-right-trim '(#\null)
-                                       first)
-                    (comment-content comment))))))
+        ((close-paren-after-comment-p first)
+         (if (always-space-till-null-p first)
+           (format t " ~A~A"
+                   (comment-content comment)
+                   (remove #\null first))
+           (progn
+             (fresh-line)
+             (write-string first nil
+                           :end (position #\null first))
+             (format t "~A" (comment-content comment))
+             (format t "~VT"
+                     (1+ (position #\space first
+                                   :start (1+ (position-of-not-space-char first)))))
+             (write-string first nil :start (1+ (position #\null first))))))
+        ((string= "" (string-trim '(#\null #\space)
+                                  first))
+         (format t " ~A" (comment-content comment)))
+        (t
+          (format t "~A ~A"
+                  (string-right-trim '(#\null)
+                                     first)
+                  (comment-content comment)))))
     (block-comment
       (write-string (string-right-trim '(#\null #\space)
                                        first))
