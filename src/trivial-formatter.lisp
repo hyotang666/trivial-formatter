@@ -140,6 +140,12 @@
         :until (char= #\null (char string index))
         :always (char= #\space (char string index))))
 
+(defun close-paren-after-comment-p(string)
+  (let((position
+         (position #\null string)))
+    (and (array-in-bounds-p string (1+ position))
+         (char= #\) (char string (1+ position))))))
+
 (defun print-as-code (exp)
   (let((*print-case*
          :downcase)
@@ -173,10 +179,7 @@
                                            (comment-content comment))
                                    ;; Comment as '; hoge'.
                                    (cond
-                                     ((let((position
-                                             (position #\null first)))
-                                        (and (array-in-bounds-p first (1+ position))
-                                             (char= #\) (char first (1+ position)))))
+                                     ((close-paren-after-comment-p first)
                                       (if (always-space-till-null-p first)
                                         (format t " ~A~A"
                                                 (comment-content comment)
