@@ -107,10 +107,13 @@
           :do (print-as-code exp))))
 
 (defun shortest-package-name (package)
-  (car (sort (cons (package-name package)
-                   (copy-list(package-nicknames package)))
-             #'<
-             :key #'length)))
+  (reduce (lambda(chanpion challenger)
+            (if(< (length chanpion)
+                  (length challenger))
+              chanpion
+              challenger))
+          (cons (package-name package)
+                (package-nicknames package))))
 
 (defun symbol-printer (stream object)
   (let((default-style
