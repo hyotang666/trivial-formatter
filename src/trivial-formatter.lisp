@@ -293,14 +293,16 @@
                                        first))
       (format t " ~A" (comment-content comment)))))
 
-(declaim (ftype (function (T)
+(declaim (ftype (function (T &optional (or null stream))
                           (values null &optional))
                 print-as-code))
-(defun print-as-code (exp)
+(defun print-as-code (exp &optional stream)
   (let((*print-case*
          :downcase)
        (*print-pprint-dispatch*
-         *pprint-dispatch*))
+         *pprint-dispatch*)
+       (*standard-output*
+         (or stream *standard-output*)))
     (typecase exp
       (comment
         (format t "~A" (comment-content exp)))
