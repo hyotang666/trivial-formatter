@@ -230,6 +230,11 @@
                       ;; Please do not ever use collon as package name!
                       (position #\: default-style))))))
 
+#+sbcl
+(defun pprint-handler-case(stream exp &rest noise)
+  (declare(ignore noise))
+  (funcall (formatter "~:<~^~W~^~3I ~:_~W~1I~@{ ~_~/sb-pretty::pprint-data-list/~}~:>") stream exp))
+
 (defparameter *pprint-dispatch*
   (let((*print-pprint-dispatch*
          (copy-pprint-dispatch)))
@@ -239,6 +244,9 @@
                            (format stream "#\\~:C" object)))
 
     (set-pprint-dispatch 'symbol 'symbol-printer)
+
+    #+sbcl
+    (set-pprint-dispatch '(cons (member handler-case)) 'pprint-handler-case)
 
     *print-pprint-dispatch*))
 
