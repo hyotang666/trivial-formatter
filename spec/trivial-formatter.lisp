@@ -121,6 +121,7 @@
 ; * Could not handle not standard reader macros.
 ; * Not support comment in #S, #A, #V reader macros.
 ; Comment will be discarded.
+; * Could not handle `*PRINT-CIRCLE*`.
 
 ;;;; Exceptional-Situations:
 
