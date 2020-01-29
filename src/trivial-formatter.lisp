@@ -305,7 +305,7 @@
              (fresh-line)
              (write-string first nil
                            :end (position #\null first))
-             (format t "~<; ~@;~^~@{~A~^ ~:_~}~:>~%" (uiop:split-string (comment-content comment)))
+             (format t "; ~A~%" (comment-content comment))
              (format t "~VT"
                      (1+ (position #\space first
                                    :start (1+ (position-of-not-space-char first)))))
