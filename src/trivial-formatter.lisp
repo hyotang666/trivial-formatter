@@ -56,6 +56,12 @@
         (let((notation
                (read-as-string:read-as-string nil eof-error-p eof-value recursive-p)))
           (handler-case(read-from-string notation)
+            #+ecl
+            (error(c)
+              (if(search "There is no package with the name"
+                         (princ-to-string c))
+                (make-broken-symbol :notation notation)
+                (error c)))
             (package-error(c)
               (let((package
                      (package-error-package c)))
