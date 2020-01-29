@@ -95,7 +95,10 @@
 (defstruct read-time-eval
   form)
 (defmethod print-object((form read-time-eval)stream)
-  (format stream "#.~S" (read-time-eval-form form)))
+  (let((string
+         (with-output-to-string(s)
+           (print-as-code (read-time-eval-form form) s))))
+    (format stream "#.~A" (string-left-trim '(#\newline) string))))
 
 ;;;; MACRO CHARS
 (defun |dot-reader| (stream character)
