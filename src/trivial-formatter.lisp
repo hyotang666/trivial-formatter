@@ -332,11 +332,3 @@
                           (error "NIY"))))
                     (setf previous first)
                     :finally (terpri)))))))))
-
-;;;; Implementation specific hacks.
-#+sbcl
-(unless(find :trivial-formatter *features*) ; First time.
-  (push :trivial-formatter *features*)
-  (if(eq '&rest #0=(second (sb-kernel:%fun-lambda-list (macro-function 'handler-case))))
-    (setf #0# '&body)
-    (warn "TRIVIAL-FORMATTER sbcl specific hack code should be removed.")))
