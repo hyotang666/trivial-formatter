@@ -323,6 +323,8 @@
     (typecase exp
       (comment
         (format t "~A" (comment-content exp)))
+      (conditional
+        (format t "~A" exp))
       (t
         (let((comments
                (collect-comments exp)))
