@@ -329,6 +329,21 @@
                                        first))
       (format t " ~A" (comment-content comment)))))
 
+(defun print-some-comment-line(comments first)
+  (loop :for char :across first
+        :while (char= #\space char)
+        :do (write-char char))
+  (let((list
+         (uiop:split-string (string-left-trim " "first)
+                            :separator '(#\nul))))
+    (format t "~<~^~@{~A~}~:>" (loop :for (elt . rest) :on list
+                                     :if rest
+                                     :collect elt
+                                     :and
+                                     :collect (with-output-to-string(s)
+                                                (print-as-code (pop comments) s))
+                                     :else :collect elt :and :do (loop-finish)))))
+
 (declaim (ftype (function (T &optional (or null stream))
                           (values null &optional))
                 print-as-code))
@@ -363,7 +378,7 @@
                                 (0 (format t "~&~A" first))
                                 (1 (print-commented-line (pop comments) first rest))
                                 (otherwise
-                                  (error "NIY"))))))))))))
+                                  (print-some-comment-line comments first))))))))))))
         (*standard-output*
           (or stream *standard-output*)))
     (loop :for line :in (uiop:split-string string :separator '(#\newline))
@@ -374,3 +389,4 @@
           :finally (unless(or (comment-p exp)
                               (conditional-p exp))
                      (terpri)))))
+
