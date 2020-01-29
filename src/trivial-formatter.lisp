@@ -2,8 +2,6 @@
 (defpackage :trivial-formatter
   (:use :cl)
   (:export
-    ;; Variable
-    #:*output-hook*
     ;; Main api
     #:fmt
     ;; Useful helpers
@@ -17,18 +15,16 @@
     ))
 (in-package :trivial-formatter)
 
-;;;; Variables.
-(declaim (type (or symbol function) *output-hook*))
-(defparameter *output-hook* 'debug-printer)
-
 ;;;; FMT
-(declaim (ftype (function ((or symbol string asdf:system))
+(declaim (ftype (function ((or symbol string asdf:system)
+                           &optional
+                           (or symbol function))
                           (values null &optional))
                 fmt))
-(defun fmt (system)
+(defun fmt (system &optional(formatter 'debug-printer))
   (asdf:load-system system)
   (dolist (component (asdf:component-children (asdf:find-system system)))
-    (funcall *output-hook* component)))
+    (funcall formatter component)))
 
 ;;;; READ-AS-CODE
 (declaim (ftype (function (&optional
@@ -55,7 +51,7 @@
         (read *standard-input* eof-error-p eof-value recursive-p)
         (let((notation
                (read-as-string:read-as-string nil eof-error-p eof-value recursive-p)))
-          (handler-case(read-from-string notation)
+          (handler-case(values(read-from-string notation))
             #+ecl
             (error(c)
               (if(search "There is no package with the name"

@@ -3,23 +3,6 @@
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
 
-(requirements-about *OUTPUT-HOOK* :doc-type variable)
-
-;;;; Description:
-; Bound function designator.
-; TRIVIAL-FORMATTER provides hook functions.
-; See `DEBUG-PRINTER`, `REPLACER`, `APPENDER`, or `RENAMER`.
-
-;;;; Value type is (OR SYMBOL FUNCTION)
-#? *OUTPUT-HOOK* :be-the (or symbol function)
-
-; Initial value is `DEBUG-PRINTER`
-
-;;;; Affected By:
-; FMT refers.
-
-;;;; Notes:
-
 (requirements-about FMT :doc-type function)
 
 ;;;; Description:
