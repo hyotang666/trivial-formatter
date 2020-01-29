@@ -83,7 +83,7 @@
   char
   condition)
 (defmethod print-object ((c conditional) stream)
-  (format stream "#~A~A"
+  (format stream "~_#~A~A"
           (conditional-char c)
           (conditional-condition c)))
 
