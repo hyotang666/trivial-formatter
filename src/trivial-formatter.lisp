@@ -317,6 +317,9 @@
         ((string= "" (string-trim '(#\null #\space)
                                   first))
          (format t " ~A" (comment-content comment)))
+        ((comment-at-first-p first)
+         (format t " ~A~A" (comment-content comment)
+                 (remove #\null first)))
         (t
           (let((exp
                  (mapcar (lambda(line)
