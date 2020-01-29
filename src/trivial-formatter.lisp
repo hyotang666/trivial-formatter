@@ -201,8 +201,8 @@
 
 ;;;; PRINT-AS-CODE
 (defun shortest-package-name (package)
-  (reduce (lambda(chanpion challenger)
-            (if(< (length chanpion)
+  (reduce (lambda(champion challenger)
+            (if(< (length champion)
                   (length challenger))
               chanpion
               challenger))
