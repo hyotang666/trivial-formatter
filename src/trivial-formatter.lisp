@@ -183,7 +183,7 @@
                      (renamed-pathname pathname)
                      :direction :output
                      :if-does-not-exist :create)
-      (map nil #'write-line old))
+      (write-line old))
     (with-open-file(*standard-output* pathname
                                       :direction :output
                                       :if-exists :supersede)
