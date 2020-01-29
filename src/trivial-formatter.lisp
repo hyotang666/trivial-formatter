@@ -377,5 +377,6 @@
                            (char= #\space char))
                          line)
           :do (write-line line)
-          :finally (unless(comment-p exp)
+          :finally (unless(or (comment-p exp)
+                              (conditional-p exp))
                      (terpri)))))
