@@ -98,7 +98,9 @@
   (let((string
          (with-output-to-string(s)
            (print-as-code (read-time-eval-form form) s))))
-    (format stream "#.~A" (string-trim '(#\newline) string))))
+    (format stream "~<#.~;~^~@{~A~^~:@_~}~:>"
+            (uiop:split-string (string-trim '(#\newline) string)
+                               :separator '(#\newline)))))
 
 ;;;; MACRO CHARS
 (defun |dot-reader| (stream character)
