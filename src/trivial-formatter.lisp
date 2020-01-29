@@ -96,6 +96,11 @@
 (defmethod print-object ((symbol broken-symbol)stream)
   (write-string (broken-symbol-notation symbol) stream))
 
+(defstruct read-time-eval
+  form)
+(defmethod print-object((form read-time-eval)stream)
+  (format stream "#.~S" (read-time-eval-form form)))
+
 ;;;; MACRO CHARS
 (defun |dot-reader| (stream character)
   (declare(ignore stream character))
@@ -125,6 +130,12 @@
   (make-conditional :char character
                     :condition (read-as-code stream)))
 
+(defun |#.reader|(stream character number)
+  (declare(ignore character))
+  (when number
+    (warn "A numeric argument is ignored in read time eval."))
+  (make-read-time-eval :form (read-as-code stream t t t)))
+
 ;;;; NAMED-READTABLE
 (named-readtables:defreadtable as-code
   (:merge :common-lisp)
@@ -134,6 +145,7 @@
   (:dispatch-macro-char #\# #\| '|block-comment-reader|)
   (:dispatch-macro-char #\# #\+ '|#+-reader|)
   (:dispatch-macro-char #\# #\- '|#+-reader|)
+  (:dispatch-macro-char #\# #\. '|#.reader|)
   )
 
 ;;;; Hookers
