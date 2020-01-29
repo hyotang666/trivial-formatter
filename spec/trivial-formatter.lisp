@@ -9,7 +9,7 @@
 ; Format every source codes of asdf:system.
 
 #+syntax
-(FMT system) ; => result
+(FMT system &optional (formatter 'debug-printer)) ; => result
 
 ;;;; Arguments and Values:
 
@@ -17,14 +17,18 @@
 ; otherwise condition depending on implementation.
 #?(fmt '(invalid type)) :signals condition
 
+; formatter := (or symbol function) otherwise condition depending on implementation.
+#?(fmt :dummy "not (or symbol function)") :signals condition
+; FORMATTER must as (function (asdf:component)(values null &optional)).
+; See `DEBUG-PRINTER`, `REPLACER`, `RENAMER`, `APPENDER`.
+
 ; result := null
 
 ;;;; Affected By:
-; `*OUTPUT-HOOK*`
 
 ;;;; Side-Effects:
 ; Load asdf:system to lisp environment.
-; Depends on `*OUTPUT-HOOK*`, some side effect occurs.
+; Depends on FORMATTER, some side effect occurs.
 ; The default behavior is to print to `*STANDARD-OUTPUT*`.
 
 ;;;; Notes:
@@ -140,7 +144,7 @@
 (requirements-about DEBUG-PRINTER :doc-type function)
 
 ;;;; Description:
-; The default hook function for `*OUTPUT-HOOK*`.
+; The default formatter function for `FMT` optional parameter.
 ; Output component codes to `*STANDARD-OUTPUT*`.
 
 #+syntax
