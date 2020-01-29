@@ -273,7 +273,7 @@
                      (char= #\space char))
                    string))
 
-(defun always-space-till-null-p(string)
+(defun comment-at-first-p(string)
   (loop :for index :upfrom 0
         :until (char= #\null (char string index))
         :always (char= #\space (char string index))))
@@ -283,12 +283,6 @@
          (position #\null string)))
     (and (array-in-bounds-p string (1+ position))
          (char= #\) (char string (1+ position))))))
-
-(defun comment-at-first-p(string)
-  (let((string
-         (string-left-trim " " string)))
-    (and (array-in-bounds-p string 0)
-         (char= #\nul (char string 0)))))
 
 (defun print-commented-line(comment first rest)
   (typecase comment
@@ -303,7 +297,7 @@
                  (comment-content comment)))
         ;; Comment as '; hoge'.
         ((close-paren-after-comment-p first)
-         (if (always-space-till-null-p first)
+         (if (comment-at-first-p first)
            (format t " ~<; ~@;~^~@{~A~^ ~:_~}~:>~%~A"
                    (uiop:split-string(comment-content comment))
                    (remove #\null first))
