@@ -116,10 +116,11 @@
 (defun |block-comment-reader| (stream number character)
   (make-block-comment :content (funcall #'read-as-string::|#\|reader| stream number character)))
 
-(defun |#+-reader|(stream number character)
+(defun |#+-reader|(stream character number)
   (declare (ignore stream))
-  (warn "A numeric argument is ignored in #~A~A."
-        number character)
+  (when number
+    (warn "A numeric argument is ignored in #~A~A."
+          number character))
   (make-conditional :char character))
 
 ;;;; NAMED-READTABLE
