@@ -282,6 +282,12 @@
     (and (array-in-bounds-p string (1+ position))
          (char= #\) (char string (1+ position))))))
 
+(defun comment-at-first-p(string)
+  (let((string
+         (string-left-trim " " string)))
+    (and (array-in-bounds-p string 0)
+         (char= #\nul (char string 0)))))
+
 (defun print-commented-line(comment first rest)
   (typecase comment
     (line-comment
