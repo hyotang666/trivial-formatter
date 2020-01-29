@@ -337,35 +337,42 @@
                           (values null &optional))
                 print-as-code))
 (defun print-as-code (exp &optional stream)
-  (let((*print-case*
-         :downcase)
-       (*print-pprint-dispatch*
-         *pprint-dispatch*)
-       (*standard-output*
-         (or stream *standard-output*)))
-    (typecase exp
-      (line-comment
-        (let((content(comment-content exp)))
-          (if(and (array-in-bounds-p content 0)
-                  (char= #\; (char content 0)))
-            (format t ";~A~%" content)
-            (format t "; ~A~%" content))))
-      (comment
-        (format t "~A" (comment-content exp)))
-      (conditional
-        (format t "~A" exp))
-      (t
-        (let((comments
-               (collect-comments exp)))
-          (if(null comments)
-            (format t "~&~S~2%" exp)
-            (let((code(format nil "~&~S~2%" exp)))
-              (loop :for (first . rest) :on (uiop:split-string code :separator '(#\newline))
-                    :do
-                    (let((count (count #\null first)))
-                      (case count ; how many comment in line?
-                        (0 (format t "~&~A" first))
-                        (1 (print-commented-line (pop comments) first rest))
-                        (otherwise
-                          (error "NIY"))))
-                    :finally (terpri)))))))))
+  (let*((*print-case*
+          :downcase)
+        (*print-pprint-dispatch*
+          *pprint-dispatch*)
+        (string
+          (with-output-to-string(*standard-output*)
+            (typecase exp
+              (line-comment
+                (let((content(comment-content exp)))
+                  (if(and (array-in-bounds-p content 0)
+                          (char= #\; (char content 0)))
+                    (format t ";~A~%" content)
+                    (format t "; ~A~%" content))))
+              (comment
+                (format t "~A" (comment-content exp)))
+              (conditional
+                (format t "~A" exp))
+              (t
+                (let((comments
+                       (collect-comments exp)))
+                  (if(null comments)
+                    (format t "~&~S~2%" exp)
+                    (let((code(format nil "~&~S~2%" exp)))
+                      (loop :for (first . rest) :on (uiop:split-string code :separator '(#\newline))
+                            :do
+                            (let((count (count #\null first)))
+                              (case count ; how many comment in line?
+                                (0 (format t "~&~A" first))
+                                (1 (print-commented-line (pop comments) first rest))
+                                (otherwise
+                                  (error "NIY"))))
+                            :finally (terpri)))))))))
+        (*standard-output*
+          (or stream *standard-output*)))
+    (loop :for line :in (uiop:split-string string :separator '(#\newline))
+          :unless (every (lambda(char)
+                           (char= #\space char))
+                         line)
+          :do (write-line line))))
