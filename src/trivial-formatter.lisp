@@ -313,7 +313,7 @@
                                   first))
          (format t " ~A" (comment-content comment)))
         (t
-          (format t "~A ~A"
+          (format t "~%~A ~A"
                   (string-right-trim '(#\null)
                                      first)
                   (comment-content comment)))))
