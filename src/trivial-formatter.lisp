@@ -204,7 +204,7 @@
   (reduce (lambda(champion challenger)
             (if(< (length champion)
                   (length challenger))
-              chanpion
+              champion
               challenger))
           (cons (package-name package)
                 (package-nicknames package))))
