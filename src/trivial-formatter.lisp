@@ -288,7 +288,7 @@
   (string= "" (string-trim '(#\null #\space)
                            string)))
 
-(defun print-commented-line(comment first rest)
+(defun print-commented-line(comment first rest comments)
   (typecase comment
     (line-comment
       (cond
@@ -314,9 +314,16 @@
                      (1+ (position #\space first
                                    :start (1+ (position-of-not-space-char first)))))
              (write-string first nil :start (1+ (position #\null first))))))
-        ((string= "" (string-trim '(#\null #\space)
-                                  first))
-         (format t " ~<; ~@;~^~@{~A~^ ~:_~}~:>" (uiop:split-string(comment-content comment))))
+        ((only-comment-line-p first)
+         (if (and (car rest)
+                  (only-comment-line-p (car rest))
+                  (not(uiop:string-prefix-p #\; (comment-content (car comments)))))
+           (setf (comment-content (car comments))
+                 (format nil "~A ~A"
+                         (comment-content comment)
+                         (comment-content (car comments))))
+           (format t " ~<; ~@;~^~@{~A~^ ~:_~}~:>"
+                   (uiop:split-string(comment-content comment)))))
         ((comment-at-first-p first)
          (format t " ~<; ~@;~^~@{~A~^ ~:_~}~:>~%~A" (uiop:split-string(comment-content comment))
                  (remove #\null first)))
@@ -380,7 +387,7 @@
                             (let((count (count #\null first)))
                               (case count ; how many comment in line?
                                 (0 (format t "~&~A" first))
-                                (1 (print-commented-line (pop comments) first rest))
+                                (1 (print-commented-line (pop comments) first rest comments))
                                 (otherwise
                                   (print-some-comment-line comments first))))))))))))
         (*standard-output*
