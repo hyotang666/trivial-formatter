@@ -350,9 +350,9 @@
                 (let((content(comment-content exp)))
                   (if(and (array-in-bounds-p content 0)
                           (char= #\; (char content 0)))
-              (comment
                     (format t ";~A" content)
                     (format t "; ~A" content))))
+              (block-comment
                 (format t "~A" (comment-content exp)))
               (conditional
                 (format t "~A" exp))
