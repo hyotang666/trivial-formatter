@@ -84,10 +84,12 @@
 (defstruct (block-comment (:include comment)))
 
 (defstruct conditional
-  char)
+  char
+  condition)
 (defmethod print-object ((c conditional) stream)
-  (format stream "#~A"
-          (conditional-char c)))
+  (format stream "#~A~A"
+          (conditional-char c)
+          (conditional-condition c)))
 
 (defstruct broken-symbol
   notation)
@@ -117,11 +119,11 @@
   (make-block-comment :content (funcall #'read-as-string::|#\|reader| stream number character)))
 
 (defun |#+-reader|(stream character number)
-  (declare (ignore stream))
   (when number
     (warn "A numeric argument is ignored in #~A~A."
           number character))
-  (make-conditional :char character))
+  (make-conditional :char character
+                    :condition (read-as-code stream)))
 
 ;;;; NAMED-READTABLE
 (named-readtables:defreadtable as-code
