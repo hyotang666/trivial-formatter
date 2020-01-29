@@ -350,9 +350,9 @@
                 (let((content(comment-content exp)))
                   (if(and (array-in-bounds-p content 0)
                           (char= #\; (char content 0)))
-                    (format t ";~A~%" content)
-                    (format t "; ~A~%" content))))
               (comment
+                    (format t ";~A" content)
+                    (format t "; ~A" content))))
                 (format t "~A" (comment-content exp)))
               (conditional
                 (format t "~A" exp))
@@ -360,8 +360,8 @@
                 (let((comments
                        (collect-comments exp)))
                   (if(null comments)
-                    (format t "~&~S~2%" exp)
-                    (let((code(format nil "~&~S~2%" exp)))
+                    (format t "~&~S" exp)
+                    (let((code(format nil "~&~S" exp)))
                       (loop :for (first . rest) :on (uiop:split-string code :separator '(#\newline))
                             :do
                             (let((count (count #\null first)))
@@ -369,12 +369,13 @@
                                 (0 (format t "~&~A" first))
                                 (1 (print-commented-line (pop comments) first rest))
                                 (otherwise
-                                  (error "NIY"))))
-                            :finally (terpri)))))))))
+                                  (error "NIY"))))))))))))
         (*standard-output*
           (or stream *standard-output*)))
     (loop :for line :in (uiop:split-string string :separator '(#\newline))
           :unless (every (lambda(char)
                            (char= #\space char))
                          line)
-          :do (write-line line))))
+          :do (write-line line)
+          :finally (unless(comment-p exp)
+                     (terpri)))))
