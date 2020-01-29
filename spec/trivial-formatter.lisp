@@ -141,6 +141,11 @@
 
 ;;;; Exceptional-Situations:
 
+;;;; Guards for implementation specific hack.
+; When test below fails, sbcl specific pretty printer may should be removed.
+#+sbcl
+#?(pprint-dispatch '(handler-case)) => sb-pretty::pprint-macro-call
+
 (requirements-about DEBUG-PRINTER :doc-type function)
 
 ;;;; Description:
