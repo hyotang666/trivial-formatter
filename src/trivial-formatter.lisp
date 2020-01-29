@@ -332,7 +332,6 @@
             (format t "~&~S~2%" exp)
             (let((code(format nil "~&~S~2%" exp)))
               (loop :for (first . rest) :on (uiop:split-string code :separator '(#\newline))
-                    :with previous
                     :do
                     (let((count (count #\null first)))
                       (case count ; how many comment in line?
@@ -340,5 +339,4 @@
                         (1 (print-commented-line (pop comments) first rest))
                         (otherwise
                           (error "NIY"))))
-                    (setf previous first)
                     :finally (terpri)))))))))
