@@ -117,7 +117,7 @@
 
 (defun |line-comment-reader| (stream character)
   (declare (ignore character))
-  (make-line-comment :content (format nil ";~A~%"(read-line stream))))
+  (make-line-comment :content(string-trim " "(read-line stream))))
 
 (defun |block-comment-reader| (stream number character)
   (make-block-comment :content (funcall #'read-as-string::|#\|reader| stream number character)))
@@ -292,9 +292,9 @@
   (typecase comment
     (line-comment
       (cond
-        ((char= #\; (char (comment-content comment) 1))
+        ((char= #\; (char (comment-content comment) 0))
          ;; Comment as ";; hoge" or ";;; hoge" etc..
-         (format t "~%~A~&~VT~A"
+         (format t "~%~A~&~VT;~A~%"
                  (string-right-trim '(#\null #\space)
                                     first)
                  (position-of-not-space-char (car rest))
@@ -302,32 +302,32 @@
         ;; Comment as '; hoge'.
         ((close-paren-after-comment-p first)
          (if (always-space-till-null-p first)
-           (format t " ~A~A"
-                   (comment-content comment)
+           (format t " ~<; ~@;~^~@{~A~^ ~:_~}~:>~%~A"
+                   (uiop:split-string(comment-content comment))
                    (remove #\null first))
            (progn
              (fresh-line)
              (write-string first nil
                            :end (position #\null first))
-             (format t "~A" (comment-content comment))
+             (format t "~<; ~@;~^~@{~A~^ ~:_~}~:>~%" (uiop:split-string (comment-content comment)))
              (format t "~VT"
                      (1+ (position #\space first
                                    :start (1+ (position-of-not-space-char first)))))
              (write-string first nil :start (1+ (position #\null first))))))
         ((string= "" (string-trim '(#\null #\space)
                                   first))
-         (format t " ~A" (comment-content comment)))
+         (format t " ~<; ~@;~^~@{~A~^ ~:_~}~:>" (uiop:split-string(comment-content comment))))
         ((comment-at-first-p first)
-         (format t " ~A~A" (comment-content comment)
+         (format t " ~<; ~@;~^~@{~A~^ ~:_~}~:>~%~A" (uiop:split-string(comment-content comment))
                  (remove #\null first)))
         (t
           (let((exp
                  (mapcar (lambda(line)
                            (string-right-trim " " line))
                          (uiop:split-string first :separator '(#\nul)))))
-            (format t "~%~{~A~} ~A"
+            (format t "~%~{~A~} ~<; ~@;~^~@{~A~^ ~:_~}~:>"
                     exp
-                    (comment-content comment))))))
+                    (uiop:split-string(comment-content comment)))))))
     (block-comment
       (write-string (string-right-trim '(#\null #\space)
                                        first))
@@ -344,6 +344,12 @@
        (*standard-output*
          (or stream *standard-output*)))
     (typecase exp
+      (line-comment
+        (let((content(comment-content exp)))
+          (if(and (array-in-bounds-p content 0)
+                  (char= #\; (char content 0)))
+            (format t ";~A~%" content)
+            (format t "; ~A~%" content))))
       (comment
         (format t "~A" (comment-content exp)))
       (conditional
