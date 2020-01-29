@@ -313,10 +313,13 @@
                                   first))
          (format t " ~A" (comment-content comment)))
         (t
-          (format t "~%~A ~A"
-                  (string-right-trim '(#\null)
-                                     first)
-                  (comment-content comment)))))
+          (let((exp
+                 (mapcar (lambda(line)
+                           (string-right-trim " " line))
+                         (uiop:split-string first :separator '(#\nul)))))
+            (format t "~%~{~A~} ~A"
+                    exp
+                    (comment-content comment))))))
     (block-comment
       (write-string (string-right-trim '(#\null #\space)
                                        first))
