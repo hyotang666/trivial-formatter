@@ -353,7 +353,8 @@
                                      :and
                                      :collect (with-output-to-string(s)
                                                 (print-as-code (pop comments) s))
-                                     :else :collect elt :and :do (loop-finish)))))
+                                     :else :collect elt :and :do (loop-finish))))
+  comments)
 
 (declaim (ftype (function (T &optional (or null stream))
                           (values null &optional))
@@ -389,7 +390,7 @@
                                 (0 (format t "~&~A" first))
                                 (1 (print-commented-line (pop comments) first rest comments))
                                 (otherwise
-                                  (print-some-comment-line comments first))))))))))))
+                                  (setf comments (print-some-comment-line comments first)))))))))))))
         (*standard-output*
           (or stream *standard-output*)))
     (loop :for line :in (uiop:split-string string :separator '(#\newline))
