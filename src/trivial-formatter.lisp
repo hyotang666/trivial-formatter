@@ -165,21 +165,18 @@
               (format out "~2,,,'0@A" num)))
     :defaults pathname))
 
-(defun call-with-file-exp(pathname callback)
+(defun file-exp(pathname)
   (with-open-file(input pathname)
     (loop :with tag = '#:end
           :for exp = (read-as-code input nil tag)
           :until (eq exp tag)
-          :do (funcall callback exp))))
+          :collect exp)))
 
 (defun renamer(component)
   (let*((pathname
           (asdf:component-pathname component))
         (old
-          (uiop:read-file-string pathname))
-        (new
-          (uiop:while-collecting(acc)
-            (call-with-file-exp pathname #'acc))))
+          (uiop:read-file-string pathname)))
     (with-open-file(*standard-output*
                      (renamed-pathname pathname)
                      :direction :output
@@ -188,29 +185,38 @@
     (with-open-file(*standard-output* pathname
                                       :direction :output
                                       :if-exists :supersede)
-      (map nil #'print-as-code new))))
+      (debug-printer component))))
 
 (defun replacer(component)
   (let*((pathname
-          (asdf:component-pathname component))
-        (new
-          (uiop:while-collecting(acc)
-            (call-with-file-exp pathname #'acc))))
+          (asdf:component-pathname component)))
     (with-open-file(*standard-output* pathname :direction :output :if-exists :supersede)
-      (map nil #'print-as-code new))))
+      (debug-printer component))))
 
 (defun appender(component)
   (let*((pathname
-          (asdf:component-pathname component))
-        (new
-          (uiop:while-collecting(acc)
-            (call-with-file-exp pathname #'acc))))
+          (asdf:component-pathname component)))
     (with-open-file(*standard-output* pathname :direction :output :if-exists :append)
-      (map nil #'print-as-code new))))
+      (debug-printer component))))
 
 (defun debug-printer (component)
-  (call-with-file-exp (asdf:component-pathname component)
-                      #'print-as-code))
+  (loop :for (exp . rest) :on (file-exp (asdf:component-pathname component))
+        :do (when(and (comment-p exp)
+                      (not (uiop:string-prefix-p #\; (comment-content exp))))
+              (write-char #\space))
+        (print-as-code exp)
+        :if (or (and (not (comment-p (car rest)))
+                     (not (conditional-p exp)))
+                (and (not (comment-p exp))
+                     (comment-p (car rest))
+                     (uiop:string-prefix-p #\; (comment-content (car rest)))))
+        :do (format t "~2%")
+        :else :if (or (and (comment-p exp)
+                           (uiop:string-prefix-p #\; (comment-content exp))
+                           (comment-p (car rest))
+                           (uiop:string-prefix-p #\; (comment-content (car rest))))
+                      (conditional-p exp))
+        :do (fresh-line)))
 
 ;;;; PRINT-AS-CODE
 (defun shortest-package-name (package)
@@ -384,7 +390,7 @@
                 (let((comments
                        (collect-comments exp)))
                   (if(null comments)
-                    (format t "~&~S" exp)
+                    (format t "~S" exp)
                     (let((code(prin1-to-string exp)))
                       (loop :for (first . rest) :on (uiop:split-string code :separator '(#\newline))
                             :do
@@ -396,12 +402,9 @@
                                   (setf comments (print-some-comment-line comments first)))))))))))))
         (*standard-output*
           (or stream *standard-output*)))
-    (loop :for line :in (uiop:split-string string :separator '(#\newline))
-          :unless (every (lambda(char)
-                           (char= #\space char))
-                         line)
-          :do (write-line line)
-          :finally (unless(or (comment-p exp)
-                              (conditional-p exp))
-                     (terpri)))))
-
+    (format t "~{~A~^~%~}"
+            (remove-if (lambda(line)
+                         (every (lambda(char)
+                                  (char= #\space char))
+                                line))
+                       (uiop:split-string string :separator '(#\newline))))))
