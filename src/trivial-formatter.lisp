@@ -205,18 +205,23 @@
                       (not (uiop:string-prefix-p #\; (comment-content exp))))
               (write-char #\space))
         (print-as-code exp)
-        :if (or (and (not (comment-p (car rest)))
-                     (not (conditional-p exp)))
-                (and (not (comment-p exp))
-                     (comment-p (car rest))
-                     (uiop:string-prefix-p #\; (comment-content (car rest)))))
-        :do (format t "~2%")
-        :else :if (or (and (comment-p exp)
-                           (uiop:string-prefix-p #\; (comment-content exp))
-                           (comment-p (car rest))
-                           (uiop:string-prefix-p #\; (comment-content (car rest))))
-                      (conditional-p exp))
-        :do (fresh-line)))
+        (typecase exp
+          (block-comment
+            (format t "~2%"))
+          (line-comment
+            (terpri)
+            (when(not (comment-p (car rest)))
+              (terpri)))
+          (conditional
+            (terpri))
+          (t
+            (typecase (car rest)
+              (null)
+              (line-comment
+                (if(uiop:string-prefix-p #\; (comment-content (car rest)))
+                  (format t "~2%")))
+              (t
+                (format t "~2%")))))))
 
 ;;;; PRINT-AS-CODE
 (defun shortest-package-name (package)
