@@ -341,19 +341,23 @@
       (format t " ~A" (comment-content comment)))))
 
 (defun print-some-comment-line(comments first)
-  (loop :for char :across first
-        :while (char= #\space char)
-        :do (write-char char))
+  (fresh-line)
   (let((list
-         (uiop:split-string (string-left-trim " "first)
-                            :separator '(#\nul))))
-    (format t "~<~^~@{~A~}~:>" (loop :for (elt . rest) :on list
-                                     :if rest
-                                     :collect elt
-                                     :and
-                                     :collect (with-output-to-string(s)
-                                                (print-as-code (pop comments) s))
-                                     :else :collect elt :and :do (loop-finish))))
+         (uiop:split-string first :separator '(#\nul))))
+    (loop :initially (write-string (car list))
+          :with indent = (length (car list))
+          :for elt :in (mapcar (lambda(elt)
+                                 (string-trim " " elt))
+                               (cdr list))
+          :if (block-comment-p (car comments))
+          :do (format t "~A ~A"
+                      (comment-content (pop comments))
+                      elt)
+          :else :do
+          (when(uiop:string-prefix-p #\; (comment-content (car comments)))
+            (format t "~%~VT" indent))
+          (print-as-code (pop comments))
+          (format t "~VT~A" indent elt)))
   comments)
 
 (declaim (ftype (function (T &optional (or null stream))
