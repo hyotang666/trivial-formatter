@@ -292,7 +292,7 @@
   (typecase comment
     (line-comment
       (cond
-        ((char= #\; (char (comment-content comment) 0))
+        ((uiop:string-prefix-p #\; (comment-content comment))
          ;; Comment as ";; hoge" or ";;; hoge" etc..
          (format t "~%~A~&~VT;~A~%"
                  (string-right-trim '(#\null #\space)
@@ -373,8 +373,7 @@
             (typecase exp
               (line-comment
                 (let((content(comment-content exp)))
-                  (if(and (array-in-bounds-p content 0)
-                          (char= #\; (char content 0)))
+                  (if(uiop:string-prefix-p #\; content)
                     (format t ";~A" content)
                     (format t "; ~A" content))))
               (block-comment
