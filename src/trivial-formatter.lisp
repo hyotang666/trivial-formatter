@@ -295,7 +295,8 @@
         ((uiop:string-prefix-p #\; (comment-content comment))
          ;; Comment as ";; hoge" or ";;; hoge" etc..
          (format t "~%~A~&~VT;~A~%"
-                 (string-right-trim '(#\null) first)
+                 (string-right-trim '(#\null #\space)
+                                    first)
                  (position-of-not-space-char (car rest))
                  (comment-content comment)))
         ;; Comment as '; hoge'.
