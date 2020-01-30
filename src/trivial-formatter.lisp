@@ -297,7 +297,7 @@
          (format t "~%~A~&~VT;~A~%"
                  (string-right-trim '(#\null #\space)
                                     first)
-                 (position-of-not-space-char (car rest))
+                 (some #'position-of-not-space-char rest)
                  (comment-content comment)))
         ;; Comment as '; hoge'.
         ((close-paren-after-comment-p first)
