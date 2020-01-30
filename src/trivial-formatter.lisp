@@ -381,7 +381,7 @@
                        (collect-comments exp)))
                   (if(null comments)
                     (format t "~&~S" exp)
-                    (let((code(format nil "~&~S" exp)))
+                    (let((code(prin1-to-string exp)))
                       (loop :for (first . rest) :on (uiop:split-string code :separator '(#\newline))
                             :do
                             (let((count (count #\null first)))
