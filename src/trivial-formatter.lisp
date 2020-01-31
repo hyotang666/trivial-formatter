@@ -369,15 +369,16 @@
           :for elt :in (mapcar (lambda(elt)
                                  (string-trim " " elt))
                                (cdr list))
-          :if (block-comment-p (car comments))
-          :do (format t "~A ~A"
-                      (comment-content (pop comments))
-                      elt)
-          :else :do
-          (when(uiop:string-prefix-p #\; (comment-content (car comments)))
-            (format t "~%~VT" indent))
-          (print-as-code (pop comments))
-          (format t "~VT~A" indent elt)))
+          :do (etypecase (car comments)
+                (block-comment
+                  (format t "~A ~A"
+                          (comment-content (pop comments))
+                          elt))
+                (line-comment
+                  (when(uiop:string-prefix-p #\; (comment-content (car comments)))
+                    (format t "~%~VT" indent))
+                  (print-as-code (pop comments))
+                  (format t "~%~VT~A" indent elt)))))
   comments)
 
 (declaim (ftype (function (T &optional (or null stream))
