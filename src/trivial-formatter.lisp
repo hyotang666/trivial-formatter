@@ -405,4 +405,6 @@
                     (write-line first)
                     (progn (format t "~A " first)
                            (rplaca rest (string-left-trim " " (car rest)))))
-                  (write-line first))))))
+                  (if rest
+                    (write-line first)
+                    (write-string first)))))))
