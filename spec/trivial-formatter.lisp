@@ -146,6 +146,15 @@
 #+sbcl
 #?(pprint-dispatch '(handler-case)) => sb-pretty::pprint-macro-call
 
+;;;; Tests.
+; 1. After line comment, newline is required.
+; 2. Space may put if needed.
+#?(with-input-from-string(s #.(format nil "(dummy; comment~%)"))
+    (print-as-code (read-as-code s)))
+:outputs
+"(dummy ; comment
+       )"
+
 (requirements-about DEBUG-PRINTER :doc-type function)
 
 ;;;; Description:
