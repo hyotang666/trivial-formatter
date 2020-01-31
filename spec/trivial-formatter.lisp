@@ -94,7 +94,7 @@
              (& (listp result)
                 (= 3 (length result))
                 (typep (second result) 'trivial-formatter::dot)
-                (string= #.(format nil "(dot . list)~2%")
+                (string= #.(format nil "(dot . list)")
                          (with-output-to-string(s)
                            (print-as-code result s)))))
 
@@ -153,7 +153,7 @@
     (print-as-code (read-as-code s)))
 :outputs
 "(dummy ; comment
-       )"
+ )"
 
 (requirements-about DEBUG-PRINTER :doc-type function)
 
