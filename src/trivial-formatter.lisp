@@ -394,37 +394,7 @@
           :downcase)
         (*print-pprint-dispatch*
           *pprint-dispatch*)
-        (string
-          (with-output-to-string(*standard-output*)
-            (typecase exp
-              (line-comment
-                (let((content(comment-content exp)))
-                  (if(uiop:string-prefix-p #\; content)
-                    (format t ";~A" content)
-                    (format t "; ~A" content))))
-              (block-comment
-                (format t "~A" (comment-content exp)))
-              (conditional
-                (format t "~A" exp))
-              (t
-                (let((comments
-                       (collect-comments exp)))
-                  (if(null comments)
-                    (format t "~S" exp)
-                    (let((code(prin1-to-string exp)))
-                      (loop :for (first . rest) :on (uiop:split-string code :separator '(#\newline))
-                            :do
-                            (let((count (count #\null first)))
-                              (case count ; how many comment in line?
-                                (0 (format t "~&~A" first))
-                                (1 (print-commented-line (pop comments) first rest comments))
-                                (otherwise
-                                  (setf comments (print-some-comment-line comments first)))))))))))))
         (*standard-output*
           (or stream *standard-output*)))
-    (format t "~{~A~^~%~}"
-            (remove-if (lambda(line)
-                         (every (lambda(char)
-                                  (char= #\space char))
-                                line))
-                       (uiop:split-string string :separator '(#\newline))))))
+    (prin1 exp))
+  nil)
