@@ -1,0 +1,33 @@
+Issue:  SBCL loop printer is ugly especially use with :DO loop keyword.
+
+E.g.
+
+(LOOP :FOR (EXP . REST) :ON (FILE-EXP
+                             (ASDF/COMPONENT:COMPONENT-PATHNAME COMPONENT))
+      :DO (WHEN
+              (AND (COMMENT-P EXP)
+                   (NOT
+                    (UIOP/UTILITY:STRING-PREFIX-P #\; (COMMENT-CONTENT EXP))))
+            (WRITE-CHAR #\ )) (PRINT-AS-CODE EXP) (TYPECASE EXP
+                                                    (BLOCK-COMMENT
+                                                     (FORMAT T "~2%"))
+                                                    (LINE-COMMENT
+                                                     (TERPRI)
+                                                     (WHEN
+                                                         (NOT
+                                                          (COMMENT-P
+                                                           (CAR REST)))
+                                                       (TERPRI)))
+                                                    (CONDITIONAL (TERPRI))
+                                                    (T
+                                                     (TYPECASE (CAR REST)
+                                                       (NULL)
+                                                       (LINE-COMMENT
+                                                        (IF (UIOP/UTILITY:STRING-PREFIX-P
+                                                             #\;
+                                                             (COMMENT-CONTENT
+                                                              (CAR REST)))
+                                                            (FORMAT T "~2%")))
+                                                       (T (FORMAT T "~2%")))))) 
+
+
