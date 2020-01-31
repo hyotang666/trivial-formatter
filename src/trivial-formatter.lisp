@@ -396,10 +396,13 @@
           (prin1-to-string exp))
         (*standard-output*
           (or stream *standard-output*)))
-    ;; Delete empty line.
-    (format t "~{~A~^~%~}"
-            (remove-if (lambda(line)
-                         (every (lambda(char)
-                                  (char= #\space char))
-                                line))
-                       (uiop:split-string string :separator '(#\newline))))))
+    (loop :for (first . rest) :on (uiop:split-string string :separator '(#\newline))
+          :do (unless(every (lambda(char)
+                              (char= #\space char))
+                            first)
+                (if(uiop:string-prefix-p "; " (string-left-trim " " (car rest)))
+                  (if(uiop:string-prefix-p "; " (string-left-trim " " first))
+                    (write-line first)
+                    (progn (format t "~A " first)
+                           (rplaca rest (string-left-trim " " (car rest)))))
+                  (write-line first))))))
