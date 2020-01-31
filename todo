@@ -1,0 +1,21 @@
+Issue:  About single semicolon line comment.
+        e.g.
+
+        (remove var seq ; Do not ever use DELETE!
+                :key value
+                :key value)
+
+        may =>
+
+        (remove var seq :key value :key ; Do not ever use DELETE!
+                value)
+
+        Ideally =>
+
+        (remove var seq ; Do not ever use DELETE!
+                :key value :key value)
+
+Current tactics (i.e. print comment object as #\null as place holder, then replace it.)
+is not able to resolve above issue.
+
+New strategy is using pretty-printer for meta object.
