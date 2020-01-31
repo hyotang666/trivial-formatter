@@ -260,6 +260,67 @@
   (declare(ignore noise))
   (funcall (formatter "~:<~^~W~^~3I ~:_~W~1I~@{ ~_~/sb-pretty::pprint-data-list/~}~:>") stream exp))
 
+;; Two functions below are copied from sbcl, and modified.
+#+sbcl
+(defun pprint-loop (stream list &rest noise)
+  (declare (ignore noise))
+  (destructuring-bind (loop-symbol . clauses) list
+    (declare (ignore loop-symbol))
+    (if (or (atom clauses) (consp (car clauses)))
+        (sb-pretty::pprint-spread-fun-call stream list)
+        (pprint-extended-loop stream list))))
+
+#+sbcl
+(defvar +loop-separating-clauses+
+  '(:and
+     :with :for
+     :collect :collecting
+     :append :appending
+     :nconc :nconcing
+     :count :counting
+     :sum :summing
+     :maximize :maximizing
+     :minimize :minimizing
+     :if :when :unless :end
+     :for :while :until :repeat :always :never :thereis
+     ))
+
+#+sbcl
+(defun pprint-extended-loop (stream list)
+  (pprint-logical-block (stream list :prefix "(" :suffix ")")
+      (sb-kernel:output-object (pprint-pop) stream)
+      (pprint-exit-if-list-exhausted)
+      (write-char #\space stream)
+      (pprint-indent :current 0 stream)
+      (sb-kernel:output-object (pprint-pop) stream)
+    (prog(thing after-do indent before-key-p)
+      :top
+      (setf thing (pprint-pop))
+      :update-vars
+      (or (and (symbolp thing)
+               (if (find thing '(:do :doing :initially :finally) :test #'string=)
+                 (setf after-do 0
+                       indent (length (prin1-to-string thing))
+                       before-key-p t)
+                 (when (member thing +loop-separating-clauses+ :test #'string=)
+                   (setf after-do nil
+                         indent nil
+                         before-key-p t))))
+          (setf before-key-p nil))
+      :newline-check
+      (when(or before-key-p
+               (and after-do
+                    (if (zerop after-do)
+                      (tagbody (incf after-do))
+                      t)))
+        (pprint-newline :mandatory stream))
+      :output
+      (sb-kernel:output-object thing stream)
+      :end-check
+      (pprint-exit-if-list-exhausted)
+      (write-char #\space stream)
+      (go :top))))
+
 (defparameter *pprint-dispatch*
   (let((*print-pprint-dispatch*
          (copy-pprint-dispatch)))
@@ -272,6 +333,8 @@
 
     #+sbcl
     (set-pprint-dispatch '(cons (member handler-case)) 'pprint-handler-case)
+    #+sbcl
+    (set-pprint-dispatch '(cons (member loop)) 'pprint-loop)
 
     *print-pprint-dispatch*))
 
