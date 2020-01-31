@@ -71,11 +71,6 @@
 (defmethod print-object ((dot dot) stream)
   (princ #\. stream))
 
-(defstruct comment content)
-(defmethod print-object ((object comment) stream)
-  (write-char #\Null stream) ; as place holder.
-  )
-
 (defstruct (line-comment (:include comment)))
 (defmethod print-object ((c line-comment)stream)
   (format stream "~<~:[; ~A~;;~A~]~:>"
