@@ -83,6 +83,8 @@
                 (comment-content c))
           ))
 (defstruct (block-comment (:include comment)))
+(defmethod print-object((c block-comment) stream)
+  (format stream "~A" (comment-content c)))
 
 (defstruct conditional
   char
