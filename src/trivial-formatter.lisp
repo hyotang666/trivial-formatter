@@ -391,7 +391,14 @@
           :downcase)
         (*print-pprint-dispatch*
           *pprint-dispatch*)
+        (string
+          (prin1-to-string exp))
         (*standard-output*
           (or stream *standard-output*)))
-    (prin1 exp))
-  nil)
+    ;; Delete empty line.
+    (format t "~{~A~^~%~}"
+            (remove-if (lambda(line)
+                         (every (lambda(char)
+                                  (char= #\space char))
+                                line))
+                       (uiop:split-string string :separator '(#\newline))))))
