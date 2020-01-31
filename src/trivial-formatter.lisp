@@ -71,11 +71,14 @@
 (defmethod print-object ((dot dot) stream)
   (princ #\. stream))
 
+(defvar *at-last-p* nil)
+
 (defstruct (line-comment (:include comment)))
 (defmethod print-object ((c line-comment)stream)
-  (format stream "~:[; ~A~;;~A~]"
+  (format stream "~:[; ~A~;;~A~]~:[~;~%~]"
           (uiop:string-prefix-p #\; (comment-content c))
           (comment-content c)
+          *at-last-p*
           ))
 (defstruct (block-comment (:include comment)))
 (defmethod print-object((c block-comment) stream)
@@ -391,6 +394,7 @@
           :downcase)
         (*print-pprint-dispatch*
           *pprint-dispatch*)
+        (*at-last-p*)
         (string
           (with-output-to-string(*standard-output*)
             (typecase exp
@@ -403,6 +407,11 @@
                 (format t "~A" (comment-content exp)))
               (conditional
                 (format t "~A" exp))
+              (list
+                (if(line-comment-p(car(last exp)))
+                  (let((*at-last-p* t))
+                    (prin1 exp))
+                  (prin1 exp)))
               (t
                 (let((comments
                        (collect-comments exp)))
