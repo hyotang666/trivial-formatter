@@ -71,12 +71,14 @@
 (defmethod print-object ((dot dot) stream)
   (princ #\. stream))
 
-(defstruct (line-comment (:include comment)))
+(defstruct (line-comment (:include comment))
+  at-last-p)
 (defmethod print-object ((c line-comment)stream)
   (format stream "~:[; ~A~;;~A~]"
           (uiop:string-prefix-p #\; (comment-content c))
-          (comment-content c)
-          ))
+          (comment-content c))
+  (when (line-comment-at-last-p c)
+    (pprint-newline :mandatory stream)))
 (defstruct (block-comment (:include comment)))
 (defmethod print-object((c block-comment) stream)
   (format stream "~A" (comment-content c)))
@@ -121,7 +123,8 @@
 
 (defun |line-comment-reader| (stream character)
   (declare (ignore character))
-  (make-line-comment :content(string-trim " "(read-line stream))))
+  (make-line-comment :content(string-trim " "(read-line stream))
+                     :at-last-p (eql #\) (peek-char t stream nil nil))))
 
 (defun |block-comment-reader| (stream number character)
   (make-block-comment :content (funcall #'read-as-string::|#\|reader| stream number character)))
