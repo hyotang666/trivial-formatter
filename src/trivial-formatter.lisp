@@ -77,6 +77,11 @@
   )
 
 (defstruct (line-comment (:include comment)))
+(defmethod print-object ((c line-comment)stream)
+  (format stream "~<~:[; ~A~;;~A~]~:>"
+          (list (uiop:string-prefix-p #\; (comment-content c))
+                (comment-content c))
+          ))
 (defstruct (block-comment (:include comment)))
 
 (defstruct conditional
