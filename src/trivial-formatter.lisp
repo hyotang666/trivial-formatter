@@ -288,9 +288,10 @@
         (*standard-output*
           (or stream *standard-output*)))
     (loop :for (first . rest) :on (mapcan (lambda(line)
-                                            (setf line (ppcre:regex-replace #.(format nil " ~C" #\nul)
-                                                                            line
-                                                                            ""))
+                                            (setf line (remove #\nul
+                                                               (ppcre:regex-replace #.(format nil " ~C[^)]" #\nul)
+                                                                                    line
+                                                                                    "")))
                                             (unless (every (lambda(char)
                                                              (char= #\space char))
                                                            line)
