@@ -98,12 +98,9 @@
 (defstruct read-time-eval
   form)
 (defmethod print-object((form read-time-eval)stream)
-  (let((string
-         (with-output-to-string(s)
-           (print-as-code (read-time-eval-form form) s))))
-    (format stream "~<#.~;~^~@{~A~^~:@_~}~:>"
-            (uiop:split-string (string-trim '(#\newline) string)
-                               :separator '(#\newline)))))
+  (format stream "~<#.~;~^~@{~A~^~:@_~}~:>"
+          (uiop:split-string (prin1-to-string (read-time-eval-form form))
+                             :separator '(#\newline))))
 
 ;;;; MACRO CHARS
 (defun |dot-reader| (stream character)
