@@ -305,11 +305,20 @@
       (cond
         ((uiop:string-prefix-p #\; (comment-content comment))
          ;; Comment as ";; hoge" or ";;; hoge" etc..
-         (format t "~%~A~&~VT;~A~%"
-                 (string-right-trim '(#\null #\space)
-                                    first)
-                 (some #'position-of-not-space-char rest)
-                 (comment-content comment)))
+         (if (comment-at-first-p first)
+           (format t "~%~A;~A~%~{~A~}"
+                   (make-string (position-of-not-space-char first)
+                                :initial-element #\space)
+                   (comment-content comment)
+                   (let((list
+                          (uiop:split-string first :separator'(#\nul))))
+                     (list (car list)
+                           (string-trim " " (cadr list)))))
+           (format t "~%~A~&~VT;~A~%"
+                   (string-right-trim '(#\null #\space)
+                                      first)
+                   (some #'position-of-not-space-char rest)
+                   (comment-content comment))))
         ;; Comment as '; hoge'.
         ((close-paren-after-comment-p first)
          (if (comment-at-first-p first)
