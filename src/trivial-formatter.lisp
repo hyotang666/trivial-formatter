@@ -338,6 +338,18 @@
 
     *print-pprint-dispatch*))
 
+(defun split-to-lines (string)
+  (mapcan (lambda(line)
+            (setf line (remove #\nul
+                               (ppcre:regex-replace #.(format nil " ~C[^)]" #\nul)
+                                                    line
+                                                    "")))
+            (unless (every (lambda(char)
+                             (char= #\space char))
+                           line)
+              (list line)))
+          (uiop:split-string string :separator '(#\newline))))
+
 (declaim (ftype (function (T &optional (or null stream))
                           (values null &optional))
                 print-as-code))
@@ -350,16 +362,7 @@
           (prin1-to-string exp))
         (*standard-output*
           (or stream *standard-output*)))
-    (loop :for (first . rest) :on (mapcan (lambda(line)
-                                            (setf line (remove #\nul
-                                                               (ppcre:regex-replace #.(format nil " ~C[^)]" #\nul)
-                                                                                    line
-                                                                                    "")))
-                                            (unless (every (lambda(char)
-                                                             (char= #\space char))
-                                                           line)
-                                              (list line)))
-                                          (uiop:split-string string :separator '(#\newline)))
+    (loop :for (first . rest) :on (split-to-lines string)
           :do (if(uiop:string-prefix-p "; " (string-left-trim " " (car rest)))
                 (if(uiop:string-prefix-p "; " (string-left-trim " " first))
                   (setf (car rest)
