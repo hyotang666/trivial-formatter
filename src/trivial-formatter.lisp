@@ -390,9 +390,10 @@
                   (progn (format t "~A " first)
                          (rplaca rest (string-left-trim " " (car rest)))))
                 (if(uiop:string-prefix-p "; " (string-left-trim " " first))
-                  (format t "~<; ~@;~@{~A~^ ~:_~}~:>~%"
+                  (format t "~<; ~@;~@{~A~^ ~:_~}~:>~:[~;~%~]"
                           (remove "" (uiop:split-string first :separator "; ")
-                                  :test #'equal))
+                                  :test #'equal)
+                          rest)
                   (if rest
                     (write-line first)
                     (write-string first)))))))
