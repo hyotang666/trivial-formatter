@@ -1,0 +1,11 @@
+Issue:  Read time refer is expanded.
+
+        e.g.
+
+        (#0=a #0#)
+
+        =>
+
+        (a a)
+
+        This means circuler list is not able to write.
