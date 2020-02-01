@@ -161,6 +161,12 @@
 :outputs
 "(#0=#:hoge #0#)"
 
+; Circular list.
+#?(with-input-from-string(s "#0=(dummy . #0#)")
+    (print-as-code (read-as-code s)))
+:outputs
+"#0=(dummy . #0#)"
+
 (requirements-about DEBUG-PRINTER :doc-type function)
 
 ;;;; Description:
