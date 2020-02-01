@@ -103,6 +103,16 @@
           (uiop:split-string (prin1-to-string (read-time-eval-form form))
                              :separator '(#\newline))))
 
+(defstruct shared-object number exp)
+(defmethod print-object((obj shared-object)stream)
+  (format stream "#~D=~S"
+          (shared-object-number obj)
+          (shared-object-exp obj)))
+
+(defstruct shared-reference number)
+(defmethod print-object((ref shared-reference)stream)
+  (format stream "#~D#" (shared-reference-number ref)))
+
 ;;;; MACRO CHARS
 (defun |dot-reader| (stream character)
   (declare(ignore stream character))
@@ -138,6 +148,14 @@
     (warn "A numeric argument is ignored in read time eval."))
   (make-read-time-eval :form (read-as-code stream t t t)))
 
+(defun |#=reader|(stream character number)
+  (declare(ignore character))
+  (make-shared-object :number number :exp (read-as-code stream)))
+
+(defun |##reader|(stream character number)
+  (declare(ignore stream character))
+  (make-shared-reference :number number))
+
 ;;;; NAMED-READTABLE
 (named-readtables:defreadtable as-code
   (:merge :common-lisp)
@@ -148,6 +166,8 @@
   (:dispatch-macro-char #\# #\+ '|#+-reader|)
   (:dispatch-macro-char #\# #\- '|#+-reader|)
   (:dispatch-macro-char #\# #\. '|#.reader|)
+  (:dispatch-macro-char #\# #\= '|#=reader|)
+  (:dispatch-macro-char #\# #\# '|##reader|)
   )
 
 ;;;; Hookers
