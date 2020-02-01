@@ -308,17 +308,17 @@
                          before-key-p t))))
           (setf before-key-p nil))
       :newline-check
-      (when(or before-key-p
+      (if(or before-key-p
                (and after-do
                     (if (zerop after-do)
                       (tagbody (incf after-do))
                       t)))
-        (pprint-newline :mandatory stream))
+        (pprint-newline :mandatory stream)
+        (write-char #\space stream))
       :output
       (sb-kernel:output-object thing stream)
       :end-check
       (pprint-exit-if-list-exhausted)
-      (write-char #\space stream)
       (go :top))))
 
 (defparameter *pprint-dispatch*
