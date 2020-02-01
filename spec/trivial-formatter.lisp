@@ -155,6 +155,12 @@
 "(dummy ; comment
  )"
 
+; Handle read time refer.
+#?(with-input-from-string(s "(#0=#:hoge #0#)")
+    (print-as-code (read-as-code s)))
+:outputs
+"(#0=#:hoge #0#)"
+
 (requirements-about DEBUG-PRINTER :doc-type function)
 
 ;;;; Description:
