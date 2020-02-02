@@ -243,6 +243,28 @@
   (declare(ignore noise))
   (funcall (formatter "~:<~^~W~^~3I ~:_~W~1I~@{ ~_~/sb-pretty::pprint-data-list/~}~:>") stream exp))
 
+#+sbcl
+(defun pprint-define-condition(stream exp &rest noise)
+  (declare(ignore noise))
+  (pprint-logical-block(stream exp :prefix "(" :suffix ")")
+    (flet((output()
+            (write (pprint-pop) :stream stream)
+            (pprint-exit-if-list-exhausted)
+            (write-char #\space stream)))
+      (output) ; operater
+      (output) ; name
+      (pprint-indent :block 3 stream)
+      (format stream "~:_~:[()~;~:*~A~]" (pprint-pop)) ; superclasses
+      (pprint-exit-if-list-exhausted)
+      (pprint-indent :block 1 stream)
+      (write-char #\space stream)
+      (format stream "~:_~:[()~;~:*~A~]" (pprint-pop)) ; slots
+      (pprint-exit-if-list-exhausted)
+      (write-char #\space stream)
+      (loop (write (pprint-pop) :stream stream)
+            (pprint-exit-if-list-exhausted)
+            (pprint-newline :mandatory stream)))))
+
 ;; Two functions below are copied from sbcl, and modified.
 #+sbcl
 (defun pprint-loop (stream list &rest noise)
@@ -322,6 +344,8 @@
     (set-pprint-dispatch '(cons (member handler-case)) 'pprint-handler-case)
     #+sbcl
     (set-pprint-dispatch '(cons (member loop)) 'pprint-loop)
+    #+sbcl
+    (set-pprint-dispatch '(cons (member define-condition)) 'pprint-define-condition)
 
     *print-pprint-dispatch*))
 
