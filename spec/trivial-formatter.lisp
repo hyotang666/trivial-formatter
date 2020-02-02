@@ -167,7 +167,8 @@
 "#0=(dummy . #0#)"
 
 ;;;; Guards.
-#?(format nil "~<~:@_~:>"nil)
+#?(let((*print-pretty* t))
+    (format nil "~<~:@_~:>"nil))
 => "
 "
 ,:test equal
