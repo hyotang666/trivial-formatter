@@ -79,6 +79,7 @@
            (format stream ";~A" (comment-content c)))
     (format stream "; ~A" (comment-content c)))
   (pprint-newline :mandatory stream)
+  #+clisp(terpri stream)
   (write-char #\null stream))
 (defstruct (block-comment (:include comment)))
 (defmethod print-object((c block-comment) stream)
