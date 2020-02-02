@@ -254,12 +254,13 @@
       (output) ; operater
       (output) ; name
       (pprint-indent :block 3 stream)
-      (format stream "~:_~:[()~;~:*~A~]" (pprint-pop)) ; superclasses
+      (format stream "~@_~:<~@{~W~^ ~}~:>" (pprint-pop)) ; superclasses
       (pprint-exit-if-list-exhausted)
-      (pprint-indent :block 1 stream)
+      (pprint-indent :block 0 stream)
       (write-char #\space stream)
-      (format stream "~:_~:[()~;~:*~A~]" (pprint-pop)) ; slots
+      (format stream "~@_~:<~^~W~^~_~:>" (pprint-pop)) ; slots
       (pprint-exit-if-list-exhausted)
+      (pprint-newline :linear stream)
       (write-char #\space stream)
       (loop (write (pprint-pop) :stream stream)
             (pprint-exit-if-list-exhausted)
