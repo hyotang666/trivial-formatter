@@ -7,24 +7,26 @@
     ;; Useful helpers
     #:read-as-code
     #:print-as-code
-    ;; Hooker
-    #:debug-printer
-    #:renamer
-    #:appender
-    #:replacer
     ))
 (in-package :trivial-formatter)
 
 ;;;; FMT
 (declaim (ftype (function ((or symbol string asdf:system)
                            &optional
-                           (or symbol function))
+                           (member nil :append :supersede :rename :error :new-version
+                                   :rename-and-delete :overwrite))
                           (values null &optional))
                 fmt))
-(defun fmt (system &optional(formatter 'debug-printer))
+(defun fmt (system &optional(if-exists nil supplied-p))
   (asdf:load-system system)
   (dolist (component (asdf:component-children (asdf:find-system system)))
-    (funcall formatter component)))
+    (if supplied-p
+      (with-open-file(s (asdf:component-pathname component
+                                                 :direction :output
+                                                 :if-does-not-exist :create
+                                                 :if-exists if-exists))
+        (debug-printer component))
+      (debug-printer component))))
 
 ;;;; READ-AS-CODE
 (declaim (ftype (function (&optional
@@ -167,55 +169,13 @@
   (:dispatch-macro-char #\# #\# '|##reader|)
   )
 
-;;;; Hookers
-(declaim (ftype (function (asdf:component)
-                          (values null &optional))
-                debug-printer
-                renamer
-                appender
-                replacer))
-
-(defun renamed-pathname(pathname)
-  (make-pathname
-    :name (with-output-to-string(out)
-            (princ (pathname-name pathname)out)
-            (dolist(num (cdddr (nreverse(multiple-value-list (get-decoded-time)))))
-              (format out "~2,,,'0@A" num)))
-    :defaults pathname))
-
+;;;; DEBUG-PRINTER
 (defun file-exp(pathname)
   (with-open-file(input pathname)
     (loop :with tag = '#:end
           :for exp = (read-as-code input nil tag)
           :until (eq exp tag)
           :collect exp)))
-
-(defun renamer(component)
-  (let*((pathname
-          (asdf:component-pathname component))
-        (old
-          (uiop:read-file-string pathname)))
-    (with-open-file(*standard-output*
-                     (renamed-pathname pathname)
-                     :direction :output
-                     :if-does-not-exist :create)
-      (write-line old))
-    (with-open-file(*standard-output* pathname
-                                      :direction :output
-                                      :if-exists :supersede)
-      (debug-printer component))))
-
-(defun replacer(component)
-  (let*((pathname
-          (asdf:component-pathname component)))
-    (with-open-file(*standard-output* pathname :direction :output :if-exists :supersede)
-      (debug-printer component))))
-
-(defun appender(component)
-  (let*((pathname
-          (asdf:component-pathname component)))
-    (with-open-file(*standard-output* pathname :direction :output :if-exists :append)
-      (debug-printer component))))
 
 (defun debug-printer (component)
   (loop :for (exp . rest) :on (file-exp (asdf:component-pathname component))

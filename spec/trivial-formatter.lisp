@@ -9,18 +9,21 @@
 ; Format every source codes of asdf:system.
 
 #+syntax
-(FMT system &optional (formatter 'debug-printer)) ; => result
+(FMT system &optional (if-exists nil supplied-p)) ; => result
 
 ;;;; Arguments and Values:
 
-; system := (or symbol (vector character) (vector nil) base-string system)
+; system := (or symbol (vector character) (vector nil) base-string asdf/system:system)
 ; otherwise condition depending on implementation.
 #?(fmt '(invalid type)) :signals condition
 
-; formatter := (or symbol function) otherwise condition depending on implementation.
-#?(fmt :dummy "not (or symbol function)") :signals condition
-; FORMATTER must as (function (asdf:component)(values null &optional)).
-; See `DEBUG-PRINTER`, `REPLACER`, `RENAMER`, `APPENDER`.
+; if-exists := (member nil :append :supersede :rename :error :new-version :rename-and-delete :overwrite)
+; otherwise condition depending on implementation.
+#?(fmt :dummy :not-member) :signals condition
+
+; If specified, depending on its value source file is modified.
+; If not specified, formatted source code is printed to `*STANDARD-OUTPUT*`.
+; Member is completely same with `CL:OPEN` keyword argument `IF-EXISTS`.
 
 ; result := null
 
@@ -28,7 +31,7 @@
 
 ;;;; Side-Effects:
 ; Load asdf:system to lisp environment.
-; Depends on FORMATTER, some side effect occurs.
+; Depends on IF-EXISTS, some side effect occurs.
 ; The default behavior is to print to `*STANDARD-OUTPUT*`.
 
 ;;;; Notes:
@@ -172,101 +175,3 @@
 => "
 "
 ,:test equal
-(requirements-about DEBUG-PRINTER :doc-type function)
-
-;;;; Description:
-; The default formatter function for `FMT` optional parameter.
-; Output component codes to `*STANDARD-OUTPUT*`.
-
-#+syntax
-(DEBUG-PRINTER component) ; => result
-
-;;;; Arguments and Values:
-
-; component := asdf:component, otherwise condition depending on implementation.
-#?(debug-printer "not component") :signals condition
-
-; result := null
-
-;;;; Affected By:
-
-;;;; Side-Effects:
-; Output to `*STANDARD-OUTPUT*`.
-
-;;;; Notes:
-
-;;;; Exceptional-Situations:
-
-(requirements-about RENAMER :doc-type function)
-
-;;;; Description:
-; Old source file is saved with renaming.
-; In such case new file is 'nameYYYYMMDDhhmmss.lisp'.
-
-#+syntax
-(RENAMER component) ; => result
-
-;;;; Arguments and Values:
-
-; component := component, otherwise condition depending on implementation.
-#?(renamer "not component") :signals condition
-
-; result := null
-
-;;;; Affected By:
-
-;;;; Side-Effects:
-; Modify file system.
-
-;;;; Notes:
-
-;;;; Exceptional-Situations:
-
-(requirements-about APPENDER :doc-type function)
-
-;;;; Description:
-; Souce file is appended with formatted codes.
-
-#+syntax
-(APPENDER component) ; => result
-
-;;;; Arguments and Values:
-
-; component := component, otherwise condition depending on implementation.
-#?(appender "not component") :signals condition
-
-; result := null
-
-;;;; Affected By:
-
-;;;; Side-Effects:
-; Append specified file.
-
-;;;; Notes:
-
-;;;; Exceptional-Situations:
-
-(requirements-about REPLACER :doc-type function)
-
-;;;; Description:
-; Source file is superseded by formatted codes.
-
-#+syntax
-(REPLACER component) ; => result
-
-;;;; Arguments and Values:
-
-; component := component, otherwise condition depending on implementation.
-#?(replacer "not component") :signals condition
-
-; result := null
-
-;;;; Affected By:
-
-;;;; Side-Effects:
-; Supersedes specified file.
-
-;;;; Notes:
-
-;;;; Exceptional-Situations:
-
