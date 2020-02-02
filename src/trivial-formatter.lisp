@@ -395,5 +395,12 @@
                                   :test #'equal)
                           rest)
                   (if rest
-                    (write-line first)
+                    (if(= (1+ (length first))
+                          (loop :for num :upfrom 0
+                                :for char :across (car rest)
+                                :while (char= #\space char)
+                                :finally (return num)))
+                      (progn (format t "~A " first)
+                             (rplaca rest (string-left-trim " " (car rest))))
+                      (write-line first))
                     (write-string first)))))))
