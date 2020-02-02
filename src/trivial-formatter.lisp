@@ -71,6 +71,7 @@
 (defmethod print-object ((dot dot) stream)
   (princ #\. stream))
 
+(defstruct comment content)
 (defstruct (line-comment (:include comment)))
 (defmethod print-object ((c line-comment)stream)
   (if (uiop:string-prefix-p #\; (comment-content c))
