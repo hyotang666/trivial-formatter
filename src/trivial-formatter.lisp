@@ -299,6 +299,7 @@
         (progn (pprint-newline :mandatory stream)
                (and indent
                     (< 0 after-do)
+                    (not (symbolp thing))
                     (loop :repeat indent :do (write-char #\space stream))))
         (write-char #\space stream))
       :output
