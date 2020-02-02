@@ -385,16 +385,24 @@
     (loop :for (first . rest) :on (split-to-lines string)
           :do (if(uiop:string-prefix-p "; " (string-left-trim " " (car rest)))
                 (if(uiop:string-prefix-p "; " (string-left-trim " " first))
+                  ;; Both are single semicoloned line comment.
+                  ;; Integrate it as one for pritty printings.
                   (setf (car rest)
                         (format nil "~A ~A" first (car rest)))
+                  ;; Next one is single semicoloned line comment but FIRST.
+                  ;; Both should be printed in same line.
                   (progn (format t "~A " first)
                          (rplaca rest (string-left-trim " " (car rest)))))
                 (if(uiop:string-prefix-p "; " (string-left-trim " " first))
+                  ;; Next is not single semicoloned line comment but FIRST.
+                  ;; Comment should be printed.
                   (format t "~<; ~@;~@{~A~^ ~:_~}~:>~:[~;~%~]"
                           (remove "" (uiop:split-string first :separator "; ")
                                   :test #'equal)
-                          rest)
+                          rest) ; To avoid unneeded newline.
+                  ;; Both are not single semicoloned line comment.
                   (if rest
+                    ;; To avoid unneeded newline. Especially for conditional.
                     (if(= (1+ (length first))
                           (loop :for num :upfrom 0
                                 :for char :across (car rest)
@@ -403,4 +411,5 @@
                       (progn (format t "~A " first)
                              (rplaca rest (string-left-trim " " (car rest))))
                       (write-line first))
+                    ;; Last line never need newline.
                     (write-string first)))))))
