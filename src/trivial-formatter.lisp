@@ -69,6 +69,7 @@
 (defmethod print-object ((dot dot) stream)
   (princ #\. stream))
 
+;;; COMMENT
 (defstruct comment content)
 (defstruct (line-comment (:include comment)))
 (defmethod print-object ((c line-comment)stream)
@@ -82,6 +83,7 @@
 (defmethod print-object((c block-comment) stream)
   (format stream "~A" (comment-content c)))
 
+;;; CONDITIONAL
 (defstruct conditional
   char
   condition)
@@ -90,11 +92,13 @@
           (conditional-char c)
           (conditional-condition c)))
 
+;;; BROKEN-SYMBOL
 (defstruct broken-symbol
   notation)
 (defmethod print-object ((symbol broken-symbol)stream)
   (write-string (broken-symbol-notation symbol) stream))
 
+;;; READ-TIME-EVAL
 (defstruct read-time-eval
   form)
 (defmethod print-object((form read-time-eval)stream)
@@ -102,12 +106,14 @@
           (uiop:split-string (prin1-to-string (read-time-eval-form form))
                              :separator '(#\newline))))
 
+;;; SHARED-OBJECT
 (defstruct shared-object number exp)
 (defmethod print-object((obj shared-object)stream)
   (format stream "#~D=~S"
           (shared-object-number obj)
           (shared-object-exp obj)))
 
+;;; SHARED-REFERENCE
 (defstruct shared-reference number)
 (defmethod print-object((ref shared-reference)stream)
   (format stream "#~D#" (shared-reference-number ref)))
@@ -201,7 +207,7 @@
               (t
                 (format t "~2%")))))))
 
-;;;; PRINT-AS-CODE
+;;;; PRETTY PRINTERS
 (defun shortest-package-name (package)
   (reduce (lambda(champion challenger)
             (if(< (length champion)
@@ -315,6 +321,7 @@
 
     *print-pprint-dispatch*))
 
+;;;; PRINT-AS-CODE
 (defun split-to-lines (string)
   (mapcan (lambda(line)
             (setf line (remove #\nul
