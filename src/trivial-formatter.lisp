@@ -375,6 +375,8 @@
           :downcase)
         (*print-pprint-dispatch*
           *pprint-dispatch*)
+        (*print-pretty*
+          t)
         (string
           (prin1-to-string exp))
         (*standard-output*
