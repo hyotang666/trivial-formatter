@@ -166,6 +166,11 @@
 :outputs
 "#0=(dummy . #0#)"
 
+;;;; Guards.
+#?(format nil "~<~:@_~:>"nil)
+=> "
+"
+,:test equal
 (requirements-about DEBUG-PRINTER :doc-type function)
 
 ;;;; Description:
