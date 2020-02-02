@@ -58,12 +58,8 @@
                          (princ-to-string c))
                 (make-broken-symbol :notation notation)
                 (error c)))
-            (package-error(c)
-              (let((package
-                     (package-error-package c)))
-                (if (stringp package) ; No such package exists.
-                  (make-broken-symbol :notation notation)
-                  (error c))))))))))
+            (package-error()
+              (make-broken-symbol :notation notation))))))))
 
 ;;;; META-OBJECT
 ;;; DOT
