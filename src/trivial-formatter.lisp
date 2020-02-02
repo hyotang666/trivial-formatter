@@ -283,7 +283,7 @@
       (or (and (symbolp thing)
                (if (find thing '(:do :doing :initially :finally) :test #'string=)
                  (setf after-do 0
-                       indent (length (prin1-to-string thing))
+                       indent (1+ (length (prin1-to-string thing)))
                        before-key-p t)
                  (when (member thing +loop-separating-clauses+ :test #'string=)
                    (setf after-do nil
@@ -296,7 +296,10 @@
                     (if (zerop after-do)
                       (tagbody (incf after-do))
                       t)))
-        (pprint-newline :mandatory stream)
+        (progn (pprint-newline :mandatory stream)
+               (and indent
+                    (< 0 after-do)
+                    (loop :repeat indent :do (write-char #\space stream))))
         (write-char #\space stream))
       :output
       (sb-kernel:output-object thing stream)
