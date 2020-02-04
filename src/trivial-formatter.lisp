@@ -396,6 +396,10 @@
             (clause-forms v))
     (call-next-method)))
 
+(defun print-clause(thing)
+  (let((*print-clause* t))
+    (prin1 thing)))
+
 (defun separation-keyword-p(thing)
   (and (symbolp thing)
        (find thing '(:and
