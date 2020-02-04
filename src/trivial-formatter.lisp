@@ -371,11 +371,30 @@
 
 ;;;; loop clause
 (defvar *print-clause* nil)
+
+;;; CLAUSE
 (defstruct (clause (:constructor %make-clause))
   keyword forms)
-(defstruct (var (:include clause)))
-(defstruct (nestable (:include clause)))
+(defmethod print-object((o clause)stream)
+  (if *print-clause*
+    (format stream "~@[~W~]~:[~; ~]~@[~{~W~^ ~_~}~]"
+            (clause-keyword o)
+            (and (clause-keyword o)
+                 (clause-forms o))
+            (clause-forms o))
+    (call-next-method)))
 
+;;; VAR
+(defstruct (var (:include clause)))
+(defmethod print-object((v var) stream)
+  (if *print-clause*
+    (apply #'format stream "~W~^ ~:I~W~@{~^ ~:_~W~^ ~W~}~5I"
+            (clause-keyword v)
+            (clause-forms v))
+    (call-next-method)))
+
+;;; NESTABLE
+(defstruct (nestable (:include clause)))
 (defmethod print-object((c nestable)stream)
   (if *print-clause*
     (format stream "~2:I~W~{~^ ~W~:@_~@{~W~^ ~:@_~}~}~5I"
@@ -383,6 +402,7 @@
             (clause-forms c))
     (call-next-method)))
 
+;;; OWN-BLOCK
 (defstruct (own-block (:include clause)))
 (defmethod print-object((c own-block)stream)
   (if *print-clause*
@@ -391,6 +411,7 @@
             (clause-forms c))
     (call-next-method)))
 
+;;; CONSTRUCTOR
 (defun make-clause(&key keyword forms)
   (case (separation-keyword-p keyword)
     ((:for :with :as)
@@ -401,22 +422,6 @@
      (make-own-block :keyword keyword :forms forms))
     (otherwise
       (%make-clause :keyword keyword :forms forms))))
-
-(defmethod print-object((o clause)stream)
-  (if *print-clause*
-    (format stream "~@[~W~]~:[~; ~]~@[~{~W~^ ~_~}~]"
-            (clause-keyword o)
-            (and (clause-keyword o)
-                 (clause-forms o))
-            (clause-forms o))
-    (call-next-method)))
-
-(defmethod print-object((v var) stream)
-  (if *print-clause*
-    (apply #'format stream "~W~^ ~:I~W~@{~^ ~:_~W~^ ~W~}~5I"
-            (clause-keyword v)
-            (clause-forms v))
-    (call-next-method)))
 
 (defun print-clause(thing)
   (let((*print-clause* t))
