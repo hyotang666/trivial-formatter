@@ -424,19 +424,15 @@
 
 ;;; CONSTRUCTOR
 (defun make-clause(&key keyword forms)
-  (case (separation-keyword-p keyword)
-    ((:for :with :as)
-     (make-var :keyword keyword :forms forms))
-    ((:if :when)
-     (make-nestable :keyword keyword :forms forms))
-    ((:do :doing :finally :initially)
-     (make-own-block :keyword keyword :forms forms))
-    ((:else)
-     (make-else :keyword keyword :forms forms))
-    ((:and)
-     (make-additional :keyword keyword :forms forms))
-    (otherwise
-      (%make-clause :keyword keyword :forms forms))))
+  (funcall (case (separation-keyword-p keyword)
+             ((:for :with :as) #'make-var)
+             ((:if :when) #'make-nestable)
+             ((:do :doing :finally :initially) #'make-own-block)
+             ((:else) #'make-else)
+             ((:and) #'make-additional)
+             (otherwise #'%make-clause))
+           :keyword keyword
+           :forms forms))
 
 (defun print-clause(thing)
   (let((*print-clause* t))
