@@ -413,6 +413,7 @@
                       :minimize :minimizing
                       :if :when :unless :end
                       :while :until :repeat :always :never :thereis
+                      :do :doing :initially :finally
                       )
              :test #'string=)))
 
