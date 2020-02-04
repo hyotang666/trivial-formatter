@@ -387,6 +387,12 @@
 ;;; OPTIONAL
 (defstruct (optional (:include clause)))
 
+;;; ADDITIONAL
+(defstruct (additional (:include optional)))
+
+;;; ELSE
+(defstruct (else (:include optional)))
+
 ;;; VAR
 (defstruct (var (:include clause)))
 (defmethod print-object((v var) stream)
@@ -425,8 +431,10 @@
      (make-nestable :keyword keyword :forms forms))
     ((:do :doing :finally :initially)
      (make-own-block :keyword keyword :forms forms))
-    ((:else :and)
-     (make-optional :keyword keyword :forms forms))
+    ((:else)
+     (make-else :keyword keyword :forms forms))
+    ((:and)
+     (make-additional :keyword keyword :forms forms))
     (otherwise
       (%make-clause :keyword keyword :forms forms))))
 
