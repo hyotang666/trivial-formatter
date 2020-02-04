@@ -1,4 +1,5 @@
 (defpackage :trivial-formatter.spec
+  (:import-from :trivial-formatter #:pprint-extended-loop)
   (:use :cl :jingoh :trivial-formatter))
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
@@ -175,3 +176,148 @@
 => "
 "
 ,:test equal
+
+(requirements-about PPRINT-EXTENDED-LOOP :doc-type function)
+
+;;;; Description:
+
+#+syntax
+(PPRINT-EXTENDED-LOOP stream list) ; => result
+
+;;;; Arguments and Values:
+
+; stream := 
+
+; list := 
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
+;;;; TESTS
+#?(pprint-extended-loop nil '(loop))
+:outputs "(LOOP)"
+
+; CLHS 6.1.1.1.1 Simple loop.
+#?(pprint-extended-loop nil '(loop (print :hoge *standard-output*)
+                                   (print :hoge *standard-output*)
+                                   (print :hoge *standard-output*)))
+:outputs "(LOOP (PRINT :HOGE *STANDARD-OUTPUT*)
+      (PRINT :HOGE *STANDARD-OUTPUT*)
+      (PRINT :HOGE *STANDARD-OUTPUT*))"
+
+; CLHS 6.1.1.3
+#?(pprint-extended-loop nil '(loop for i from 1 to (compute-top-value)       ; first clause
+                                   while (not (unacceptable i))              ; second clause
+                                   collect (square i)                        ; third clause
+                                   do (format t "Working on ~D now" i)       ; fourth clause
+                                   when (evenp i)                            ; fifth clause
+                                     do (format t "~D is a non-odd number" i)
+                                   finally (format t "About to exit!")))     ; sixth clause
+:outputs "(LOOP FOR I FROM 1 TO (COMPUTE-TOP-VALUE)
+      WHILE (NOT (UNACCEPTABLE I))
+      COLLECT (SQUARE I)
+      DO (FORMAT T \"Working on ~D now\" I)
+      WHEN (EVENP I)
+        DO (FORMAT T \"~D is a non-odd number\" I)
+      FINALLY (FORMAT T \"About to exit!\"))"
+
+; CLHS 6.1.1.7
+#?(pprint-extended-loop nil '(loop for (x y) of-type (vector fixnum)
+                                   in (list :super :long :list :like :this)
+                                   do))
+:outputs "(LOOP FOR (X Y) OF-TYPE (VECTOR FIXNUM)
+          IN (LIST :SUPER :LONG :LIST :LIKE :THIS)
+      DO)"
+
+; CLHS 6.1.1.7
+#?(pprint-extended-loop nil '(loop for numlist in '((1 2 4.0) (5 6 8.3) (8 9 10.4))
+                                   for a of-type integer = (first numlist)
+                                   and b of-type integer = (second numlist)
+                                   and c of-type float = (third numlist)
+                                   collect (list c b a)))
+:outputs "(LOOP FOR NUMLIST IN '((1 2 4.0) (5 6 8.3) (8 9 10.4))
+      FOR A OF-TYPE INTEGER = (FIRST NUMLIST)
+      AND B OF-TYPE INTEGER = (SECOND NUMLIST)
+      AND C OF-TYPE FLOAT = (THIRD NUMLIST)
+      COLLECT (LIST C B A))"
+
+; CLHS 6.1.1.7
+#?(pprint-extended-loop nil '(loop with (a b) of-type float = '(1.0 2.0)
+                                   and (c d) of-type integer = '(3 4)
+                                   and (e f)
+                                   return (list a b c d e f)))
+:outputs "(LOOP WITH (A B) OF-TYPE FLOAT = '(1.0 2.0)
+      AND (C D) OF-TYPE INTEGER = '(3 4)
+      AND (E F)
+      RETURN (LIST A B C D E F))"
+
+; CLHS 6.1.3.2
+#?(pprint-extended-loop nil '(loop for i upfrom 0
+                                   as x in '(a b (c))
+                                   nconc (if (evenp i) (list x) nil)))
+:outputs "(LOOP FOR I UPFROM 0
+      AS X IN '(A B (C))
+      NCONC (IF (EVENP I)
+                (LIST X)
+                NIL))"
+
+#?(pprint-extended-loop nil '(loop for i from 1 to 3
+                                   do (print i *standard-output*)
+                                   (print i *standard-output*)
+                                   (print (* i i) *standard-output*)))
+:outputs "(LOOP FOR I FROM 1 TO 3
+      DO (PRINT I *STANDARD-OUTPUT*)
+         (PRINT I *STANDARD-OUTPUT*)
+         (PRINT (* I I) *STANDARD-OUTPUT*))"
+
+; CLHS 6.1.8.1
+#?(pprint-extended-loop nil '(loop for i in '(1 324 2345 323 2 4 235 252)
+                                   when (oddp i)
+                                   do (print i *standard-output*)
+                                   and collect i into odd-numbers
+                                   and do (terpri)
+                                   else                              ; I is even.
+                                   collect i into even-numbers
+                                   finally
+                                   (return (values odd-numbers even-numbers))))
+:outputs "(LOOP FOR I IN '(1 324 2345 323 2 4 235 252)
+      WHEN (ODDP I)
+        DO (PRINT I *STANDARD-OUTPUT*)
+        AND COLLECT I INTO ODD-NUMBERS
+        AND DO (TERPRI)
+      ELSE
+        COLLECT I INTO EVEN-NUMBERS
+      FINALLY (RETURN (VALUES ODD-NUMBERS EVEN-NUMBERS)))"
+
+; CLHS 6.1.8.1
+#?(pprint-extended-loop nil '(loop for i in list
+                                   when (numberp i)
+                                   when (floatp i)
+                                   collect i into float-numbers
+                                   else                                  ; Not (floatp i)
+                                   collect i into other-numbers
+                                   else                                    ; Not (numberp i)
+                                   when (symbolp i)
+                                   collect i into symbol-list
+                                   else                                  ; Not (symbolp i)
+                                   do (error "found a funny value in list ~S, value ~S~%" list i)
+                                   finally (return (values float-numbers other-numbers symbol-list))))
+:outputs "(LOOP FOR I IN LIST
+      WHEN (NUMBERP I)
+        WHEN (FLOATP I)
+          COLLECT I INTO FLOAT-NUMBERS
+        ELSE
+          COLLECT I INTO OTHER-NUMBERS
+      ELSE
+        WHEN (SYMBOLP I)
+          COLLECT I INTO SYMBOL-LIST
+        ELSE
+          DO (ERROR \"found a funny value in list ~S, value ~S~%\" LIST I)
+      FINALLY (RETURN (VALUE FLOAT-NUMBERS OTHER-NUMBERS SYMBOL-LIST)))"
