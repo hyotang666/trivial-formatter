@@ -397,7 +397,9 @@
             (clause-forms v))))
 
 ;;; NESTABLE
-(defstruct (nestable (:include clause)))
+(defstruct (nestable (:include clause))
+  pred
+  else)
 (defmethod print-object((c nestable)stream)
   (if (null *print-clause*)
     (call-next-method)
@@ -475,8 +477,14 @@
                   ((nil)
                    (rec rest
                         (if temp
-                          (progn (push first (clause-forms temp))
-                                 temp)
+                          (if(nestable-p temp)
+                            (if(null (nestable-forms temp))
+                              (progn (setf (nestable-pred temp) first)
+                                     temp)
+                              (progn (push first (clause-forms temp))
+                                     temp))
+                            (progn (push first (clause-forms temp))
+                                   temp))
                           (make-clause :forms (list first)))
                         acc))
                   (otherwise
@@ -494,8 +502,13 @@
                                         acc)
                                  (cons (reverse-form temp first)acc)))
                              (t
-                               (cons (reverse-form temp first)
-                                     acc)))
+                               (if(nestable-p temp)
+                                 (if(null (clause-forms temp))
+                                   (cons (progn (setf (nestable-pred temp) first)
+                                                temp)
+                                         acc)
+                                   (cons (reverse-form temp first) acc))
+                                 (cons (reverse-form temp first) acc))))
                            (cons (make-clause :forms (list first)) acc))))))))
           (append-forms(clause other)
             (setf (clause-forms clause)
