@@ -410,6 +410,7 @@
                     (write-string first)))))))
 
 ;;;; loop clause
+(defvar *print-clause* nil)
 (defstruct clause keyword forms)
 
 (defun separation-keyword-p(thing)
