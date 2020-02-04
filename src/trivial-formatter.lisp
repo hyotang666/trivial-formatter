@@ -385,7 +385,7 @@
 
 (defun make-clause(&key keyword forms)
   (case (separation-keyword-p keyword)
-    ((:for :with)
+    ((:for :with :as)
      (make-var :keyword keyword :forms forms))
     ((:if :when)
      (make-nestable :keyword keyword :forms forms))
@@ -416,7 +416,7 @@
 (defun separation-keyword-p(thing)
   (and (symbolp thing)
        (find thing '(:and
-                      :with :for
+                      :with :for :as
                       :collect :collecting
                       :append :appending
                       :nconc :nconcing
