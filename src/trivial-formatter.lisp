@@ -374,6 +374,7 @@
 (defstruct (clause (:constructor %make-clause))
   keyword forms)
 (defstruct (var (:include clause)))
+(defstruct (nestable (:include clause)))
 
 (defun make-clause(&key keyword forms)
   (case (separation-keyword-p keyword)
