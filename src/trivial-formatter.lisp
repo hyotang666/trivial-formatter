@@ -380,6 +380,8 @@
   (case (separation-keyword-p keyword)
     ((:for :with)
      (make-var :keyword keyword :forms forms))
+    ((:if :when)
+     (make-nestable :keyword keyword :forms forms))
     (otherwise
       (%make-clause :keyword keyword :forms forms))))
 
