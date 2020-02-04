@@ -442,28 +442,36 @@
           (body(first rest temp acc)
             (if(separation-keyword-p first)
               (rec rest (make-clause :keyword first) acc)
-              (if(separation-keyword-p (car rest))
-                (rec (cdr rest) (make-clause :keyword (car rest))
-                     (if temp
-                       (if (nestable-p (car acc))
-                         (progn (setf (clause-forms (car acc))
-                                      (append (clause-forms (car acc))
-                                              (list (progn (setf (clause-forms temp)
-                                                                 (nreconc
-                                                                   (clause-forms temp)
-                                                                   (list first)))
-                                                           temp))))
-                                acc)
-                         (cons (progn (setf (clause-forms temp)
-                                            (nreconc (clause-forms temp)(list first)))
-                                      temp)
-                               acc))
-                       (cons (make-clause :forms (list first)) acc)))
-                (rec rest (if temp
-                            (progn (push first (clause-forms temp))
-                                   temp)
-                            (make-clause :forms (list first)))
-                     acc)))))
+              (let((next(separation-keyword-p (car rest))))
+                (if next
+                  (rec (cdr rest)
+                       (case next
+                         ((:and)
+                          (typecase temp
+                            (var (make-var :keyword (car rest)))
+                            (t (make-clause :keyword (car rest)))))
+                         (otherwise
+                           (make-clause :keyword (car rest))))
+                       (if temp
+                         (if (nestable-p (car acc))
+                           (progn (setf (clause-forms (car acc))
+                                        (append (clause-forms (car acc))
+                                                (list (progn (setf (clause-forms temp)
+                                                                   (nreconc
+                                                                     (clause-forms temp)
+                                                                     (list first)))
+                                                             temp))))
+                                  acc)
+                           (cons (progn (setf (clause-forms temp)
+                                              (nreconc (clause-forms temp)(list first)))
+                                        temp)
+                                 acc))
+                         (cons (make-clause :forms (list first)) acc)))
+                  (rec rest (if temp
+                              (progn (push first (clause-forms temp))
+                                     temp)
+                              (make-clause :forms (list first)))
+                       acc))))))
     (rec body)))
 
 (defun pprint-extended-loop (stream list)
