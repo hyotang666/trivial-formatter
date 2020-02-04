@@ -377,11 +377,11 @@
   keyword forms)
 (defmethod print-object((o clause)stream)
   (if *print-clause*
-    (format stream "~@[~W~]~:[~; ~]~@[~{~W~^ ~_~}~]"
-            (clause-keyword o)
-            (and (clause-keyword o)
-                 (clause-forms o))
-            (clause-forms o))
+    (if (clause-keyword o)
+      (format stream "~W~@[ ~{~W~^ ~@_~}~]"
+              (clause-keyword o)
+              (clause-forms o))
+      (format stream "~{~W~^ ~_~}" (clause-forms o)))
     (call-next-method)))
 
 ;;; VAR
