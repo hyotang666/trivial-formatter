@@ -389,6 +389,13 @@
             (clause-forms o))
     (call-next-method)))
 
+(defmethod print-object((v var) stream)
+  (if *print-clause*
+    (format stream "~W ~{~W~^ ~@_~}"
+            (clause-keyword v)
+            (clause-forms v))
+    (call-next-method)))
+
 (defun separation-keyword-p(thing)
   (and (symbolp thing)
        (find thing '(:and
