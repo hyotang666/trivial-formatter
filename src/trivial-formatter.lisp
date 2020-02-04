@@ -408,7 +408,8 @@
 
 (defun print-clause(thing)
   (let((*print-clause* t))
-    (prin1 thing)))
+    (pprint-logical-block(nil nil)
+      (prin1 thing))))
 
 (defun separation-keyword-p(thing)
   (and (symbolp thing)
