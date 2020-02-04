@@ -427,3 +427,30 @@
                       :while :until :repeat :always :never :thereis
                       )
              :test #'string=)))
+
+(defun parse-loop-body(body)
+  (labels((rec(list &optional temp acc)
+            (if(endp list)
+              (if temp
+                (progn (setf (clause-forms temp)
+                             (nreverse (clause-forms temp)))
+                       (nreconc acc (list temp)))
+                (nreverse acc))
+              (body (car list)(cdr list) temp acc)))
+          (body(first rest temp acc)
+            (if(separation-keyword-p first)
+              (rec rest (make-clause :keyword first) acc)
+              (if(separation-keyword-p (car rest))
+                (rec (cdr rest) (make-clause :keyword (cadr rest))
+                     (cons (if temp
+                             (progn (setf (clause-forms temp)
+                                          (nreverse (clause-forms temp)))
+                                    temp)
+                             (make-clause :forms (list first)))
+                           acc))
+                (rec rest (if temp
+                            (progn (push first (clause-forms temp))
+                                   temp)
+                            (make-clause :forms (list first)))
+                     acc)))))
+    (rec body)))
