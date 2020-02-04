@@ -1,5 +1,5 @@
 (defpackage :trivial-formatter.spec
-  (:import-from :trivial-formatter #:pprint-extended-loop)
+  (:import-from :trivial-formatter #:pprint-extended-loop #:parse-loop-body)
   (:use :cl :jingoh :trivial-formatter))
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
@@ -321,3 +321,25 @@
         ELSE
           DO (ERROR \"found a funny value in list ~S, value ~S~%\" LIST I)
       FINALLY (RETURN (VALUE FLOAT-NUMBERS OTHER-NUMBERS SYMBOL-LIST)))"
+
+(requirements-about PARSE-LOOP-BODY :doc-type function)
+
+;;;; Description:
+
+#+syntax
+(PARSE-LOOP-BODY body) ; => result
+
+;;;; Arguments and Values:
+
+; body := 
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
