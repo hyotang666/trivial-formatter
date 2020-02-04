@@ -371,8 +371,16 @@
 
 ;;;; loop clause
 (defvar *print-clause* nil)
-(defstruct clause keyword forms)
+(defstruct (clause (:constructor %make-clause))
+  keyword forms)
 (defstruct (var (:include clause)))
+
+(defun make-clause(&key keyword forms)
+  (case (separation-keyword-p keyword)
+    ((:for :with)
+     (make-var :keyword keyword :forms forms))
+    (otherwise
+      (%make-clause :keyword keyword :forms forms))))
 
 (defmethod print-object((o clause)stream)
   (if *print-clause*
