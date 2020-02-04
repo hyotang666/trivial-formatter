@@ -230,10 +230,10 @@
 
 ; CLHS 6.1.1.7
 #?(pprint-extended-loop nil '(loop for (x y) of-type (vector fixnum)
-                                   in (list :super :long :list :like :this)
+                                   in (list :super :long :list :like :this :more)
                                    do))
 :outputs "(LOOP FOR (X Y) OF-TYPE (VECTOR FIXNUM)
-          IN (LIST :SUPER :LONG :LIST :LIKE :THIS)
+          IN (LIST :SUPER :LONG :LIST :LIKE :THIS :MORE)
       DO)"
 
 ; CLHS 6.1.1.7
