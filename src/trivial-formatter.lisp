@@ -453,29 +453,40 @@
             (if(separation-keyword-p first)
               (rec rest (make-clause :keyword first) acc)
               (let((next(separation-keyword-p (car rest))))
-                (if next
-                  (rec (cdr rest)
-                       (case next
-                         ((:and)
-                          (typecase temp
-                            (var (make-var :keyword (car rest)))
-                            (t (make-clause :keyword (car rest)))))
-                         (otherwise
-                           (make-clause :keyword (car rest))))
-                       (if temp
-                         (if (nestable-p (car acc))
-                           (progn (setf (clause-forms (car acc))
-                                        (append (clause-forms (car acc))
-                                                (list (reverse-form temp first))))
-                                  acc)
-                           (cons (reverse-form temp first)
-                                 acc))
-                         (cons (make-clause :forms (list first)) acc)))
-                  (rec rest (if temp
-                              (progn (push first (clause-forms temp))
-                                     temp)
-                              (make-clause :forms (list first)))
-                       acc)))))
+                (case next
+                  ((nil)
+                   (rec rest (if temp
+                               (progn (push first (clause-forms temp))
+                                      temp)
+                               (make-clause :forms (list first)))
+                        acc))
+                  ((:and)
+                   (rec (cddr rest)
+                        (make-clause :keyword (car rest)
+                                     :forms (list(if(separation-keyword-p(cadr rest))
+                                                   (make-clause :keyword(cadr rest))
+                                                   (make-clause :forms (list (cadr rest))))))
+                        (if temp
+                          (if (nestable-p (car acc))
+                            (progn (setf (clause-forms (car acc))
+                                         (append (clause-forms (car acc))
+                                                 (list (reverse-form temp first))))
+                                   acc)
+                            (cons (reverse-form temp first)
+                                  acc))
+                          (cons (make-clause :forms (list first)) acc))))
+                  (otherwise
+                    (rec (cdr rest)
+                         (make-clause :keyword (car rest))
+                         (if temp
+                           (if (nestable-p (car acc))
+                             (progn (setf (clause-forms (car acc))
+                                          (append (clause-forms (car acc))
+                                                  (list (reverse-form temp first))))
+                                    acc)
+                             (cons (reverse-form temp first)
+                                   acc))
+                           (cons (make-clause :forms (list first)) acc))))))))
           (reverse-form(clause tail)
             (setf (clause-forms clause)
                   (nreconc (clause-forms clause)
