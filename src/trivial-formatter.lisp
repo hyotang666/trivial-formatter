@@ -376,6 +376,13 @@
 (defstruct (var (:include clause)))
 (defstruct (nestable (:include clause)))
 
+(defmethod print-object((c nestable)stream)
+  (if *print-clause*
+    (format stream "~2:I~W~:{~^ ~W~:@_~@{~W~^ ~:_~}~}~5I"
+            (clause-keyword c)
+            (list (clause-forms c)))
+    (call-next-method)))
+
 (defun make-clause(&key keyword forms)
   (case (separation-keyword-p keyword)
     ((:for :with)
