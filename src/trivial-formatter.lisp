@@ -376,40 +376,40 @@
 (defstruct (clause (:constructor %make-clause))
   keyword forms)
 (defmethod print-object((o clause)stream)
-  (if *print-clause*
+  (if (null *print-clause*)
+    (call-next-method)
     (if (clause-keyword o)
       (format stream "~W~@[ ~{~W~^ ~@_~}~]"
               (clause-keyword o)
               (clause-forms o))
-      (format stream "~{~W~^ ~_~}" (clause-forms o)))
-    (call-next-method)))
+      (format stream "~{~W~^ ~_~}" (clause-forms o)))))
 
 ;;; VAR
 (defstruct (var (:include clause)))
 (defmethod print-object((v var) stream)
-  (if *print-clause*
+  (if (null *print-clause*)
+    (call-next-method)
     (apply #'format stream "~W~^ ~:I~W~@{~^ ~:_~W~^ ~W~}~5I"
             (clause-keyword v)
-            (clause-forms v))
-    (call-next-method)))
+            (clause-forms v))))
 
 ;;; NESTABLE
 (defstruct (nestable (:include clause)))
 (defmethod print-object((c nestable)stream)
-  (if *print-clause*
+  (if (null *print-clause*)
+    (call-next-method)
     (format stream "~2:I~W~{~^ ~W~:@_~@{~W~^ ~:@_~}~}~5I"
             (clause-keyword c)
-            (clause-forms c))
-    (call-next-method)))
+            (clause-forms c))))
 
 ;;; OWN-BLOCK
 (defstruct (own-block (:include clause)))
 (defmethod print-object((c own-block)stream)
-  (if *print-clause*
+  (if (null *print-clause*)
+    (call-next-method)
     (format stream "~W~@[ ~:I~{~W~^~:@_~}~]~5I"
             (clause-keyword c)
-            (clause-forms c))
-    (call-next-method)))
+            (clause-forms c))))
 
 ;;; CONSTRUCTOR
 (defun make-clause(&key keyword forms)
