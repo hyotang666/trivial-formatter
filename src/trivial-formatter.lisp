@@ -450,4 +450,4 @@
          (first (car list)(car list))
          (*print-clause* t))
       ((null list))
-      (format stream "~W~:[~; ~@_~]" first (cdr list)))))
+      (format stream "~W~:[~;~:@_~]" first (cdr list)))))
