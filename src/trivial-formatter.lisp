@@ -378,9 +378,9 @@
 
 (defmethod print-object((c nestable)stream)
   (if *print-clause*
-    (format stream "~2:I~W~:{~^ ~W~:@_~@{~W~^ ~:_~}~}~5I"
+    (format stream "~2:I~W~{~^ ~W~:@_~@{~W~^ ~:@_~}~}~5I"
             (clause-keyword c)
-            (list (clause-forms c)))
+            (clause-forms c))
     (call-next-method)))
 
 (defstruct (own-block (:include clause)))
