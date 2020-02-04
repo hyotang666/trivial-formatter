@@ -425,10 +425,10 @@
             (if(separation-keyword-p first)
               (rec rest (make-clause :keyword first) acc)
               (if(separation-keyword-p (car rest))
-                (rec (cdr rest) (make-clause :keyword (cadr rest))
+                (rec (cdr rest) (make-clause :keyword (car rest))
                      (cons (if temp
                              (progn (setf (clause-forms temp)
-                                          (nreverse (clause-forms temp)))
+                                          (nreconc (clause-forms temp)(list first)))
                                     temp)
                              (make-clause :forms (list first)))
                            acc))
