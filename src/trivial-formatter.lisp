@@ -374,7 +374,7 @@
 (defstruct clause keyword forms)
 (defmethod print-object((o clause)stream)
   (if *print-clause*
-    (format stream "~@[~W ~]~{~W~^ ~@_~}"
+    (format stream "~@[~W ~]~{~W~^ ~_~}"
             (clause-keyword o)
             (clause-forms o))
     (call-next-method)))
