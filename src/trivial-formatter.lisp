@@ -401,7 +401,7 @@
 
 (defmethod print-object((v var) stream)
   (if *print-clause*
-    (format stream "~W ~{~W~^ ~@_~}"
+    (apply #'format stream "~W~^ ~:I~W~@{~^ ~:_~W~^ ~W~}~5I"
             (clause-keyword v)
             (clause-forms v))
     (call-next-method)))
