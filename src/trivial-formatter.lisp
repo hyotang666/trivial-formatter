@@ -411,3 +411,19 @@
 
 ;;;; loop clause
 (defstruct clause keyword forms)
+
+(defun separation-keyword-p(thing)
+  (and (symbolp thing)
+       (find thing '(:and
+                      :with :for
+                      :collect :collecting
+                      :append :appending
+                      :nconc :nconcing
+                      :count :counting
+                      :sum :summing
+                      :maximize :maximizing
+                      :minimize :minimizing
+                      :if :when :unless :end
+                      :while :until :repeat :always :never :thereis
+                      )
+             :test #'string=)))
