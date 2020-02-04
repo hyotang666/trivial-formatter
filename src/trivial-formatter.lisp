@@ -291,46 +291,6 @@
      :for :while :until :repeat :always :never :thereis
      ))
 
-#+sbcl
-(defun pprint-extended-loop (stream list)
-  (pprint-logical-block (stream list :prefix "(" :suffix ")")
-      (sb-kernel:output-object (pprint-pop) stream)
-      (pprint-exit-if-list-exhausted)
-      (write-char #\space stream)
-      (pprint-indent :current 0 stream)
-      (sb-kernel:output-object (pprint-pop) stream)
-    (prog(thing after-do indent before-key-p)
-      :top
-      (setf thing (pprint-pop))
-      :update-vars
-      (or (and (symbolp thing)
-               (if (find thing '(:do :doing :initially :finally) :test #'string=)
-                 (setf after-do 0
-                       indent (1+ (length (prin1-to-string thing)))
-                       before-key-p t)
-                 (when (member thing +loop-separating-clauses+ :test #'string=)
-                   (setf after-do nil
-                         indent nil
-                         before-key-p t))))
-          (setf before-key-p nil))
-      :newline-check
-      (if(or before-key-p
-               (and after-do
-                    (if (zerop after-do)
-                      (tagbody (incf after-do))
-                      t)))
-        (progn (pprint-newline :mandatory stream)
-               (and indent
-                    (< 0 after-do)
-                    (not (symbolp thing))
-                    (loop :repeat indent :do (write-char #\space stream))))
-        (write-char #\space stream))
-      :output
-      (sb-kernel:output-object thing stream)
-      :end-check
-      (pprint-exit-if-list-exhausted)
-      (go :top))))
-
 (defparameter *pprint-dispatch*
   (let((*print-pprint-dispatch*
          (copy-pprint-dispatch)))
@@ -461,3 +421,12 @@
                             (make-clause :forms (list first)))
                      acc)))))
     (rec body)))
+
+(defun pprint-extended-loop (stream list)
+  (pprint-logical-block(stream nil :prefix "(" :suffix ")")
+    (format stream "~W~:[~; ~:I~]" (car list)(cdr list))
+    (do*((list (parse-loop-body (cdr list))(cdr list))
+         (first (car list)(car list))
+         (*print-clause* t))
+      ((null list))
+      (format stream "~W~:[~; ~@_~]" first (cdr list)))))
