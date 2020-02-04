@@ -372,6 +372,8 @@
 ;;;; loop clause
 (defvar *print-clause* nil)
 (defstruct clause keyword forms)
+(defstruct (var (:include clause)))
+
 (defmethod print-object((o clause)stream)
   (if *print-clause*
     (format stream "~@[~W ~]~{~W~^ ~_~}"
