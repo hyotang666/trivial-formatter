@@ -383,12 +383,22 @@
             (list (clause-forms c)))
     (call-next-method)))
 
+(defstruct (own-block (:include clause)))
+(defmethod print-object((c own-block)stream)
+  (if *print-clause*
+    (format stream "~W~@[ ~:I~{~W~^~:@_~}~]~5I"
+            (clause-keyword c)
+            (clause-forms c))
+    (call-next-method)))
+
 (defun make-clause(&key keyword forms)
   (case (separation-keyword-p keyword)
     ((:for :with :as)
      (make-var :keyword keyword :forms forms))
     ((:if :when)
      (make-nestable :keyword keyword :forms forms))
+    ((:do :doing :finally :initially)
+     (make-own-block :keyword keyword :forms forms))
     (otherwise
       (%make-clause :keyword keyword :forms forms))))
 
