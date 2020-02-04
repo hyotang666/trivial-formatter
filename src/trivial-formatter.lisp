@@ -408,3 +408,6 @@
                       (write-line first))
                     ;; Last line never need newline.
                     (write-string first)))))))
+
+;;;; loop clause
+(defstruct clause keyword forms)
