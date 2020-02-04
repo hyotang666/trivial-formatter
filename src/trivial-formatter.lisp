@@ -466,9 +466,7 @@
                    (if temp
                      (if(and (optional-p(car acc))
                              (null (clause-forms (car acc))))
-                       (progn (setf (clause-forms (car acc))
-                                    (append (clause-forms (car acc))
-                                            (list (reverse-form temp first))))
+                       (progn (append-forms (car acc) (reverse-form temp first))
                               acc)
                        (cons (reverse-form temp nil) acc))
                      acc))
@@ -487,9 +485,7 @@
                          (if temp
                            (typecase (car acc)
                              (nestable
-                               (setf (clause-forms (car acc))
-                                     (append (clause-forms (car acc))
-                                             (list (reverse-form temp first))))
+                               (append-forms (car acc) (reverse-form temp first))
                                acc)
                              (optional
                                (if(null (clause-forms (car acc)))
@@ -501,6 +497,10 @@
                                (cons (reverse-form temp first)
                                      acc)))
                            (cons (make-clause :forms (list first)) acc))))))))
+          (append-forms(clause other)
+            (setf (clause-forms clause)
+                  (append (clause-forms clause)
+                          (list other))))
           (reverse-form(clause tail)
             (setf (clause-forms clause)
                   (nreconc (clause-forms clause)
