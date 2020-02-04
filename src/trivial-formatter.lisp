@@ -394,8 +394,10 @@
 
 (defmethod print-object((o clause)stream)
   (if *print-clause*
-    (format stream "~@[~W ~]~{~W~^ ~_~}"
+    (format stream "~@[~W~]~:[~; ~]~@[~{~W~^ ~_~}~]"
             (clause-keyword o)
+            (and (clause-keyword o)
+                 (clause-forms o))
             (clause-forms o))
     (call-next-method)))
 
