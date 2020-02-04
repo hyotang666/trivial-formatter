@@ -465,18 +465,19 @@
             (if(separation-keyword-p first)
               (rec rest
                    (make-clause :keyword first)
-                   (if temp
+                   (if(null temp)
+                     acc
                      (if(and (optional-p(car acc))
                              (null (clause-forms (car acc))))
                        (progn (append-forms (car acc) (reverse-form temp first))
                               acc)
-                       (cons (reverse-form temp nil) acc))
-                     acc))
+                       (cons (reverse-form temp nil) acc))))
               (let((next(separation-keyword-p (car rest))))
                 (case next
                   ((nil)
                    (rec rest
-                        (if temp
+                        (if (null temp)
+                          (make-clause :forms (list first))
                           (if(nestable-p temp)
                             (if(null (nestable-forms temp))
                               (progn (setf (nestable-pred temp) first)
@@ -484,13 +485,13 @@
                               (progn (push first (clause-forms temp))
                                      temp))
                             (progn (push first (clause-forms temp))
-                                   temp))
-                          (make-clause :forms (list first)))
+                                   temp)))
                         acc))
                   (otherwise
                     (rec (cdr rest)
                          (make-clause :keyword (car rest))
-                         (if temp
+                         (if (null temp)
+                           (cons (make-clause :forms (list first)) acc)
                            (typecase (car acc)
                              (nestable
                                (append-forms (car acc) (reverse-form temp first))
@@ -508,8 +509,7 @@
                                                 temp)
                                          acc)
                                    (cons (reverse-form temp first) acc))
-                                 (cons (reverse-form temp first) acc))))
-                           (cons (make-clause :forms (list first)) acc))))))))
+                                 (cons (reverse-form temp first) acc)))))))))))
           (append-forms(clause other)
             (setf (clause-forms clause)
                   (append (clause-forms clause)
