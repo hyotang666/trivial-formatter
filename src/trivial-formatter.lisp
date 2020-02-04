@@ -451,7 +451,10 @@
               (body (car list)(cdr list) temp acc)))
           (body(first rest temp acc)
             (if(separation-keyword-p first)
-              (rec rest (make-clause :keyword first) acc)
+              (rec rest (make-clause :keyword first)
+                   (if temp
+                     (cons (reverse-form temp nil) acc)
+                     acc))
               (let((next(separation-keyword-p (car rest))))
                 (case next
                   ((nil)
@@ -462,10 +465,14 @@
                         acc))
                   ((:and)
                    (rec (cddr rest)
-                        (make-clause :keyword (car rest)
-                                     :forms (list(if(separation-keyword-p(cadr rest))
-                                                   (make-clause :keyword(cadr rest))
-                                                   (make-clause :forms (list (cadr rest))))))
+                        (typecase temp
+                          (var (make-var :keyword (car rest)
+                                         :forms (list (cadr rest))))
+                          (otherwise
+                            (make-clause :keyword (car rest)
+                                         :forms (list(if(separation-keyword-p(cadr rest))
+                                                       (make-clause :keyword(cadr rest))
+                                                       (make-clause :forms (list (cadr rest))))))))
                         (if temp
                           (if (nestable-p (car acc))
                             (progn (setf (clause-forms (car acc))
