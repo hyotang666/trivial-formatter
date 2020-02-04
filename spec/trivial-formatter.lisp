@@ -343,3 +343,13 @@
 
 ;;;; Exceptional-Situations:
 
+;;;; Tests
+#?(parse-loop-body nil) => NIL
+#?(parse-loop-body '(:not-loop-keyword))
+:satisfies (lambda(result)
+             (& (listp result)
+                (every #'trivial-formatter::clause-p result)
+                (= 1 (length result))
+                (equal '(:not-loop-keyword)
+                       (trivial-formatter::clause-forms (car result)))
+                (null (trivial-formatter::clause-keyword (car result)))))
