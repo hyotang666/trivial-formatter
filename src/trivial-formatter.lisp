@@ -434,12 +434,21 @@
               (rec rest (make-clause :keyword first) acc)
               (if(separation-keyword-p (car rest))
                 (rec (cdr rest) (make-clause :keyword (car rest))
-                     (cons (if temp
-                             (progn (setf (clause-forms temp)
-                                          (nreconc (clause-forms temp)(list first)))
-                                    temp)
-                             (make-clause :forms (list first)))
-                           acc))
+                     (if temp
+                       (if (nestable-p (car acc))
+                         (progn (setf (clause-forms (car acc))
+                                      (append (clause-forms (car acc))
+                                              (list (progn (setf (clause-forms temp)
+                                                                 (nreconc
+                                                                   (clause-forms temp)
+                                                                   (list first)))
+                                                           temp))))
+                                acc)
+                         (cons (progn (setf (clause-forms temp)
+                                            (nreconc (clause-forms temp)(list first)))
+                                      temp)
+                               acc))
+                       (cons (make-clause :forms (list first)) acc)))
                 (rec rest (if temp
                             (progn (push first (clause-forms temp))
                                    temp)
