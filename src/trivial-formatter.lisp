@@ -477,6 +477,9 @@
              :test #'string=)))
 
 (defun parse-loop-body(body)
+  (make-nest(make-loop-clauses body)))
+
+(defun make-loop-clauses(body)
   (labels((rec(list &optional temp acc)
             (if(endp list)
               (if temp
@@ -543,7 +546,7 @@
                            (when tail
                              (list tail))))
             clause))
-    (make-nest(rec body))))
+    (rec body)))
 
 (defun make-nest (list)
   (do*((list list (cdr list))
