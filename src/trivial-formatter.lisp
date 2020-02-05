@@ -389,6 +389,14 @@
 
 ;;; ADDITIONAL
 (defstruct (additional (:include optional)))
+(defmethod print-object((c additional) stream)
+  (if(null *print-clause*)
+    (call-next-method)
+    (let((*indent* (+ 4 *indent*)))
+      (format stream "~VI~W~^ ~{~W~^ ~@_~}~5I"
+              *indent*
+              (clause-keyword c)
+              (clause-forms c)))))
 
 ;;; ELSE
 (defstruct (else (:include optional)))
