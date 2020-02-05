@@ -412,7 +412,8 @@
 (defvar *depth* 0)
 (defstruct (nestable (:include clause))
   pred
-  else)
+  else
+  end)
 (defmethod print-object((c nestable)stream)
   (if (null *print-clause*)
     (call-next-method)
@@ -430,7 +431,12 @@
                   (*depth*(1+ *depth*)))
                (format stream "~VI~:@_~W"
                        current-indent
-                       (nestable-else c)))))))
+                       (nestable-else c))))
+           (when(nestable-end c)
+             (format stream "~:@_~W"(nestable-end c))))))
+
+;;; END
+(defstruct (end(:include clause)))
 
 ;;; OWN-BLOCK
 (defstruct (own-block (:include clause)))
@@ -535,6 +541,12 @@
   (typecase first
     (null
       (values when nil))
+    (end
+      (cond
+        ((null(nestable-end when))
+         (setf (nestable-end when) first)
+         (values when (cons first rest)))
+        (t (values when (cons first rest)))))
     (nestable
       (cond
         ((null (clause-forms when))
