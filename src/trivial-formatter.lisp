@@ -481,71 +481,35 @@
 
 (defun make-loop-clauses(body)
   (labels((rec(list &optional temp acc)
-            (if(endp list)
-              (if temp
-                (progn (reverse-form temp nil)
-                       (nreconc acc (list temp)))
-                (nreverse acc))
-              (body (car list)(cdr list) temp acc)))
+            (if (endp list)
+              (nreverse acc)
+              (body (car list)(cdr list)temp acc)))
           (body(first rest temp acc)
             (if(separation-keyword-p first)
+              ;; Make new clause.
               (rec rest
                    (make-clause :keyword first)
-                   (if(null temp)
-                     acc
-                     (if(and (optional-p(car acc))
-                             (null (clause-forms (car acc))))
-                       (progn (append-forms (car acc) (reverse-form temp first))
-                              acc)
-                       (cons (reverse-form temp nil) acc))))
-              (let((next(separation-keyword-p (car rest))))
-                (case next
-                  ((nil)
-                   (rec rest
-                        (if (null temp)
-                          (make-clause :forms (list first))
-                          (if(nestable-p temp)
-                            (if(null (nestable-forms temp))
-                              (progn (setf (nestable-pred temp) first)
-                                     temp)
-                              (progn (push first (clause-forms temp))
-                                     temp))
-                            (progn (push first (clause-forms temp))
-                                   temp)))
-                        acc))
-                  (otherwise
-                    (rec (cdr rest)
-                         (make-clause :keyword (car rest))
-                         (if (null temp)
-                           (cons (make-clause :forms (list first)) acc)
-                           (typecase (car acc)
-                             (nestable
-                               (append-forms (car acc) (reverse-form temp first))
-                               acc)
-                             (optional
-                               (if(null (clause-forms (car acc)))
-                                 (progn (setf (clause-forms (car acc))
-                                              (list (reverse-form temp first)))
-                                        acc)
-                                 (cons (reverse-form temp first)acc)))
-                             (t
-                               (if(nestable-p temp)
-                                 (if(null (clause-forms temp))
-                                   (cons (progn (setf (nestable-pred temp) first)
-                                                temp)
-                                         acc)
-                                   (cons (reverse-form temp first) acc))
-                                 (cons (reverse-form temp first) acc)))))))))))
-          (append-forms(clause other)
-            (setf (clause-forms clause)
-                  (append (clause-forms clause)
-                          (list other))))
-          (reverse-form(clause tail)
-            (setf (clause-forms clause)
-                  (nreconc (clause-forms clause)
-                           (when tail
-                             (list tail))))
-            clause))
+                   (if temp
+                     (cons temp acc)
+                     acc))
+              (typecase temp
+                (null
+                  ;; Make new junk clause.
+                  (rec rest
+                       (make-clause :forms (list first))
+                       acc))
+                (nestable
+                  ;; Set nestable pred, and reset temp NIL.
+                  (setf (nestable-pred temp) first)
+                  (rec rest nil (cons temp acc)))
+                (otherwise
+                  ;; Modify temp clause.
+                  (rec rest
+                       (progn (setf (clause-forms temp)
+                                    (nconc (clause-forms temp)
+                                           (list first)))
+                              temp)
+                       acc))))))
     (rec body)))
 
 (defun make-nest (list)
