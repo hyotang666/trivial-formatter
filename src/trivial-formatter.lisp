@@ -426,9 +426,11 @@
                                  (+ 5 (* 2 *depth*))
                                  form))))
            (when (nestable-else c)
-             (format stream "~VI~:@_~W"
-                     (+ 5 (* 2 *depth*))
-                     (nestable-else c))))))
+             (let((current-indent(+ 5 (* 2 *depth*)))
+                  (*depth*(1+ *depth*)))
+               (format stream "~VI~:@_~W"
+                       current-indent
+                       (nestable-else c)))))))
 
 ;;; OWN-BLOCK
 (defstruct (own-block (:include clause)))
