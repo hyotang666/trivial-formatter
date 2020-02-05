@@ -426,7 +426,9 @@
                                  (+ 5 (* 2 *depth*))
                                  form))))
            (when (nestable-else c)
-             (format stream "~:@_~W"(nestable-else c))))))
+             (format stream "~VI~:@_~W"
+                     (+ 5 (* 2 *depth*))
+                     (nestable-else c))))))
 
 ;;; OWN-BLOCK
 (defstruct (own-block (:include clause)))
