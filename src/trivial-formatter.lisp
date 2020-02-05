@@ -524,7 +524,42 @@
                            (when tail
                              (list tail))))
             clause))
-    (rec body)))
+    (make-nest(rec body))))
+
+(defun make-nest (list)
+  (do*((list list (cdr list))
+       (first (car list)(car list))
+       when
+       acc)
+    ((endp list)
+     (if when
+       (nreconc acc (list when))
+       (nreverse acc)))
+    (typecase first
+      (additional
+        (if(null when)
+          (push first acc)
+          (if(nestable-else when)
+            (setf (nestable-else when)
+                  (append (nestable-else when)
+                          (list first)))
+            (setf (nestable-forms when)
+                  (append (nestable-forms when)
+                          (list first))))))
+      (else (if(null when)
+              (push first acc)
+              (if(nestable-else when)
+                (setq acc (list* first when acc))
+                (setf (nestable-else when)
+                      (append (nestable-else when)
+                              (list first))))))
+      (nestable
+        (setf when first))
+      (otherwise
+        (if when
+          (setq acc (list* first when acc)
+                when nil)
+          (push first acc))))))
 
 (defun pprint-extended-loop (stream list)
   (pprint-logical-block(stream nil :prefix "(" :suffix ")")
