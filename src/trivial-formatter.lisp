@@ -409,7 +409,7 @@
             (clause-forms v))))
 
 ;;; NESTABLE
-(defvar *depth* 0)
+(defvar *indent* 5)
 (defstruct (nestable (:include clause))
   pred
   else
@@ -421,14 +421,14 @@
                    (clause-keyword c)
                    (nestable-pred c))
            (when (clause-forms c)
-             (let((*depth*(1+ *depth*)))
+             (let((*indent*(+ 2 *indent*)))
                (loop :for form :in (clause-forms c)
                      :do (format stream "~VI~:@_~W"
-                                 (+ 5 (* 2 *depth*))
+                                 *indent*
                                  form))))
            (when (nestable-else c)
-             (let((current-indent(+ 5 (* 2 *depth*)))
-                  (*depth*(1+ *depth*)))
+             (let((current-indent *indent*)
+                  (*indent*(+ 2 *indent*)))
                (format stream "~VI~:@_~W"
                        current-indent
                        (nestable-else c))))
