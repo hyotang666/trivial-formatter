@@ -455,6 +455,7 @@
              ((:do :doing :finally :initially) #'make-own-block)
              ((:else) #'make-else)
              ((:and) #'make-additional)
+             ((:end) #'make-end)
              (otherwise #'%make-clause))
            :keyword keyword
            :forms forms))
