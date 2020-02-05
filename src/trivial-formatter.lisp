@@ -441,7 +441,7 @@
                        current-indent
                        (nestable-else c))))
            (when(nestable-end c)
-             (format stream "~:@_~W"(nestable-end c))))))
+             (format stream "~VI~:@_~W"*indent*(nestable-end c))))))
 
 ;;; END
 (defstruct (end(:include clause)))
