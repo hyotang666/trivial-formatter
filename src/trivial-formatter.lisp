@@ -409,9 +409,11 @@
 (defmethod print-object((c nestable)stream)
   (if (null *print-clause*)
     (call-next-method)
-    (format stream "~2:I~W~{~^ ~W~:@_~@{~W~^ ~:@_~}~}~5I"
+    (format stream "~2:I~W ~W~@[~:@_~{~W~^~:@_~}~]~@[~:@_~{~W~^~:@_~}~]"
             (clause-keyword c)
-            (clause-forms c))))
+            (nestable-pred c)
+            (clause-forms c)
+            (nestable-else c))))
 
 ;;; OWN-BLOCK
 (defstruct (own-block (:include clause)))
