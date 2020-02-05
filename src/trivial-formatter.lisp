@@ -392,6 +392,12 @@
 
 ;;; ELSE
 (defstruct (else (:include optional)))
+(defmethod print-object ((c else)stream)
+  (if (null *print-clause*)
+    (call-next-method)
+    (format stream "~2:I~W~:@_~{~W~^~:@_~}~5I"
+            (clause-keyword c)
+            (clause-forms c))))
 
 ;;; VAR
 (defstruct (var (:include clause)))
