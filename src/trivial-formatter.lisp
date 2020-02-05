@@ -403,17 +403,28 @@
             (clause-forms v))))
 
 ;;; NESTABLE
+(defvar *depth* 0)
 (defstruct (nestable (:include clause))
   pred
   else)
 (defmethod print-object((c nestable)stream)
   (if (null *print-clause*)
     (call-next-method)
-    (format stream "~2:I~W ~W~@[~:@_~{~W~^~:@_~}~]~@[~:@_~{~W~^~:@_~}~]"
-            (clause-keyword c)
-            (nestable-pred c)
-            (clause-forms c)
-            (nestable-else c))))
+    (progn (format stream "~2:I~W ~W"
+                   (clause-keyword c)
+                   (nestable-pred c))
+           (when (clause-forms c)
+             (let((*depth*(1+ *depth*)))
+               (loop :for form :in (clause-forms c)
+                     :do (format stream "~VI~:@_~W"
+                                 (+ 5 (* 2 *depth*))
+                                 form))))
+           (when (nestable-else c)
+             (let((*depth* *depth*))
+               (loop :for form :in (nestable-else c)
+                     :do (format stream "~VI~:@_~W"
+                                 (+ 5 (* 2 *depth*))
+                                 form)))))))
 
 ;;; OWN-BLOCK
 (defstruct (own-block (:include clause)))
