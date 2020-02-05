@@ -313,6 +313,24 @@
               (list line)))
           (uiop:split-string string :separator '(#\newline))))
 
+(defun alignment(list)
+  (labels((rec(list &optional acc)
+            (if(endp list)
+              acc
+              (body (car list)(cdr list)acc)))
+          (body(first rest acc)
+            (if(uiop:string-prefix-p ";;" (string-left-trim " " (car rest)))
+              (rec (cons (set-align first (car rest))(cdr rest))
+                   (cons first acc))
+              (rec rest (cons first acc))))
+          (set-align(current comment)
+            (with-output-to-string(*standard-output*)
+              (loop :for char :across current
+                    :while (char= #\space char)
+                    :do (write-char char))
+              (write-string (string-left-trim " " comment)))))
+    (rec (reverse list))))
+
 (declaim (ftype (function (T &optional (or null stream))
                           (values null &optional))
                 print-as-code))
@@ -327,7 +345,7 @@
           (prin1-to-string exp))
         (*standard-output*
           (or stream *standard-output*)))
-    (loop :for (first . rest) :on (split-to-lines string)
+    (loop :for (first . rest) :on (alignment(split-to-lines string))
           :do (if(uiop:string-prefix-p "; " (string-left-trim " " (car rest)))
                 (if(uiop:string-prefix-p "; " (string-left-trim " " first))
                   ;; Both are single semicoloned line comment.
