@@ -426,11 +426,7 @@
                                  (+ 5 (* 2 *depth*))
                                  form))))
            (when (nestable-else c)
-             (let((*depth* *depth*))
-               (loop :for form :in (nestable-else c)
-                     :do (format stream "~VI~:@_~W"
-                                 (+ 5 (* 2 *depth*))
-                                 form)))))))
+             (format stream "~:@_~W"(nestable-else c))))))
 
 ;;; OWN-BLOCK
 (defstruct (own-block (:include clause)))
