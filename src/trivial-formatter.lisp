@@ -512,6 +512,15 @@
                        acc))))))
     (rec body)))
 
+(declaim (ftype (function (list) (values clause list &optional nil))
+                pick-clause))
+(defun pick-clause(list)
+  (typecase (car list)
+    (nestable
+      (make-nest (car list)(cadr list)(cddr list)))
+    (otherwise
+      (values (car list) (cdr list)))))
+
 (declaim (ftype (function (nestable (or clause null) list)
                           (values nestable list &optional nil))
                 make-nest))
