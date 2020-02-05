@@ -477,7 +477,12 @@
              :test #'string=)))
 
 (defun parse-loop-body(body)
-  (make-nest(make-loop-clauses body)))
+  (labels((rec(list &optional acc)
+            (if(endp list)
+              (nreverse acc)
+              (multiple-value-bind(obj rest)(pick-clause list)
+                (rec rest (cons obj acc))))))
+    (rec (make-loop-clauses body))))
 
 (defun make-loop-clauses(body)
   (labels((rec(list &optional temp acc)
