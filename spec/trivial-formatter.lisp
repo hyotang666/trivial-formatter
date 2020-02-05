@@ -321,3 +321,21 @@
         ELSE
           DO (ERROR \"found a funny value in list ~S, value ~S~%\" LIST I)
       FINALLY (RETURN (VALUES FLOAT-NUMBERS OTHER-NUMBERS SYMBOL-LIST)))"
+
+; CLHS 6.1.8.1
+#?(pprint-extended-loop nil '(loop for x from 0 to 3 
+                                   do (print x)
+                                   if (zerop (mod x 2))
+                                   do (princ " a")
+                                   and if (zerop (floor x 2))
+                                   do (princ " b")
+                                   end
+                                   and do (princ " c")))
+:outputs "(LOOP FOR X FROM 0 TO 3
+      DO (PRINT X)
+      IF (ZEROP (MOD X 2))
+        DO (PRINC \" a\")
+        AND IF (ZEROP (FLOOR X 2))
+              DO (PRINC \" b\")
+            END
+        AND DO (PRINC \" c\"))"
