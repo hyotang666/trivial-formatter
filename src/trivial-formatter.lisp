@@ -487,7 +487,9 @@
 (defun make-loop-clauses(body)
   (labels((rec(list &optional temp acc)
             (if (endp list)
-              (nreverse acc)
+              (if temp
+                (nreconc acc (list temp))
+                (nreverse acc))
               (body (car list)(cdr list)temp acc)))
           (body(first rest temp acc)
             (if(separation-keyword-p first)
