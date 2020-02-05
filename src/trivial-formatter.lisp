@@ -546,7 +546,7 @@
       (cond
         ((null(nestable-end when))
          (setf (nestable-end when) first)
-         (values when (cons first rest)))
+         (values when rest))
         (t (values when (cons first rest)))))
     (nestable
       (cond
