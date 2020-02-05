@@ -266,31 +266,6 @@
             (pprint-exit-if-list-exhausted)
             (pprint-newline :mandatory stream)))))
 
-;; Two functions below are copied from sbcl, and modified.
-#+sbcl
-(defun pprint-loop (stream list &rest noise)
-  (declare (ignore noise))
-  (destructuring-bind (loop-symbol . clauses) list
-    (declare (ignore loop-symbol))
-    (if (or (atom clauses) (consp (car clauses)))
-        (sb-pretty::pprint-spread-fun-call stream list)
-        (pprint-extended-loop stream list))))
-
-#+sbcl
-(defvar +loop-separating-clauses+
-  '(:and
-     :with :for
-     :collect :collecting
-     :append :appending
-     :nconc :nconcing
-     :count :counting
-     :sum :summing
-     :maximize :maximizing
-     :minimize :minimizing
-     :if :when :unless :end
-     :for :while :until :repeat :always :never :thereis
-     ))
-
 (defparameter *pprint-dispatch*
   (let((*print-pprint-dispatch*
          (copy-pprint-dispatch)))
@@ -303,8 +278,7 @@
 
     #+sbcl
     (set-pprint-dispatch '(cons (member handler-case)) 'pprint-handler-case)
-    #+sbcl
-    (set-pprint-dispatch '(cons (member loop)) 'pprint-loop)
+    (set-pprint-dispatch '(cons (member loop)) 'pprint-extended-loop)
     #+sbcl
     (set-pprint-dispatch '(cons (member define-condition)) 'pprint-define-condition)
 
