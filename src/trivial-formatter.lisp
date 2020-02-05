@@ -238,7 +238,6 @@
                       ;; Please do not ever use collon as package name!
                       (position #\: default-style))))))
 
-#+sbcl
 (defun pprint-handler-case(stream exp &rest noise)
   (declare(ignore noise))
   (pprint-logical-block(stream exp :prefix "(" :suffix ")")
@@ -263,7 +262,6 @@
           (pprint-indent :block 1 stream)
           (pprint-newline :mandatory stream))))
 
-#+sbcl
 (defun pprint-define-condition(stream exp &rest noise)
   (declare(ignore noise))
   (pprint-logical-block(stream exp :prefix "(" :suffix ")")
@@ -296,10 +294,8 @@
 
     (set-pprint-dispatch 'symbol 'symbol-printer)
 
-    #+sbcl
     (set-pprint-dispatch '(cons (member handler-case)) 'pprint-handler-case)
     (set-pprint-dispatch '(cons (member loop)) 'pprint-extended-loop)
-    #+sbcl
     (set-pprint-dispatch '(cons (member define-condition)) 'pprint-define-condition)
 
     *print-pprint-dispatch*))
