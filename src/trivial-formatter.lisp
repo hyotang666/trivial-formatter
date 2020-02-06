@@ -54,7 +54,7 @@
         (let*((notation
                 (read-as-string:read-as-string nil eof-error-p eof-value recursive-p)))
           (handler-case(let((value(read-from-string notation)))
-                         (if (valid-value-p value)
+                         (if (valid-value-p value notation)
                            value
                            (make-broken-symbol :notation notation)))
             #+ecl
@@ -66,11 +66,15 @@
             (package-error()
               (make-broken-symbol :notation notation))))))))
 
-(defun valid-value-p(thing)
+(defun valid-value-p(thing notation)
   (or (not(symbolp thing))
       (keywordp thing)
       (null(symbol-package thing))
-      (nth-value 1 (find-symbol (symbol-name thing)))))
+      (and (nth-value 1 (find-symbol (symbol-name thing)))
+           (or (not (find #\: notation)) ; Please do not use #\: as package or symbol name!
+               (string-equal (package-name(symbol-package thing))
+                             notation
+                             :end2 (position #\: notation))))))
 
 ;;;; META-OBJECT
 ;;; DOT
