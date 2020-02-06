@@ -293,6 +293,11 @@
             (pprint-exit-if-list-exhausted)
             (pprint-newline :mandatory stream)))))
 
+(defun pprint-linear-elt (stream exp &rest noise)
+  (declare(ignore noise))
+  (setf stream (or stream *standard-output*))
+  (format stream "~:<~W~^~1:I ~@{~W~^ ~_~}~:>" exp))
+
 (defparameter *pprint-dispatch*
   (let((*print-pprint-dispatch*
          (copy-pprint-dispatch)))
@@ -306,6 +311,7 @@
     (set-pprint-dispatch '(cons (member handler-case)) 'pprint-handler-case)
     (set-pprint-dispatch '(cons (member loop)) 'pprint-extended-loop)
     (set-pprint-dispatch '(cons (member define-condition)) 'pprint-define-condition)
+    (set-pprint-dispatch '(cons (member or and)) 'pprint-linear-elt)
 
     *print-pprint-dispatch*))
 
