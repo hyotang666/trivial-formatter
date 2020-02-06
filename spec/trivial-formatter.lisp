@@ -83,9 +83,39 @@
 #?(with-input-from-string(s "symbol")
     (read-as-code s))
 => SYMBOL
+#?(with-input-from-string(s "#:uninterned")
+    (read-as-code s))
+:satisfies (lambda(result)
+             (& (symbolp result)
+                (null(symbol-package result))
+                (equal "UNINTERNED" (symbol-name result))))
+#?(with-input-from-string(s ":keyword")
+    (read-as-code s))
+=> :KEYWORD
+; Double colloned keyword symbol will be canonicalized to single colloned keyword symbol.
+#?(with-input-from-string(s "::double-colloned")
+    (read-as-code s))
+=> :DOUBLE-COLLONED
+; Without package prefix, symbol is interned to current package.
+#?(with-input-from-string(s "without-prefix")
+    (read-as-code s))
+:satisfies (lambda(result)
+             (&(symbolp result)
+               (eq *package* (symbol-package result))
+               (equal "WITHOUT-PREFIX" (symbol-name result))))
+; When prefixed,
+; * If package does not exists current lisp image, broken-symbol will be made.
 #?(with-input-from-string(s "no-such-package:symbol")
     (read-as-code s))
 :be-the trivial-formatter::broken-symbol
+; * If specified package name is different actual package name, broken-symbol will be made.
+; This prevents e.g. closer-mop symbols becomes underlying implementation dependent symbol.
+#?(with-input-from-string(s "asdf:find-system")
+    (read-as-code s))
+:satisfies (lambda(result)
+             (&(trivial-formatter::broken-symbol-p result)
+               (equal "asdf:find-system" (trivial-formatter::broken-symbol-notation result))))
+
 #?(with-input-from-string(s "; line comment.")
     (read-as-code s))
 :be-the trivial-formatter::line-comment
