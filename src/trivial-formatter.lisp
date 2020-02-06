@@ -276,7 +276,7 @@
       (pprint-exit-if-list-exhausted)
       (pprint-indent :block 0 stream)
       (write-char #\space stream)
-      (format stream "~@_~:<~^~W~^~_~:>" (pprint-pop)) ; slots
+      (format stream "~:_~:<~^~W~^~_~:>" (pprint-pop)) ; slots
       (pprint-exit-if-list-exhausted)
       (pprint-newline :linear stream)
       (write-char #\space stream)
