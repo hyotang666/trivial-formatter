@@ -51,9 +51,16 @@
       eof-value
       (if(get-macro-character char)
         (read *standard-input* eof-error-p eof-value recursive-p)
-        (let((notation
-               (read-as-string:read-as-string nil eof-error-p eof-value recursive-p)))
-          (handler-case(values(read-from-string notation))
+        (let*((notation
+                (read-as-string:read-as-string nil eof-error-p eof-value recursive-p)))
+          (handler-case(let((value(read-from-string notation)))
+                         (if (and (symbolp value)
+                                  (symbol-package value)
+                                  (string-equal (package-name (symbol-package value))
+                                                notation
+                                                :end2 (position #\: notation)))
+                           value
+                           (make-broken-symbol :notation notation)))
             #+ecl
             (error(c)
               (if(search "There is no package with the name"
