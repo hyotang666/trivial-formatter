@@ -245,7 +245,7 @@
     (pprint-indent :block 3 stream)
     (pprint-exit-if-list-exhausted)
     (write-char #\space stream)
-    (pprint-newline :miser stream)
+    (pprint-newline :fill stream)
     (write (pprint-pop) :stream stream)
     (pprint-exit-if-list-exhausted)
     (pprint-indent :block 1 stream)
