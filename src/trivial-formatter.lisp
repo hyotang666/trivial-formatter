@@ -304,7 +304,7 @@
 (defun split-to-lines (string)
   (mapcan (lambda(line)
             (setf line (remove #\nul
-                               (ppcre:regex-replace #.(format nil " ~C[^)]" #\nul)
+                               (ppcre:regex-replace #.(format nil "~C " #\nul)
                                                     line
                                                     "")))
             (unless (every (lambda(char)
