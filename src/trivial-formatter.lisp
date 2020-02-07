@@ -468,6 +468,7 @@
 
 ;;;; loop clause
 (defvar *print-clause* nil)
+(defvar *indent* 5)
 
 ;;; CLAUSE
 (defstruct (clause (:constructor %make-clause))
@@ -514,7 +515,6 @@
             (clause-forms v))))
 
 ;;; NESTABLE
-(defvar *indent* 5)
 (defstruct (nestable (:include clause))
   pred
   else
