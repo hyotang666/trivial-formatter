@@ -21,7 +21,7 @@
   (asdf:load-system system)
   (dolist (component (asdf:component-children (asdf:find-system system)))
     (if supplied-p
-      (with-open-file(s (asdf:component-pathname component)
+      (with-open-file(*standard-output* (asdf:component-pathname component)
                         :direction :output
                         :if-does-not-exist :create
                         :if-exists if-exists)
