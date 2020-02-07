@@ -105,10 +105,13 @@
                (eq *package* (symbol-package result))
                (equal "WITHOUT-PREFIX" (symbol-name result))))
 ; When prefixed,
-; * If package does not exists current lisp image, broken-symbol will be made.
+; * If package does not exists current lisp image, uninterned symbol will be made.
 #?(with-input-from-string(s "no-such-package:symbol")
     (read-as-code s))
-:be-the trivial-formatter::broken-symbol
+:satisfies (lambda(result)
+             (& (symbolp result)
+                (null(symbol-package result))
+                (equal "no-such-package:symbol" (get result 'trivial-formatter::notation))))
 ; * If specified package name is different actual package name, such symbol is marked.
 ; This prevents e.g. closer-mop symbols becomes underlying implementation dependent symbol.
 #?(with-input-from-string(s "asdf:find-system")

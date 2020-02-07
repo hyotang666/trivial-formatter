@@ -62,10 +62,16 @@
             (error(c)
               (if(search "There is no package with the name"
                          (princ-to-string c))
-                (make-broken-symbol :notation notation)
+                (make-broken-symbol notation)
                 (error c)))
             (package-error()
-              (make-broken-symbol :notation notation))))))))
+              (make-broken-symbol notation))))))))
+
+(defun make-broken-symbol(notation)
+  (let((symbol(gensym)))
+    (setf(get symbol 'notation)notation
+      (symbol-function symbol) #'make-broken-symbol) ; as dummy.
+    symbol))
 
 (defun valid-value-p(thing notation)
   (or (not(symbolp thing))
@@ -104,12 +110,6 @@
   (format stream "~_#~A~A"
           (conditional-char c)
           (conditional-condition c)))
-
-;;; BROKEN-SYMBOL
-(defstruct broken-symbol
-  notation)
-(defmethod print-object ((symbol broken-symbol)stream)
-  (write-string (broken-symbol-notation symbol) stream))
 
 ;;; READ-TIME-EVAL
 (defstruct read-time-eval
