@@ -301,10 +301,12 @@
   (setf stream (or stream *standard-output*))
   (format stream "~:<~W~^~1:I ~@{~W~^ ~_~}~:>" exp))
 
-(defun underlying-printer(thing)
-  (let((*print-pprint-dispatch*
-         (copy-pprint-dispatch nil)))
-    (pprint-dispatch thing)))
+(let((dispatcher
+       *print-pprint-dispatch*))
+  (defun underlying-printer(thing)
+    (let((*print-pprint-dispatch*
+           (copy-pprint-dispatch dispatcher)))
+      (pprint-dispatch thing))))
 
 (defun pprint-flet(stream exp)
   (let((printer(underlying-printer exp))
