@@ -194,7 +194,7 @@
     (unwind-protect (with-open-file(input (asdf:component-pathname component))
                       (loop :with tag = '#:end
                             :for exp = (read-as-code input nil tag) :then next
-                            :for next = (read-as-code input nil tag)
+                            :with next
                             :until (eq exp tag)
                             :do
                             (when(and (comment-p exp)
@@ -210,6 +210,7 @@
                                 (trivial-macroexpand-all:macroexpand-all
                                   (read-from-string string nil))
                                 (write-string string)))
+                            (setf next (read-as-code input nil tag))
                             (typecase exp
                               (block-comment
                                 (format t "~2%"))
