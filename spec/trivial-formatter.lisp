@@ -211,7 +211,9 @@
 "
 ,:test equal
 
-(requirements-about PPRINT-EXTENDED-LOOP :doc-type function)
+(requirements-about PPRINT-EXTENDED-LOOP :doc-type function
+                    :around(let((*print-pretty* t))
+                             (call-body)))
 
 ;;;; Description:
 
@@ -296,11 +298,9 @@
 #?(pprint-extended-loop nil '(loop for i upfrom 0
                                    as x in '(a b (c))
                                    nconc (if (evenp i) (list x) nil)))
-:outputs "(LOOP FOR I UPFROM 0
+:outputs #.(format nil "(LOOP FOR I UPFROM 0
       AS X IN '(A B (C))
-      NCONC (IF (EVENP I)
-                (LIST X)
-                NIL))"
+      NCONC ~A)" '(if (evenp i)(list x)nil))
 
 #?(pprint-extended-loop nil '(loop for i from 1 to 3
                                    do (print i *standard-output*)
@@ -405,7 +405,9 @@
 #?(split-keywords '(call :k1 v1 rest)) :values ((call :k1 v1 rest) nil)
 #?(split-keywords '(call not-key :k1 v1)) :values ((call not-key)(:k1 v1))
 
-(requirements-about PPRINT-FUN-CALL :doc-type function)
+(requirements-about PPRINT-FUN-CALL :doc-type function
+                    :around(let((*print-pretty* t))
+                             (call-body)))
 
 ;;;; Description:
 
