@@ -3,6 +3,8 @@
 (defsystem "trivial-formatter"
   :version
   "3.25.1"
+  :description "Code formatter for common lisp."
+  :license "MIT"
   :depends-on
   (
    "read-as-string" ; Read S-Expression as string.
