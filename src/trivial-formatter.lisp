@@ -333,6 +333,18 @@
                                    (funcall (underlying-printer exp) stream exp))))
     (funcall printer stream exp)))
 
+(defun split-keywords(exp)
+  (do*((list (reverse exp) (cdr list))
+       (first(car list)(car list))
+       pre
+       post)
+    ((null list)(values pre post))
+    (if(keywordp (cadr list))
+      (progn (push (car list) post)
+             (push (cadr list) post)
+             (setf list (cdr list)))
+      (return (values (reverse list) post)))))
+
 (defparameter *pprint-dispatch*
   (let((*print-pprint-dispatch*
          (copy-pprint-dispatch)))

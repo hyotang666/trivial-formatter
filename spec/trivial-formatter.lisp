@@ -1,5 +1,5 @@
 (defpackage :trivial-formatter.spec
-  (:import-from :trivial-formatter #:pprint-extended-loop)
+  (:import-from :trivial-formatter #:pprint-extended-loop #:split-keywords)
   (:use :cl :jingoh :trivial-formatter))
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
@@ -369,3 +369,34 @@
               DO (PRINC \" b\")
             END
         AND DO (PRINC \" c\"))"
+
+(requirements-about SPLIT-KEYWORDS :doc-type function)
+
+;;;; Description:
+
+#+syntax
+(SPLIT-KEYWORDS exp) ; => result
+
+;;;; Arguments and Values:
+
+; exp := 
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
+;;;; Tests:
+#?(split-keywords '(call)) :values ((call)nil)
+#?(split-keywords '(call :key)) :values ((call :key)nil)
+#?(split-keywords '(call :key :value)) :values ((call)(:key :value))
+#?(split-keywords '(call :k1 :v1 :k2 :v2)) :values ((call)(:k1 :v1 :k2 :v2))
+#?(split-keywords '(call :k1 :k2 :k3)) :values ((call :k1)(:k2 :k3))
+#?(split-keywords '(call :k1 :k2 :k3 :k4 :k5)) :values ((call :k1)(:k2 :k3 :k4 :k5))
+#?(split-keywords '(call :k1 v1 rest)) :values ((call :k1 v1 rest) nil)
+#?(split-keywords '(call not-key :k1 v1)) :values ((call not-key)(:k1 v1))
