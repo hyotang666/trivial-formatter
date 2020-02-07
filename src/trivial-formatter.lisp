@@ -337,6 +337,26 @@
                                    (funcall (underlying-printer exp) stream exp))))
     (funcall printer stream exp)))
 
+(defun pprint-fun-call(stream exp)
+  (setf stream (or stream *standard-output*))
+  (multiple-value-bind(pre post)(split-keywords exp)
+    (pprint-logical-block(stream nil :prefix "(" :suffix ")")
+      (write (car pre) :stream stream)
+      (when (cdr pre)
+        (write-char #\space stream)
+        (pprint-newline :fill stream)
+        (pprint-indent :current 0 stream)
+        (format stream "~{~W~^ ~:_~}" (cdr pre)))
+      (format stream "~@[ ~_~{~^~W ~@_~W~^ ~_~}~]" post))))
+
+(defun pprint-list(stream exp)
+  (if(and (symbolp (car exp))
+          (fboundp (car exp))
+          (not(special-operator-p (car exp)))
+          (not(macro-function (car exp))))
+    (pprint-fun-call stream exp)
+    (funcall (pprint-dispatch exp *pprint-dispatch*) stream exp)))
+
 (defun split-keywords(exp)
   (do*((list (reverse exp) (cdr list))
        (first(car list)(car list))
@@ -405,11 +425,12 @@
   (let*((*print-case*
           :downcase)
         (*print-pprint-dispatch*
-          *pprint-dispatch*)
+          (copy-pprint-dispatch *pprint-dispatch*))
         (*print-pretty*
           t)
         (string
-          (prin1-to-string exp))
+          (progn (set-pprint-dispatch 'list 'pprint-list)
+                 (prin1-to-string exp)))
         (*standard-output*
           (or stream *standard-output*)))
     (loop :for (first . rest) :on (alignment(split-to-lines string))

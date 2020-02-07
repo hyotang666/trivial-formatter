@@ -1,5 +1,6 @@
 (defpackage :trivial-formatter.spec
-  (:import-from :trivial-formatter #:pprint-extended-loop #:split-keywords)
+  (:import-from :trivial-formatter #:pprint-extended-loop #:split-keywords
+                #:pprint-fun-call)
   (:use :cl :jingoh :trivial-formatter))
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
@@ -400,3 +401,43 @@
 #?(split-keywords '(call :k1 :k2 :k3 :k4 :k5)) :values ((call :k1)(:k2 :k3 :k4 :k5))
 #?(split-keywords '(call :k1 v1 rest)) :values ((call :k1 v1 rest) nil)
 #?(split-keywords '(call not-key :k1 v1)) :values ((call not-key)(:k1 v1))
+
+(requirements-about PPRINT-FUN-CALL :doc-type function)
+
+;;;; Description:
+
+#+syntax
+(PPRINT-FUN-CALL stream exp) ; => result
+
+;;;; Arguments and Values:
+
+; stream := 
+
+; exp := 
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
+;;;; Tests:
+#?(pprint-fun-call nil '(call)) :outputs "(CALL)"
+#?(pprint-fun-call nil '(call arg)) :outputs "(CALL ARG)"
+#?(pprint-fun-call nil '(asdf:component-pathname component
+                                                 :direction :output
+                                                 :if-does-not-exist :create
+                                                 :if-exists if-exists))
+:outputs
+"(ASDF/COMPONENT:COMPONENT-PATHNAME COMPONENT
+                                   :DIRECTION :OUTPUT
+                                   :IF-DOES-NOT-EXIST :CREATE
+                                   :IF-EXISTS IF-EXISTS)"
+#?(pprint-fun-call nil '(call :k v)) :outputs "(CALL :K V)"
+#?(pprint-fun-call nil '(member nil :append :supersede :rename :error :new-version))
+:outputs
+"(MEMBER NIL :APPEND :SUPERSEDE :RENAME :ERROR :NEW-VERSION)"
