@@ -108,13 +108,13 @@
 #?(with-input-from-string(s "no-such-package:symbol")
     (read-as-code s))
 :be-the trivial-formatter::broken-symbol
-; * If specified package name is different actual package name, broken-symbol will be made.
+; * If specified package name is different actual package name, such symbol is marked.
 ; This prevents e.g. closer-mop symbols becomes underlying implementation dependent symbol.
 #?(with-input-from-string(s "asdf:find-system")
     (read-as-code s))
 :satisfies (lambda(result)
-             (&(trivial-formatter::broken-symbol-p result)
-               (equal "asdf:find-system" (trivial-formatter::broken-symbol-notation result))))
+             (&(eq result 'asdf:find-system)
+               (equal "asdf:find-system" (get result 'trivial-formatter::notation))))
 
 #?(with-input-from-string(s "; line comment.")
     (read-as-code s))
