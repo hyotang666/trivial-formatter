@@ -2,7 +2,7 @@
 (in-package :asdf)
 (defsystem "trivial-formatter"
   :version
-  "3.25.3"
+  "3.25.4"
   :description "Code formatter for common lisp."
   :license "MIT"
   :depends-on

@@ -377,15 +377,13 @@
     (funcall (pprint-dispatch exp *pprint-dispatch*) stream exp)))
 
 (defun split-keywords(exp)
-  (do*((list (reverse exp) (cdr list))
-       (first(car list)(car list))
+  (do*((list (reverse exp) (cddr list))
        pre
        post)
     ((null list)(values pre post))
     (if(keywordp (cadr list))
       (progn (push (car list) post)
-             (push (cadr list) post)
-             (setf list (cdr list)))
+             (push (cadr list) post))
       (return (values (reverse list) post)))))
 
 ;;;; PRINT-AS-CODE
