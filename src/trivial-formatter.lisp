@@ -301,6 +301,26 @@
   (setf stream (or stream *standard-output*))
   (format stream "~:<~W~^~1:I ~@{~W~^ ~_~}~:>" exp))
 
+(defun underlying-printer(thing)
+  (let((*print-pprint-dispatch*
+         (copy-pprint-dispatch nil)))
+    (pprint-dispatch thing)))
+
+(defun pprint-flet(stream exp)
+  (let((printer(underlying-printer exp))
+       (*print-pprint-dispatch*
+         (copy-pprint-dispatch)))
+    (set-pprint-dispatch 'list (lambda(stream exp &rest noise)
+                                 (declare(ignore noise))
+                                 (if (and (symbolp (car exp))
+                                          (not(keywordp (car exp)))
+                                          (not(special-operator-p (car exp)))
+                                          (not (macro-function (car exp)))
+                                          (not (fboundp (car exp))))
+                                   (pprint-linear-elt stream exp)
+                                   (funcall (underlying-printer exp) stream exp))))
+    (funcall printer stream exp)))
+
 (defparameter *pprint-dispatch*
   (let((*print-pprint-dispatch*
          (copy-pprint-dispatch)))
@@ -315,6 +335,7 @@
     (set-pprint-dispatch '(cons (member loop)) 'pprint-extended-loop)
     (set-pprint-dispatch '(cons (member define-condition)) 'pprint-define-condition)
     (set-pprint-dispatch '(cons (member or and)) 'pprint-linear-elt)
+    (set-pprint-dispatch '(cons (member flet labels)) 'pprint-flet)
 
     *print-pprint-dispatch*))
 
