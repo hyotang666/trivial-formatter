@@ -189,36 +189,45 @@
   )
 
 ;;;; DEBUG-PRINTER
-(defun file-exp(pathname)
-  (with-open-file(input pathname)
-    (loop :with tag = '#:end
-          :for exp = (read-as-code input nil tag)
-          :until (eq exp tag)
-          :collect exp)))
-
 (defun debug-printer (component)
-  (loop :for (exp . rest) :on (file-exp (asdf:component-pathname component))
-        :do (when(and (comment-p exp)
-                      (not (uiop:string-prefix-p #\; (comment-content exp))))
-              (write-char #\space))
-        (print-as-code exp)
-        (typecase exp
-          (block-comment
-            (format t "~2%"))
-          (line-comment
-            (terpri)
-            (when(not (comment-p (car rest)))
-              (terpri)))
-          (conditional
-            (terpri))
-          (t
-            (typecase (car rest)
-              (null)
-              (line-comment
-                (if(uiop:string-prefix-p #\; (comment-content (car rest)))
-                  (format t "~2%")))
-              (t
-                (format t "~2%")))))))
+  (let((package *package*))
+    (unwind-protect (with-open-file(input (asdf:component-pathname component))
+                      (loop :with tag = '#:end
+                            :for exp = (read-as-code input nil tag) :then next
+                            :for next = (read-as-code input nil tag)
+                            :until (eq exp tag)
+                            :do
+                            (when(and (comment-p exp)
+                                      (not (uiop:string-prefix-p #\; (comment-content exp))))
+                              (write-char #\space))
+                            (let((*macroexpand-hook*
+                                   (lambda(expander form env)
+                                     (if(typep form '(cons (eql in-package)))
+                                       (eval (funcall expander form env))
+                                       (funcall expander form env)))))
+                              (let((string(with-output-to-string(s)
+                                            (print-as-code exp s))))
+                                (trivial-macroexpand-all:macroexpand-all
+                                  (read-from-string string nil))
+                                (write-string string)))
+                            (typecase exp
+                              (block-comment
+                                (format t "~2%"))
+                              (line-comment
+                                (terpri)
+                                (when(not (comment-p next))
+                                  (terpri)))
+                              (conditional
+                                (terpri))
+                              (t
+                                (cond
+                                  ((eq next tag)) ; Do nothing.
+                                  ((line-comment-p next)
+                                   (if(uiop:string-prefix-p #\; (comment-content next))
+                                     (format t "~2%")))
+                                  (t
+                                    (format t "~2%")))))))
+      (setf *package* package))))
 
 ;;;; PRETTY PRINTERS
 (defun shortest-package-name (package)

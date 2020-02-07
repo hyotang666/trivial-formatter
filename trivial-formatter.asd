@@ -2,13 +2,14 @@
 (in-package :asdf)
 (defsystem "trivial-formatter"
   :version
-  "3.21.2"
+  "3.22.0"
   :depends-on
   (
    "read-as-string" ; Read S-Expression as string.
    "named-readtables" ; Readtable manager.
    "alexandria" ; Public domain utilities.
    "cl-ppcre" ; Pearl compatible regular expression.
+   "trivial-macroexpand-all" ; Macroexpand all.
    )
   :pathname
   "src/"
