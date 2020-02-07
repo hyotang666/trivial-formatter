@@ -55,9 +55,9 @@
                 (string-downcase
                   (read-as-string:read-as-string nil eof-error-p eof-value recursive-p))))
           (handler-case(let((value(read-from-string notation)))
-                         (if (valid-value-p value notation)
-                           value
-                           (make-broken-symbol :notation notation)))
+                         (unless (valid-value-p value notation)
+                           (setf (get value 'notation) notation))
+                         value)
             #+ecl
             (error(c)
               (if(search "There is no package with the name"
@@ -240,25 +240,29 @@
                 (package-nicknames package))))
 
 (defun symbol-printer (stream object)
-  (let((default-style
-         (let((*print-pprint-dispatch*
-                (copy-pprint-dispatch nil)))
-           (prin1-to-string object))))
-    (if (or (null (symbol-package object))
-            (eq #.(find-package :keyword)
-                (symbol-package object))
-            (nth-value 1 (find-symbol (symbol-name object))))
-      (write-string default-style stream)
-      (progn
-        (write-string (string-downcase
-                        (shortest-package-name
-                          (symbol-package object)))
-                      stream)
-        (write-string default-style
-                      stream
-                      :start
-                      ;; Please do not ever use collon as package name!
-                      (position #\: default-style))))))
+  (let((notation
+         (get object 'notation)))
+    (if notation
+      (write-string notation stream)
+      (let((default-style
+             (let((*print-pprint-dispatch*
+                    (copy-pprint-dispatch nil)))
+               (prin1-to-string object))))
+        (if (or (null (symbol-package object))
+                (eq #.(find-package :keyword)
+                    (symbol-package object))
+                (nth-value 1 (find-symbol (symbol-name object))))
+          (write-string default-style stream)
+          (progn
+            (write-string (string-downcase
+                            (shortest-package-name
+                              (symbol-package object)))
+                          stream)
+            (write-string default-style
+                          stream
+                          :start
+                          ;; Please do not ever use collon as package name!
+                          (position #\: default-style))))))))
 
 (defun pprint-handler-case(stream exp &rest noise)
   (declare(ignore noise))
