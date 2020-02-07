@@ -52,7 +52,8 @@
       (if(get-macro-character char)
         (read *standard-input* eof-error-p eof-value recursive-p)
         (let*((notation
-                (read-as-string:read-as-string nil eof-error-p eof-value recursive-p)))
+                (string-downcase
+                  (read-as-string:read-as-string nil eof-error-p eof-value recursive-p))))
           (handler-case(let((value(read-from-string notation)))
                          (if (valid-value-p value notation)
                            value
