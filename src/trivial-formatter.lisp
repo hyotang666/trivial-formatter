@@ -296,7 +296,7 @@
       (pprint-indent :block 3 stream)
       (format stream "~@_~:<~@{~W~^ ~}~:>" (pprint-pop)) ; superclasses
       (pprint-exit-if-list-exhausted)
-      (pprint-indent :block 0 stream)
+      (pprint-indent :block 1 stream)
       (write-char #\space stream)
       (format stream "~:_~:<~^~W~^~_~:>" (pprint-pop)) ; slots
       (pprint-exit-if-list-exhausted)
