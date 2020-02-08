@@ -314,10 +314,10 @@
       (pprint-exit-if-list-exhausted)
       (pprint-indent :block 1 stream)
       (write-char #\Space stream)
-      (format stream "~:_~:<~^~W~^~_~:>" (pprint-pop)) ; slots
+      (format stream "~:_~:<~@{~^~W~^~_~}~:>" (pprint-pop)) ; slots
       (pprint-exit-if-list-exhausted)
-      (pprint-newline :linear stream)
       (write-char #\Space stream)
+      (pprint-newline :linear stream)
       (loop (write (pprint-pop) :stream stream)
             (pprint-exit-if-list-exhausted)
             (pprint-newline :mandatory stream)))))

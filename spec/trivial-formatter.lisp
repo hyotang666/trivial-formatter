@@ -1,6 +1,6 @@
 (defpackage :trivial-formatter.spec
   (:import-from :trivial-formatter #:pprint-extended-loop #:split-keywords
-                #:pprint-fun-call)
+                #:pprint-fun-call #:pprint-define-condition)
   (:use :cl :jingoh :trivial-formatter))
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
@@ -445,3 +445,45 @@
 #?(pprint-fun-call nil '(member nil :append :supersede :rename :error :new-version))
 :outputs
 "(MEMBER NIL :APPEND :SUPERSEDE :RENAME :ERROR :NEW-VERSION)"
+
+(requirements-about PPRINT-DEFINE-CONDITION :doc-type function)
+
+;;;; Description:
+
+#+syntax
+(PPRINT-DEFINE-CONDITION stream exp &rest noise
+                         :around (let((*print-pretty* t))
+                                   (call-body))) ; => result
+
+;;;; Arguments and Values:
+
+; stream := 
+
+; exp := 
+
+; noise := 
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
+;;;; Tests:
+#?(pprint-define-condition
+    nil
+    '(define-condition syntax-error(error)
+       ((whole :initform nil :initarg :whole :reader whole-form<=syntax-error)
+        (definitions :initform nil :initarg :definitions :reader bnf-definitions))
+       (:report (lambda(condition stream)
+                  (princ condition stream)))
+       (:default-initargs :format-control "")))
+:outputs "(DEFINE-CONDITION SYNTAX-ERROR (ERROR)
+  ((WHOLE :INITFORM NIL :INITARG :WHOLE :READER WHOLE-FORM<=SYNTAX-ERROR)
+   (DEFINITIONS :INITFORM NIL :INITARG :DEFINITIONS :READER BNF-DEFINITIONS))
+  (:REPORT (LAMBDA (CONDITION STREAM) (PRINC CONDITION STREAM)))
+  (:DEFAULT-INITARGS :FORMAT-CONTROL \"\"))"
