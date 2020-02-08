@@ -25,11 +25,14 @@
   (asdf:load-system system)
   (dolist (component (asdf:component-children (asdf:find-system system)))
     (if supplied-p
-      (with-open-file(*standard-output* (asdf:component-pathname component)
-                        :direction :output
-                        :if-does-not-exist :create
-                        :if-exists if-exists)
-        (debug-printer component))
+      (let((string
+             (with-output-to-string(*standard-output*)
+               (debug-printer component))))
+        (with-open-file(*standard-output* (asdf:component-pathname component)
+                                          :direction :output
+                                          :if-does-not-exist :create
+                                          :if-exists if-exists)
+          (write-string string)))
       (debug-printer component))))
 
 ;;;; READ-AS-CODE
