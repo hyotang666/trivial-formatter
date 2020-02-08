@@ -421,22 +421,23 @@
               (write-string (string-left-trim " " comment)))))
     (rec (reverse list))))
 
-(declaim (ftype (function (T &optional (or null stream))
-                          (values null &optional))
-                print-as-code))
-(defun print-as-code (exp &optional stream)
+(defun string-as-code(exp)
   (let*((*print-case*
           :downcase)
         (*print-pprint-dispatch*
           (copy-pprint-dispatch *pprint-dispatch*))
         (*print-pretty*
-          t)
-        (string
-          (progn (set-pprint-dispatch 'list 'pprint-list)
-                 (prin1-to-string exp)))
-        (*standard-output*
-          (or stream *standard-output*)))
-    (loop :for (first . rest) :on (alignment(split-to-lines string))
+          t))
+    (set-pprint-dispatch 'list 'pprint-list)
+    (prin1-to-string exp)))
+
+(declaim (ftype (function (T &optional (or null stream))
+                          (values null &optional))
+                print-as-code))
+(defun print-as-code (exp &optional stream)
+  (let((*standard-output*
+         (or stream *standard-output*)))
+    (loop :for (first . rest) :on (alignment(split-to-lines (string-as-code exp)))
           :do (if(uiop:string-prefix-p "; " (string-left-trim " " (car rest)))
                 (if(uiop:string-prefix-p "; " (string-left-trim " " first))
                   ;; Both are single semicoloned line comment.
