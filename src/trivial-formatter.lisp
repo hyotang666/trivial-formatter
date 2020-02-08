@@ -463,8 +463,7 @@
                                 :for char :across (car rest)
                                 :while (char= #\space char)
                                 :finally (return num)))
-                      (progn (format t "~A " first)
-                             (rplaca rest (string-left-trim " " (car rest))))
+                      (rplaca rest (format nil "~A ~A" first (string-left-trim " " (car rest))))
                       (write-line first))
                     ;; Last line never need newline.
                     (write-string first)))))))
