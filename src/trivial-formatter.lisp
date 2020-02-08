@@ -204,16 +204,16 @@
                             (when(and (comment-p exp)
                                       (not (uiop:string-prefix-p #\; (comment-content exp))))
                               (write-char #\space))
-                            (let((*macroexpand-hook*
+                            (let*((*macroexpand-hook*
                                    (lambda(expander form env)
                                      (if(typep form '(cons (eql in-package)))
                                        (eval (funcall expander form env))
-                                       (funcall expander form env)))))
-                              (let((string(with-output-to-string(s)
-                                            (print-as-code exp s))))
-                                (macroexpand-all
-                                  (read-from-string string nil))
-                                (write-string string)))
+                                       (funcall expander form env))))
+                                  (string(with-output-to-string(s)
+                                           (print-as-code exp s))))
+                              (macroexpand-all
+                                (read-from-string string nil))
+                              (write-string string))
                             (setf next (read-as-code input nil tag))
                             (typecase exp
                               (block-comment
