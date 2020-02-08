@@ -1,4 +1,4 @@
-# TRIVIAL-FORMATTER 3.25.1
+# TRIVIAL-FORMATTER 3.26.2
 ## What is this?
 Code formatter for common lisp.
 
@@ -25,13 +25,14 @@ SBCL/2.0.0
 
 ### Tested with
 * SBCL/2.0.0
+* CCL/1.11.5
 * ECL/16.1.3
 
 #### Note
 Trivial-formatter works portable at least above implementation.
 But it never means works samely.
 For example, `IF` format is different.
-SBCL print newline even if element is short, but others.
+SBCL prints newline even if element is short, but others.
 
 ```lisp
 #+sbcl
@@ -43,6 +44,7 @@ SBCL print newline even if element is short, but others.
 (if a b c)
 ```
 ### Known issue.
+#### CLISP
 CLISP is not supported due to mandatory newline does not work.
 
 ```lisp
@@ -52,7 +54,9 @@ CLISP is not supported due to mandatory newline does not work.
 => ""
 ```
 
-CCL is not supported due to backquote works in readtime.
+#### CCL
+CCL is not recommended due to backquote works in readtime.
+If your project does not have backquote, trivial-formatter will work fine.
 
 ```lisp
 #+ccl
