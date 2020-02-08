@@ -503,9 +503,15 @@
 (defmethod print-object ((c else)stream)
   (if (null *print-clause*)
     (call-next-method)
-    (format stream "~2:I~W~:@_~{~W~^~:@_~}~5I"
-            (clause-keyword c)
-            (clause-forms c))))
+    (if (nestable-p (car (clause-forms c)))
+      (let((*indent* (- *indent* 2)))
+        (format stream "~2:I~W ~:_~W~@[~:@_~{~W~^~:@_~}~]~5I"
+                (clause-keyword c)
+                (car (clause-forms c))
+                (cdr (clause-forms c))))
+      (format stream "~2:I~W~:@_~{~W~^~:@_~}~5I"
+              (clause-keyword c)
+              (clause-forms c)))))
 
 ;;; VAR
 (defstruct (var (:include clause)))

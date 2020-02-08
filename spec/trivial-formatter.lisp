@@ -349,11 +349,10 @@
           COLLECT I INTO FLOAT-NUMBERS
         ELSE
           COLLECT I INTO OTHER-NUMBERS
+      ELSE WHEN (SYMBOLP I)
+        COLLECT I INTO SYMBOL-LIST
       ELSE
-        WHEN (SYMBOLP I)
-          COLLECT I INTO SYMBOL-LIST
-        ELSE
-          DO (ERROR \"found a funny value in list ~S, value ~S~%\" LIST I)
+        DO (ERROR \"found a funny value in list ~S, value ~S~%\" LIST I)
       FINALLY (RETURN (VALUES FLOAT-NUMBERS OTHER-NUMBERS SYMBOL-LIST)))"
 
 ; CLHS 6.1.8.1
