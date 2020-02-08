@@ -1,6 +1,10 @@
 (in-package :cl-user)
 (defpackage :trivial-formatter
   (:use :cl)
+  (:import-from #.(or ; To avoid #-
+                    #+ecl '#:agnostic-lizard
+                    '#:trivial-macroexpand-all) ; As default.
+                #:macroexpand-all)
   (:export
     ;; Main api
     #:fmt
@@ -207,7 +211,7 @@
                                        (funcall expander form env)))))
                               (let((string(with-output-to-string(s)
                                             (print-as-code exp s))))
-                                (trivial-macroexpand-all:macroexpand-all
+                                (macroexpand-all
                                   (read-from-string string nil))
                                 (write-string string)))
                             (setf next (read-as-code input nil tag))
