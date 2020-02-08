@@ -341,9 +341,8 @@
                            (if (and (symbolp (car exp))
                                     (not (keywordp (car exp)))
                                     (not (special-operator-p (car exp)))
-                                    (not (macro-function (car exp)))
-                                    (not (fboundp (car exp))))
-                               (pprint-linear-elt stream exp)
+                                    (not (macro-function (car exp))))
+                               (pprint-fun-call stream exp)
                                (funcall (underlying-printer exp) stream exp))))
     (funcall printer stream exp)))
 
