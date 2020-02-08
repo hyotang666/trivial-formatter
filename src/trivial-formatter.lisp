@@ -502,21 +502,6 @@
         (format stream "~VI~W~^ ~{~W~^ ~@_~}~5I" *indent* (clause-keyword c)
                 (clause-forms c)))))
 
-;;; ELSE
-
-(defstruct (else (:include optional)))
-
-(defmethod print-object ((c else) stream)
-  (if (null *print-clause*)
-      (call-next-method)
-      (if (nestable-p (car (clause-forms c)))
-          (let ((*indent* (- *indent* 2)))
-            (format stream "~2:I~W ~:_~W~@[~:@_~{~W~^~:@_~}~]~5I"
-                    (clause-keyword c) (car (clause-forms c))
-                    (cdr (clause-forms c))))
-          (format stream "~2:I~W~:@_~{~W~^~:@_~}~5I" (clause-keyword c)
-                  (clause-forms c)))))
-
 ;;; VAR
 
 (defstruct (var (:include clause)))
@@ -545,6 +530,21 @@
            (format stream "~VI~:@_~W" current-indent (nestable-else c))))
        (when (nestable-end c)
          (format stream "~VI~:@_~W" *indent* (nestable-end c))))))
+
+;;; ELSE
+
+(defstruct (else (:include optional)))
+
+(defmethod print-object ((c else) stream)
+  (if (null *print-clause*)
+      (call-next-method)
+      (if (nestable-p (car (clause-forms c)))
+          (let ((*indent* (- *indent* 2)))
+            (format stream "~2:I~W ~:_~W~@[~:@_~{~W~^~:@_~}~]~5I"
+                    (clause-keyword c) (car (clause-forms c))
+                    (cdr (clause-forms c))))
+          (format stream "~2:I~W~:@_~{~W~^~:@_~}~5I" (clause-keyword c)
+                  (clause-forms c)))))
 
 ;;; END
 
