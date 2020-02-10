@@ -190,6 +190,16 @@
   (declare (ignore stream character))
   (make-shared-reference :number number))
 
+(defun |'reader| (stream character)
+  (declare (ignore character))
+  `(quote ,(read-as-code stream)))
+
+(defun |#'reader| (stream character number)
+  (declare (ignore character))
+  (when number
+    (warn "Ignore numeric argument for #~D'." number))
+  `(function ,(read-as-code stream)))
+
 ;;;; NAMED-READTABLE
 
 (named-readtables:defreadtable as-code
@@ -197,10 +207,12 @@
   (:macro-char #\( '|paren-reader|)
   (:macro-char #\. '|dot-reader| t)
   (:macro-char #\; '|line-comment-reader|)
+  (:macro-char #\' '|'reader|)
   (:dispatch-macro-char #\# #\| '|block-comment-reader|)
   (:dispatch-macro-char #\# #\+ '|#+-reader|)
   (:dispatch-macro-char #\# #\- '|#+-reader|)
   (:dispatch-macro-char #\# #\. '|#.reader|)
+  (:dispatch-macro-char #\# #\' '|#'reader|)
   (:dispatch-macro-char #\# #\= '|#=reader|)
   (:dispatch-macro-char #\# #\# '|##reader|))
 
