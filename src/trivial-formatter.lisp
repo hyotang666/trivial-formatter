@@ -375,6 +375,7 @@
                          'pprint-define-condition)
     (set-pprint-dispatch '(cons (member or and)) 'pprint-linear-elt)
     (set-pprint-dispatch '(cons (member flet labels)) 'pprint-flet)
+    (set-pprint-dispatch '(cons (member when unless)) 'pprint-when)
     *print-pprint-dispatch*))
 
 (defun pprint-list (stream exp)
@@ -393,6 +394,9 @@
     (if (keywordp (cadr list))
         (progn (push (car list) post) (push (cadr list) post))
         (return (values (reverse list) post)))))
+
+(defun pprint-when (stream exp)
+  (format stream (formatter "~:<~W~3I~^ ~@_~W~^ ~1I~:@_~@{~^~W~^ ~_~}~:>") exp))
 
 ;;;; PRINT-AS-CODE
 
