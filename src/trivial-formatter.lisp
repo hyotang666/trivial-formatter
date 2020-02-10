@@ -346,7 +346,7 @@
                                     (not (special-operator-p (car exp)))
                                     (not (macro-function (car exp))))
                                (pprint-fun-call stream exp)
-                               (funcall (underlying-printer exp) stream exp))))
+                               (funcall (pprint-dispatch exp *pprint-dispatch*) stream exp))))
     (funcall printer stream exp)))
 
 (defun pprint-fun-call (stream exp)
