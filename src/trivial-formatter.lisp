@@ -239,9 +239,14 @@
                                   (funcall expander form env))))
                            (string
                             (with-output-to-string (s) (print-as-code exp s))))
-                      (when (listp exp) ; to ignore reading top level conditional.
-                                        ; We believe there is no case e.g.
-                                        ; #+hoge (in-package :fuga)
+                      (when (and
+                              ;; to ignore reading top level conditional.
+                              ;; We believe there is no case e.g. #+hoge (in-package :fuga)
+                              (listp exp)
+                              ;; SBCL fails to macroexpand-all defun when
+                              ;; function declaimed as inline.
+                              ;; I beleave there is no in-package inside defun.
+                              (not (typep exp '(cons (eql defun)))))
                         (macroexpand-all (read-from-string string nil)))
                       (write-string string))
                     (setf next (read-as-code input nil tag))
