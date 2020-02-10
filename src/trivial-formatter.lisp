@@ -357,6 +357,7 @@
       (write (car pre) :stream stream)
       (when (cdr pre)
         (write-char #\Space stream)
+        (pprint-indent :block 1 stream)
         (pprint-newline :fill stream)
         (pprint-indent :current 0 stream)
         (format stream "~{~W~^ ~:_~}" (cdr pre)))
