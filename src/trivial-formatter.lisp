@@ -227,7 +227,10 @@
                                   (funcall expander form env))))
                            (string
                             (with-output-to-string (s) (print-as-code exp s))))
-                      (macroexpand-all (read-from-string string nil))
+                      (when (listp exp) ; to ignore reading top level conditional.
+                                        ; We believe there is no case e.g.
+                                        ; #+hoge (in-package :fuga)
+                        (macroexpand-all (read-from-string string nil)))
                       (write-string string))
                     (setf next (read-as-code input nil tag))
                     (typecase exp

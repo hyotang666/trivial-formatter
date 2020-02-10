@@ -49,7 +49,7 @@ CLISP is not supported due to mandatory newline does not work.
 
 ```lisp
 #+clisp
-(format nil "~<~:@_~>" nil)
+(format nil "~<~:@_~:>" nil)
 
 => ""
 ```
