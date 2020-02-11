@@ -382,7 +382,7 @@
           (write-char #\Space stream)
           (pprint-newline :miser stream)
           (pprint-indent :block 3 stream)
-          (format stream "~:<~@[~{~W~^ ~@_~}~]~@[~:_~{~W~^ ~@_~W~^ ~_~}~]~:>"
+          (format stream "~:<~@[~{~W~^ ~@_~}~]~@[ ~:_~{~W~^ ~@_~W~^ ~_~}~]~:>"
                   (list pre post))
           (pprint-indent :block 1 stream)
           (pprint-newline :mandatory stream)
