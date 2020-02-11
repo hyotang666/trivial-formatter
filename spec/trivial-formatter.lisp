@@ -1,6 +1,6 @@
 (defpackage :trivial-formatter.spec
   (:import-from :trivial-formatter #:pprint-extended-loop #:split-keywords
-                #:pprint-fun-call #:pprint-define-condition)
+                #:pprint-fun-call #:pprint-define-condition #:pprint-restart-case)
   (:use :cl :jingoh :trivial-formatter))
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
@@ -487,3 +487,66 @@
    (DEFINITIONS :INITFORM NIL :INITARG :DEFINITIONS :READER BNF-DEFINITIONS))
   (:REPORT (LAMBDA (CONDITION STREAM) (PRINC CONDITION STREAM)))
   (:DEFAULT-INITARGS :FORMAT-CONTROL \"\"))"
+
+(requirements-about PPRINT-RESTART-CASE :doc-type function)
+
+;;;; Description:
+
+#+syntax
+(PPRINT-RESTART-CASE stream exp) ; => result
+
+;;;; Arguments and Values:
+
+; stream := 
+
+; exp := 
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
+;;;; Tests:
+#?(pprint-restart-case nil '(restart-case))
+:outputs "(RESTART-CASE)"
+#?(pprint-restart-case nil '(restart-case form))
+:outputs "(RESTART-CASE FORM)"
+#?(pprint-restart-case nil '(restart-case form nil))
+:outputs "(RESTART-CASE FORM NIL)"
+#?(pprint-restart-case nil '(restart-case form (restart)))
+:outputs "(RESTART-CASE FORM (RESTART))"
+#?(pprint-restart-case nil '(restart-case form (restart nil)))
+:outputs "(RESTART-CASE FORM (RESTART ()))"
+#?(pprint-restart-case nil '(restart-case form (restart (var))))
+:outputs "(RESTART-CASE FORM (RESTART (VAR)))"
+#?(pprint-restart-case nil '(restart-case form (restart (var) var)))
+:outputs "(RESTART-CASE FORM (RESTART (VAR) VAR))"
+#?(pprint-restart-case nil '(restart-case(multiple-value-call #'dribble-print
+                                          (funcall *spec-append-hook*
+                                                   (lambda()
+                                                     (dribble-eval (dribble-read)))))
+                             (dribble()
+                               :report "Return to dribble.")))
+:outputs
+"(RESTART-CASE (MULTIPLE-VALUE-CALL #'DRIBBLE-PRINT
+                (FUNCALL *SPEC-APPEND-HOOK*
+                         (LAMBDA () (DRIBBLE-EVAL (DRIBBLE-READ)))))
+  (DRIBBLE () :REPORT \"Return to dribble.\"))"
+
+#?(pprint-restart-case nil '(restart-case(error 'unexpected-behavior)
+                              (use-value(expected)
+                                :report "Specify expected output"
+                                :interactive (lambda()
+                                               (list(read-expected)))
+                                expected)))
+:outputs
+"(RESTART-CASE (ERROR 'UNEXPECTED-BEHAVIOR)
+  (USE-VALUE (EXPECTED)
+      :REPORT \"Specify expected output\"
+      :INTERACTIVE (LAMBDA () (LIST (READ-EXPECTED)))
+    EXPECTED))"

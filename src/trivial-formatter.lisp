@@ -393,6 +393,7 @@
     (set-pprint-dispatch '(cons (member or and)) 'pprint-linear-elt)
     (set-pprint-dispatch '(cons (member flet labels)) 'pprint-flet)
     (set-pprint-dispatch '(cons (member when unless)) 'pprint-when)
+    (set-pprint-dispatch '(cons (member restart-case)) 'pprint-restart-case)
     *print-pprint-dispatch*))
 
 (defun pprint-list (stream exp)
@@ -414,6 +415,29 @@
 
 (defun pprint-when (stream exp)
   (format stream (formatter "~:<~W~3I~^ ~@_~W~^ ~1I~:@_~@{~^~W~^ ~_~}~:>") exp))
+
+(defun pprint-restart-case(stream exp)
+  (pprint-logical-block(stream nil :prefix "(" :suffix ")")
+    (format stream "~W" (car exp))
+    (when (cdr exp)
+      (format stream " ~3I~@_~W" (cadr exp))
+      (if (cddr exp)
+        (if (some #'atom (cddr exp))
+          (format stream " ~@_~{~W~^ ~@_~}" (cddr exp))
+          (dolist(clause (cddr exp))
+            (format stream " ~1I~:_~:<~{~W~^ ~@_~:S~^ ~@_~}~@[ ~3I~{~_~W~^ ~@_~W~^ ~}~]~^ ~1I~_~@{~W~^ ~:_~}~:>"
+                    (parse-restart-clause clause))))))))
+
+(defun parse-restart-clause(clause)
+  (let((pre (cons (car clause)
+                  (when (cdr clause)
+                    (list (cadr clause))))))
+    (loop :for list :on (cddr clause) :by #'cddr
+          :while (and (keywordp (car list))
+                      (cdr list))
+          :collect (car list) :into keys
+          :collect (cadr list) :into keys
+          :finally (return (list* pre keys list)))))
 
 ;;;; PRINT-AS-CODE
 
