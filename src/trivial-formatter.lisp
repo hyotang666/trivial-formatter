@@ -574,7 +574,8 @@
 (defmethod print-object ((c additional) stream)
   (if (null *print-clause*)
       (call-next-method)
-      (let ((*indent* (+ 4 *indent*)))
+      (let ((*indent*
+             (+ 1 (length (prin1-to-string (clause-keyword c))) *indent*)))
         (format stream "~VI~W~^ ~{~W~^ ~@_~}~5I" *indent* (clause-keyword c)
                 (clause-forms c)))))
 
