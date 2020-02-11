@@ -11,7 +11,7 @@ Code formatter for common lisp.
 For detail, see spec files.
 
 ## From developer
-Trivial-formatter heavily depends on prity printing system.
+Trivial-formatter heavily depends on pretty printing system.
 You can extend code format with ordinary common lisp way.
 For detail, see CLHS.
 
