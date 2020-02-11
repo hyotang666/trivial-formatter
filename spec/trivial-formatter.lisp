@@ -587,8 +587,18 @@
                                                    :output :if-does-not-exist :create :if-exists if-exists)
                                 (write-string string)))
 :outputs
-"(WITH-OPEN-FILE (*STANDARD-OUTPUT* (ASDF/COMPONENT:COMPONENT-PATHNAME COMPONENT)
+"(WITH-OPEN-FILE (*STANDARD-OUTPUT* (ASDF/COMPONENT:COMPONENT-PATHNAME
+                                    COMPONENT)
                  :DIRECTION :OUTPUT
                  :IF-DOES-NOT-EXIST :CREATE
                  :IF-EXISTS IF-EXISTS)
   (WRITE-STRING STRING))"
+
+#?(pprint-with-open-file nil '(with-open-file(*spec-output* *default-pathname-defaults*
+                                                            :direction :output
+                                                            :if-exists :append)
+                                (funcall appender)))
+:outputs
+"(WITH-OPEN-FILE (*SPEC-OUTPUT* *DEFAULT-PATHNAME-DEFAULTS* :DIRECTION :OUTPUT
+                 :IF-EXISTS :APPEND)
+  (FUNCALL APPENDER))"
