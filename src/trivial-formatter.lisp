@@ -606,7 +606,8 @@
          (let ((current-indent *indent*) (*indent* (+ 2 *indent*)))
            (format stream "~VI~:@_~W" current-indent (nestable-else c))))
        (when (nestable-end c)
-         (format stream "~VI~:@_~W" *indent* (nestable-end c))))))
+         (format stream "~VI~:@_~W" *indent* (nestable-end c)))
+       (pprint-indent :block 5 stream))))
 
 ;;; ELSE
 
