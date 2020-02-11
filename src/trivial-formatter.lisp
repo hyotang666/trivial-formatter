@@ -366,6 +366,9 @@
                                (funcall (pprint-dispatch exp *pprint-dispatch*) stream exp))))
     (funcall printer stream exp)))
 
+(defun pprint-cond (stream exp)
+  (format stream "~:<~W ~:_~:I~@{~W~^~_~}~:>" exp))
+
 (defun pprint-fun-call (stream exp)
   (setf stream (or stream *standard-output*))
   (multiple-value-bind (pre post)
@@ -394,6 +397,7 @@
     (set-pprint-dispatch '(cons (member flet labels)) 'pprint-flet)
     (set-pprint-dispatch '(cons (member when unless)) 'pprint-when)
     (set-pprint-dispatch '(cons (member restart-case)) 'pprint-restart-case)
+    (set-pprint-dispatch '(cons (member cond)) 'pprint-cond)
     *print-pprint-dispatch*))
 
 (defun pprint-list (stream exp)
