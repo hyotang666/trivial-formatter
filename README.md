@@ -1,4 +1,4 @@
-# TRIVIAL-FORMATTER 3.26.2
+# TRIVIAL-FORMATTER 3.31.3
 ## What is this?
 Code formatter for common lisp.
 
@@ -45,14 +45,10 @@ SBCL prints newline even if element is short, but others.
 ```
 ### Known issue.
 #### CLISP
-CLISP is not supported due to mandatory newline does not work.
+CLISP is not supported.
+[CLISP say](https://clisp.sourceforge.io/impnotes.html#clpp)
 
-```lisp
-#+clisp
-(format nil "~<~:@_~:>" nil)
-
-=> ""
-```
+> The Lisp Pretty Printer implementation is not perfect yet.
 
 #### CCL
 CCL is not recommended due to backquote works in readtime.
