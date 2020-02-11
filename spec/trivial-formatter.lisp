@@ -1,6 +1,7 @@
 (defpackage :trivial-formatter.spec
   (:import-from :trivial-formatter #:pprint-extended-loop #:split-keywords
-                #:pprint-fun-call #:pprint-define-condition #:pprint-restart-case)
+                #:pprint-fun-call #:pprint-define-condition #:pprint-restart-case
+                #:pprint-with-open-file)
   (:use :cl :jingoh :trivial-formatter))
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
@@ -550,3 +551,44 @@
       :REPORT \"Specify expected output\"
       :INTERACTIVE (LAMBDA () (LIST (READ-EXPECTED)))
     EXPECTED))"
+
+(requirements-about PPRINT-WITH-OPEN-FILE :doc-type function)
+
+;;;; Description:
+
+#+syntax
+(PPRINT-WITH-OPEN-FILE stream exp) ; => result
+
+;;;; Arguments and Values:
+
+; stream := 
+
+; exp := 
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
+;;;; Tests:
+#?(pprint-with-open-file nil '(with-open-file))
+:outputs "(WITH-OPEN-FILE)"
+#?(pprint-with-open-file nil '(with-open-file :not-list))
+:outputs "(WITH-OPEN-FILE :NOT-LIST)"
+#?(pprint-with-open-file nil '(with-open-file nil))
+:outputs "(WITH-OPEN-FILE NIL)"
+#?(pprint-with-open-file nil '(with-open-file
+                                (*standard-output* (asdf:component-pathname component) :direction
+                                                   :output :if-does-not-exist :create :if-exists if-exists)
+                                (write-string string)))
+:outputs
+"(WITH-OPEN-FILE (*STANDARD-OUTPUT* (ASDF/COMPONENT:COMPONENT-PATHNAME COMPONENT)
+                 :DIRECTION :OUTPUT
+                 :IF-DOES-NOT-EXIST :CREATE
+                 :IF-EXISTS IF-EXISTS)
+  (WRITE-STRING STRING))"

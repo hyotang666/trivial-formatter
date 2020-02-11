@@ -369,6 +369,23 @@
 (defun pprint-cond (stream exp)
   (format stream "~:<~W ~:_~:I~@{~W~^~_~}~:>" exp))
 
+(defun pprint-with-open-file (stream exp)
+  (setf stream (or stream *standard-output*))
+  (if (or (null (cdr exp)) (atom (cadr exp)))
+      (format stream "~:<~@{~W~^ ~@_~}~:>" exp)
+      (multiple-value-bind (pre post)
+          (split-keywords (cadr exp))
+        (pprint-logical-block (stream nil :prefix "(" :suffix ")")
+          (write (car exp) :stream stream)
+          (write-char #\Space stream)
+          (pprint-newline :miser stream)
+          (pprint-indent :block 3 stream)
+          (format stream "~:<~@[~{~W~^ ~@_~}~]~@[~:_~{~W~^ ~@_~W~^ ~_~}~]~:>"
+                  (list pre post))
+          (pprint-indent :block 1 stream)
+          (pprint-newline :mandatory stream)
+          (format stream "~@[~{~W~^ ~_~}~]" (cddr exp))))))
+
 (defun pprint-fun-call (stream exp)
   (setf stream (or stream *standard-output*))
   (multiple-value-bind (pre post)
@@ -398,6 +415,8 @@
     (set-pprint-dispatch '(cons (member when unless)) 'pprint-when)
     (set-pprint-dispatch '(cons (member restart-case)) 'pprint-restart-case)
     (set-pprint-dispatch '(cons (member cond)) 'pprint-cond)
+    (set-pprint-dispatch '(cons (member with-open-file))
+                         'pprint-with-open-file)
     *print-pprint-dispatch*))
 
 (defun pprint-list (stream exp)
