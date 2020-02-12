@@ -132,9 +132,7 @@
 (defstruct read-time-eval form)
 
 (defmethod print-object ((form read-time-eval) stream)
-  (format stream "~<#.~;~^~@{~A~^~:@_~}~:>"
-          (uiop:split-string (prin1-to-string (read-time-eval-form form))
-                             :separator '(#\Newline))))
+  (format stream "~<#.~;~W~:>" (list (read-time-eval-form form))))
 
 ;;; SHARED-OBJECT
 
