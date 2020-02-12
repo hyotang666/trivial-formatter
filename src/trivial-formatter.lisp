@@ -377,13 +377,8 @@
   (setf stream (or stream *standard-output*))
   (format stream "~:<~W~^~1:I ~@{~W~^ ~_~}~:>" exp))
 
-(let ((dispatcher *print-pprint-dispatch*))
-  (defun underlying-printer (thing)
-    (let ((*print-pprint-dispatch* (copy-pprint-dispatch dispatcher)))
-      (pprint-dispatch thing))))
-
 (defun pprint-flet (stream exp)
-  (let ((printer (underlying-printer exp))
+  (let ((printer (pprint-dispatch exp (copy-pprint-dispatch nil)))
         (*print-pprint-dispatch* (copy-pprint-dispatch)))
     (set-pprint-dispatch 'list
                          (lambda (stream exp &rest noise)
