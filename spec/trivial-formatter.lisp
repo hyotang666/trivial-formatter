@@ -529,29 +529,23 @@
 :outputs "(RESTART-CASE FORM (RESTART (VAR)))"
 #?(pprint-restart-case nil '(restart-case form (restart (var) var)))
 :outputs "(RESTART-CASE FORM (RESTART (VAR) VAR))"
-#?(pprint-restart-case nil '(restart-case(multiple-value-call #'dribble-print
-                                          (funcall *spec-append-hook*
-                                                   (lambda()
-                                                     (dribble-eval (dribble-read)))))
+#?(pprint-restart-case nil '(restart-case (funcall *macroexpand-hook*)
                              (dribble()
                                :report "Return to dribble.")))
 :outputs
-"(RESTART-CASE (MULTIPLE-VALUE-CALL #'DRIBBLE-PRINT
-                (FUNCALL *SPEC-APPEND-HOOK*
-                         (LAMBDA () (DRIBBLE-EVAL (DRIBBLE-READ)))))
+"(RESTART-CASE (FUNCALL *MACROEXPAND-HOOK*)
   (DRIBBLE () :REPORT \"Return to dribble.\"))"
 
 #?(pprint-restart-case nil '(restart-case(error 'unexpected-behavior)
                               (use-value(expected)
                                 :report "Specify expected output"
-                                :interactive (lambda()
-                                               (list(read-expected)))
+                                :interactive #'read
                                 expected)))
 :outputs
 "(RESTART-CASE (ERROR 'UNEXPECTED-BEHAVIOR)
   (USE-VALUE (EXPECTED)
       :REPORT \"Specify expected output\"
-      :INTERACTIVE (LAMBDA () (LIST (READ-EXPECTED)))
+      :INTERACTIVE #'READ
     EXPECTED))"
 
 (requirements-about PPRINT-WITH-OPEN-FILE :doc-type function
@@ -587,13 +581,11 @@
 #?(pprint-with-open-file nil '(with-open-file nil))
 :outputs "(WITH-OPEN-FILE NIL)"
 #?(pprint-with-open-file nil '(with-open-file
-                                (*standard-output* (asdf:component-pathname component) :direction
+                                (*standard-output* #P"hoge" :direction
                                                    :output :if-does-not-exist :create :if-exists if-exists)
                                 (write-string string)))
 :outputs
-"(WITH-OPEN-FILE (*STANDARD-OUTPUT* (ASDF/COMPONENT:COMPONENT-PATHNAME
-                                    COMPONENT)
-                 :DIRECTION :OUTPUT
+"(WITH-OPEN-FILE (*STANDARD-OUTPUT* #P\"hoge\" :DIRECTION :OUTPUT
                  :IF-DOES-NOT-EXIST :CREATE
                  :IF-EXISTS IF-EXISTS)
   (WRITE-STRING STRING))"

@@ -1,31 +1,30 @@
 (in-package :cl-user)
 
 (defpackage :trivial-formatter
-  (:use :cl)
-  (:import-from #.(or ; To avoid #-
-                      #+ecl
-                      '#:agnostic-lizard
-                      '#:trivial-macroexpand-all) ; As default.
-                #:macroexpand-all)
-  (:export ;; Main api
-           #:fmt
-           ;; Useful helpers
-           #:read-as-code
-           #:print-as-code))
+            (:use :cl)
+            (:import-from
+             #.(or ; To avoid #-
+                   #+ecl
+                   '#:agnostic-lizard
+                   '#:trivial-macroexpand-all) ; As default.
+             #:macroexpand-all)
+            (:export
+             ;; Main api
+             #:fmt
+             ;; Useful helpers
+             #:read-as-code #:print-as-code))
 
 (in-package :trivial-formatter)
 
 ;;;; FMT
 
-(declaim
- (ftype (function
-         ((or symbol string asdf:system) &optional
-          (member nil :append
-                  :supersede :rename
-                  :error :new-version
-                  :rename-and-delete :overwrite))
-         (values null &optional))
-        fmt))
+(declaim (ftype (function ((or symbol string asdf:system) &optional
+                           (member nil :append
+                                   :supersede :rename
+                                   :error :new-version
+                                   :rename-and-delete :overwrite))
+                          (values null &optional))
+                fmt))
 
 (defun fmt (system &optional (if-exists nil supplied-p))
   (asdf:load-system system)
@@ -36,7 +35,7 @@
                (with-output-to-string (*standard-output*)
                  (debug-printer component))))
           (with-open-file (*standard-output* (asdf:component-pathname
-                                               component)
+                                              component)
                            :direction :output
                            :if-does-not-exist :create
                            :if-exists if-exists)
@@ -44,13 +43,12 @@
 
 ;;;; READ-AS-CODE
 
-(declaim
- (ftype (function (&optional (or null stream) boolean t boolean)
-         (values t &optional))
-        read-as-code))
+(declaim (ftype (function (&optional (or null stream) boolean t boolean)
+                          (values t &optional))
+                read-as-code))
 
-(defun read-as-code
-       (&optional stream (eof-error-p t) (eof-value nil) (recursive-p nil))
+(defun read-as-code (&optional stream (eof-error-p t) (eof-value nil)
+                     (recursive-p nil))
   (let* ((*readtable* (named-readtables:find-readtable 'as-code))
          (*standard-input* (or stream *standard-input*))
          (char (peek-char t nil eof-error-p eof-value)))
@@ -90,8 +88,16 @@
       (keywordp thing)
       (null (symbol-package thing))
       (and (nth-value 1 (find-symbol (symbol-name thing)))
-           (or (not (find #\: notation)) ; Please do not use #\: as package or
-                                         ; symbol name!
+           (or (not (find #\: notation)) ; Please
+                                         ; do
+                                         ; not
+                                         ; use
+                                         ; #\:
+                                         ; as
+                                         ; package
+                                         ; or
+                                         ; symbol
+                                         ; name!
                (string-equal (package-name (symbol-package thing)) notation
                              :end2 (position #\: notation))))))
 
@@ -113,7 +119,7 @@
       (format stream "~:@_;~A" (comment-content c))
       (format stream "; ~A" (comment-content c)))
   (pprint-newline :mandatory stream)
-  (write-char #\Nul stream))
+  (write-char #\Null stream))
 
 (defstruct (block-comment (:include comment)))
 
@@ -180,8 +186,7 @@
 
 (defun |#.reader| (stream character number)
   (declare (ignore character))
-  (when number
-    (warn "A numeric argument is ignored in read time eval."))
+  (when number (warn "A numeric argument is ignored in read time eval."))
   (make-read-time-eval :form (read-as-code stream t t t)))
 
 (defun |#=reader| (stream character number)
@@ -194,29 +199,29 @@
 
 (defun |'reader| (stream character)
   (declare (ignore character))
-  `',(read-as-code stream))
+  (list* 'quote (list (read-as-code stream))))
 
 (defun |#'reader| (stream character number)
   (declare (ignore character))
-  (when number
-    (warn "Ignore numeric argument for #~D'." number))
-  `#',(read-as-code stream))
+  (when number (warn "Ignore numeric argument for #~D'." number))
+  (list* 'function (list (read-as-code stream))))
 
 ;;;; NAMED-READTABLE
 
 (named-readtables:defreadtable as-code
-  (:merge :common-lisp)
-  (:macro-char #\( '|paren-reader|)
-  (:macro-char #\. '|dot-reader| t)
-  (:macro-char #\; '|line-comment-reader|)
-  (:macro-char #\' '|'reader|)
-  (:dispatch-macro-char #\# #\| '|block-comment-reader|)
-  (:dispatch-macro-char #\# #\+ '|#+-reader|)
-  (:dispatch-macro-char #\# #\- '|#+-reader|)
-  (:dispatch-macro-char #\# #\. '|#.reader|)
-  (:dispatch-macro-char #\# #\' '|#'reader|)
-  (:dispatch-macro-char #\# #\= '|#=reader|)
-  (:dispatch-macro-char #\# #\# '|##reader|))
+                               (:merge :common-lisp)
+                               (:macro-char #\( '|paren-reader|)
+                               (:macro-char #\. '|dot-reader| t)
+                               (:macro-char #\; '|line-comment-reader|)
+                               (:macro-char #\' '|'reader|)
+                               (:dispatch-macro-char #\# #\|
+                                '|block-comment-reader|)
+                               (:dispatch-macro-char #\# #\+ '|#+-reader|)
+                               (:dispatch-macro-char #\# #\- '|#+-reader|)
+                               (:dispatch-macro-char #\# #\. '|#.reader|)
+                               (:dispatch-macro-char #\# #\' '|#'reader|)
+                               (:dispatch-macro-char #\# #\= '|#=reader|)
+                               (:dispatch-macro-char #\# #\# '|##reader|))
 
 ;;;; DEBUG-PRINTER
 
@@ -252,10 +257,8 @@
                     (setf next (read-as-code input nil tag))
                     (typecase exp
                       (block-comment (format t "~2%"))
-                      (line-comment
-                       (terpri)
-                       (when (not (comment-p next))
-                         (terpri)))
+                      (line-comment (terpri)
+                       (when (not (comment-p next)) (terpri)))
                       (conditional (terpri))
                       (t
                        (cond ((eq next tag)) ; Do nothing.
@@ -300,9 +303,7 @@
 (defun shortest-package-name (package)
   (reduce
     (lambda (champion challenger)
-      (if (< (length champion) (length challenger))
-          champion
-          challenger))
+      (if (< (length champion) (length challenger)) champion challenger))
     (cons (package-name package) (package-nicknames package))))
 
 (defun symbol-printer (stream object)
@@ -316,18 +317,18 @@
                   (eq #.(find-package :keyword) (symbol-package object))
                   (nth-value 1 (find-symbol (symbol-name object))))
               (write-string default-style stream)
-              (progn
-               (write-string
-                 (string-downcase
-                   (shortest-package-name (symbol-package object)))
-                 stream)
-               (write-string default-style stream :start
-                             ;; Please do not ever use collon as package name!
-                             (position #\: default-style))))))))
+              (progn (write-string
+                       (string-downcase
+                         (shortest-package-name (symbol-package object)))
+                       stream)
+                     (write-string default-style stream :start
+                                   ;; Please do not ever use collon as package name!
+                                   (position #\: default-style))))))))
 
 (defun pprint-handler-case (stream exp &rest noise)
   (declare (ignore noise))
-  (pprint-logical-block (stream exp :prefix "(" :suffix ")")
+  (pprint-logical-block
+    (stream exp :prefix "(" :suffix ")")
     (write (pprint-pop) :stream stream)
     (pprint-indent :block 3 stream)
     (pprint-exit-if-list-exhausted)
@@ -352,8 +353,9 @@
 
 (defun pprint-define-condition (stream exp &rest noise)
   (declare (ignore noise))
-  (pprint-logical-block (stream exp :prefix "(" :suffix ")")
-    (flet ((output ()
+  (pprint-logical-block
+    (stream exp :prefix "(" :suffix ")")
+    (flet ((output nil
              (write (pprint-pop) :stream stream)
              (pprint-exit-if-list-exhausted)
              (write-char #\Space stream)))
@@ -401,7 +403,8 @@
       (format stream "~:<~@{~W~^ ~@_~}~:>" exp)
       (multiple-value-bind (pre post)
           (split-keywords (cadr exp))
-        (pprint-logical-block (stream nil :prefix "(" :suffix ")")
+        (pprint-logical-block
+          (stream nil :prefix "(" :suffix ")")
           (write (car exp) :stream stream)
           (write-char #\Space stream)
           (pprint-newline :miser stream)
@@ -416,7 +419,8 @@
   (setf stream (or stream *standard-output*))
   (multiple-value-bind (pre post)
       (split-keywords exp)
-    (pprint-logical-block (stream nil :prefix "(" :suffix ")")
+    (pprint-logical-block
+      (stream nil :prefix "(" :suffix ")")
       (write (car pre) :stream stream)
       (when (cdr pre)
         (write-char #\Space stream)
@@ -435,9 +439,7 @@
       (funcall (pprint-dispatch exp *pprint-dispatch*) stream exp)))
 
 (defun split-keywords (exp)
-  (do* ((list (reverse exp) (cddr list))
-        pre
-        post)
+  (do* ((list (reverse exp) (cddr list)) pre post)
        ((null list) (values pre post))
     (if (keywordp (cadr list))
         (progn (push (car list) post) (push (cadr list) post))
@@ -447,7 +449,8 @@
   (format stream (formatter "~:<~W~3I~^ ~@_~W~^ ~1I~:@_~@{~^~W~^ ~_~}~:>") exp))
 
 (defun pprint-restart-case (stream exp)
-  (pprint-logical-block (stream nil :prefix "(" :suffix ")")
+  (pprint-logical-block
+    (stream nil :prefix "(" :suffix ")")
     (format stream "~W" (car exp))
     (when (cdr exp)
       (format stream " ~3I~@_~W" (cadr exp))
@@ -460,10 +463,7 @@
                         (parse-restart-clause clause))))))))
 
 (defun parse-restart-clause (clause)
-  (let ((pre
-         (cons (car clause)
-               (when (cdr clause)
-                 (list (cadr clause))))))
+  (let ((pre (cons (car clause) (when (cdr clause) (list (cadr clause))))))
     (loop :for list :on (cddr clause) :by #'cddr
           :while (and (keywordp (car list)) (cdr list))
           :collect (car list) :into keys
@@ -476,22 +476,18 @@
   (mapcan
     (lambda (line)
       (setf line
-              (remove #\Nul
-                      (ppcre:regex-replace #.(format nil "~C " #\Nul) line
-                                           "")))
-      (unless (every (lambda (char) (char= #\Space char)) line)
-        (list line)))
+            (remove #\Null
+                    (ppcre:regex-replace #.(format nil "~C " #\Null) line "")))
+      (unless (every (lambda (char) (char= #\Space char)) line) (list line)))
     (uiop:split-string string :separator '(#\Newline))))
 
 (defun alignment (list)
   (labels ((rec (list &optional acc)
-             (if (endp list)
-                 acc
-                 (body (car list) (cdr list) acc)))
+             (if (endp list) acc (body (car list) (cdr list) acc)))
            (body (first rest acc)
              (if (uiop:string-prefix-p ";;" (string-left-trim " " (car rest)))
                  (rec (cons (set-align first (car rest)) (cdr rest))
-                      (cons first acc))
+                  (cons first acc))
                  (rec rest (cons first acc))))
            (set-align (current comment)
              (with-output-to-string (*standard-output*)
@@ -509,9 +505,9 @@
     (set-pprint-dispatch 'list 'pprint-list)
     (prin1-to-string exp)))
 
-(declaim
- (ftype (function (t &optional (or null stream)) (values null &optional))
-        print-as-code))
+(declaim (ftype (function (t &optional (or null stream))
+                          (values null &optional))
+                print-as-code))
 
 (defun print-as-code (exp &optional stream)
   (let ((*standard-output* (or stream *standard-output*)))
@@ -524,9 +520,8 @@
                       (setf (car rest) (format nil "~A ~A" first (car rest)))
                       ;; Next one is single semicoloned line comment but FIRST.
                       ;; Both should be printed in same line.
-                      (progn
-                       (format t "~A " first)
-                       (rplaca rest (string-left-trim " " (car rest)))))
+                      (progn (format t "~A " first)
+                             (rplaca rest (string-left-trim " " (car rest)))))
                   (if (uiop:string-prefix-p "; " (string-left-trim " " first))
                       ;; Next is not single semicoloned line comment but FIRST.
                       ;; Comment should be printed.
@@ -545,8 +540,9 @@
                                        :finally (return num)))
                               (rplaca rest
                                       (format nil "~A ~A" first
-                                              (string-left-trim " "
-                                                                (car rest))))
+                                              (string-left-trim
+                                               " "
+                                               (car rest))))
                               (write-line first))
                           ;; Last line never need newline.
                           (write-string first)))))))
@@ -602,18 +598,17 @@
 (defmethod print-object ((c nestable) stream)
   (if (null *print-clause*)
       (call-next-method)
-      (progn
-       (format stream "~2:I~W ~W" (clause-keyword c) (nestable-pred c))
-       (when (clause-forms c)
-         (let ((*indent* (+ 2 *indent*)))
-           (loop :for form :in (clause-forms c)
-                 :do (format stream "~VI~:@_~W" *indent* form))))
-       (when (nestable-else c)
-         (let ((current-indent *indent*) (*indent* (+ 2 *indent*)))
-           (format stream "~VI~:@_~W" current-indent (nestable-else c))))
-       (when (nestable-end c)
-         (format stream "~VI~:@_~W" *indent* (nestable-end c)))
-       (pprint-indent :block 5 stream))))
+      (progn (format stream "~2:I~W ~W" (clause-keyword c) (nestable-pred c))
+             (when (clause-forms c)
+               (let ((*indent* (+ 2 *indent*)))
+                 (loop :for form :in (clause-forms c)
+                       :do (format stream "~VI~:@_~W" *indent* form))))
+             (when (nestable-else c)
+               (let ((current-indent *indent*) (*indent* (+ 2 *indent*)))
+                 (format stream "~VI~:@_~W" current-indent (nestable-else c))))
+             (when (nestable-end c)
+               (format stream "~VI~:@_~W" *indent* (nestable-end c)))
+             (pprint-indent :block 5 stream))))
 
 ;;; ELSE
 
@@ -660,8 +655,7 @@
     :forms forms))
 
 (defun print-clause (thing)
-  (let ((*print-clause* t))
-    (pprint-logical-block (nil nil) (prin1 thing))))
+  (let ((*print-clause* t)) (pprint-logical-block (nil nil) (prin1 thing))))
 
 (defun separation-keyword-p (thing)
   (and (symbolp thing)
@@ -685,21 +679,16 @@
 (defun make-loop-clauses (body)
   (labels ((rec (list &optional temp acc)
              (if (endp list)
-                 (if temp
-                     (nreconc acc (list temp))
-                     (nreverse acc))
+                 (if temp (nreconc acc (list temp)) (nreverse acc))
                  (body (car list) (cdr list) temp acc)))
            (body (first rest temp acc)
              (if (separation-keyword-p first)
                  ;; Make new clause.
                  (rec rest (make-clause :keyword first)
-                      (if temp
-                          (cons temp acc)
-                          acc))
+                  (if temp (cons temp acc) acc))
                  (typecase temp
-                   (null
-                    ;; Make new junk clause.
-                    (rec rest (make-clause :forms (list first)) acc))
+                   (null ;; Make new junk clause.
+                         (rec rest (make-clause :forms (list first)) acc))
                    (nestable
                     ;; Set nestable pred, and reset temp NIL.
                     (setf (nestable-pred temp) first)
@@ -707,25 +696,23 @@
                    (otherwise
                     ;; Modify temp clause.
                     (rec rest
-                         (progn
-                          (setf (clause-forms temp)
+                     (progn (setf (clause-forms temp)
                                   (nconc (clause-forms temp) (list first)))
-                          temp)
-                         acc))))))
+                            temp)
+                     acc))))))
     (rec body)))
 
-(declaim
- (ftype (function (list) (values clause list &optional nil)) pick-clause))
+(declaim (ftype (function (list) (values clause list &optional nil))
+                pick-clause))
 
 (defun pick-clause (list)
   (typecase (car list)
     (nestable (make-nest (car list) (cadr list) (cddr list)))
     (otherwise (values (car list) (cdr list)))))
 
-(declaim
- (ftype (function (nestable (or clause null) list)
-         (values nestable list &optional nil))
-        make-nest))
+(declaim (ftype (function (nestable (or clause null) list)
+                          (values nestable list &optional nil))
+                make-nest))
 
 (defun make-nest (when first rest)
   (typecase first
@@ -759,14 +746,14 @@
        (multiple-value-bind (obj list)
            (make-nest first (car rest) (cdr rest))
          (setf (clause-forms (nestable-else when))
-                 (append (clause-forms (nestable-else when)) (list obj)))
+               (append (clause-forms (nestable-else when)) (list obj)))
          (make-nest when (car list) (cdr list))))
       (t (values when (cons first rest)))))
     (additional
      (cond
       ((and (nestable-else when) (clause-forms (nestable-else when)))
        (setf (clause-forms (nestable-else when))
-               (append (clause-forms (nestable-else when)) (list first)))
+             (append (clause-forms (nestable-else when)) (list first)))
        (make-nest when (car rest) (cdr rest)))
       ((and (nestable-forms when) (null (nestable-else when)))
        (setf (clause-forms when) (append (clause-forms when) (list first)))
@@ -793,12 +780,13 @@
             (null
               (clause-forms (car (last (clause-forms (nestable-else when)))))))
        (setf (clause-forms (car (last (clause-forms (nestable-else when)))))
-               (list first))
+             (list first))
        (make-nest when (car rest) (cdr rest)))
       (t (values when (cons first rest)))))))
 
 (defun pprint-extended-loop (stream list)
-  (pprint-logical-block (stream nil :prefix "(" :suffix ")")
+  (pprint-logical-block
+    (stream nil :prefix "(" :suffix ")")
     (format stream "~W~:[~; ~:I~]" (car list) (cdr list))
     (let ((*print-clause* t))
       (format stream "~{~W~^~:@_~}" (parse-loop-body (cdr list))))))
