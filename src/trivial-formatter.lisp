@@ -77,10 +77,13 @@
                 (package-error ()
                   (make-broken-symbol notation))))))))
 
+(defvar *brokens* nil)
+
 (defun make-broken-symbol (notation)
   (let ((symbol (gensym)))
     (setf (get symbol 'notation) notation
           (symbol-function symbol) #'make-broken-symbol) ; as dummy.
+    (push symbol *brokens*)
     symbol))
 
 (defun valid-value-p (thing notation)
@@ -264,7 +267,10 @@
                                                         (comment-content next))
                                   (format t "~2%")))
                              (t (format t "~2%")))))))
-      (setf *package* package))))
+      (setf *package* package)
+      (loop :for symbol = (pop *brokens*)
+            :while symbol
+            :do (remf (symbol-plist symbol) 'notation)))))
 
 ;;;; PRETTY PRINTERS
 
