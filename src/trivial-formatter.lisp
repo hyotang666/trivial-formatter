@@ -273,6 +273,26 @@
 
 ;;;; PRETTY PRINTERS
 
+(defparameter *pprint-dispatch*
+  (let ((*print-pprint-dispatch* (copy-pprint-dispatch)))
+    (set-pprint-dispatch '(eql #\Space)
+                         (lambda (stream object)
+                           (format stream "#\\~:C" object)))
+    (set-pprint-dispatch 'symbol 'symbol-printer)
+    (set-pprint-dispatch '(cons (member handler-case)) 'pprint-handler-case)
+    (set-pprint-dispatch '(cons (member loop)) 'pprint-extended-loop)
+    (set-pprint-dispatch '(cons (member define-condition))
+                         'pprint-define-condition)
+    (set-pprint-dispatch '(cons (member or and)) 'pprint-linear-elt)
+    (set-pprint-dispatch '(cons (member flet labels)) 'pprint-flet)
+    (set-pprint-dispatch '(cons (member when unless)) 'pprint-when)
+    (set-pprint-dispatch '(cons (member restart-case)) 'pprint-restart-case)
+    (set-pprint-dispatch '(cons (member cond)) 'pprint-cond)
+    (set-pprint-dispatch '(cons (member with-open-file))
+                         'pprint-with-open-file)
+    (set-pprint-dispatch '(cons (member ftype)) 'pprint-ftype)
+    *print-pprint-dispatch*))
+
 (defun pprint-ftype (stream exp)
   (setf stream (or stream *standard-output*))
   (format stream "~:<~W~1I~^ ~@_~:I~^~W~^ ~_~@{~W~^ ~_~}~:>" exp))
@@ -410,26 +430,6 @@
         (pprint-indent :current 0 stream)
         (format stream "~{~W~^ ~:_~}" (cdr pre)))
       (format stream "~@[ ~_~{~^~W ~@_~W~^ ~_~}~]" post))))
-
-(defparameter *pprint-dispatch*
-  (let ((*print-pprint-dispatch* (copy-pprint-dispatch)))
-    (set-pprint-dispatch '(eql #\Space)
-                         (lambda (stream object)
-                           (format stream "#\\~:C" object)))
-    (set-pprint-dispatch 'symbol 'symbol-printer)
-    (set-pprint-dispatch '(cons (member handler-case)) 'pprint-handler-case)
-    (set-pprint-dispatch '(cons (member loop)) 'pprint-extended-loop)
-    (set-pprint-dispatch '(cons (member define-condition))
-                         'pprint-define-condition)
-    (set-pprint-dispatch '(cons (member or and)) 'pprint-linear-elt)
-    (set-pprint-dispatch '(cons (member flet labels)) 'pprint-flet)
-    (set-pprint-dispatch '(cons (member when unless)) 'pprint-when)
-    (set-pprint-dispatch '(cons (member restart-case)) 'pprint-restart-case)
-    (set-pprint-dispatch '(cons (member cond)) 'pprint-cond)
-    (set-pprint-dispatch '(cons (member with-open-file))
-                         'pprint-with-open-file)
-    (set-pprint-dispatch '(cons (member ftype)) 'pprint-ftype)
-    *print-pprint-dispatch*))
 
 (defun pprint-list (stream exp)
   (if (and (symbolp (car exp))
