@@ -447,14 +447,14 @@
 :outputs
 "(MEMBER NIL :APPEND :SUPERSEDE :RENAME :ERROR :NEW-VERSION)"
 
-(requirements-about PPRINT-DEFINE-CONDITION :doc-type function)
+(requirements-about PPRINT-DEFINE-CONDITION :doc-type function
+                    :around (let((*print-pretty* t))
+                              (call-body)))
 
 ;;;; Description:
 
 #+syntax
-(PPRINT-DEFINE-CONDITION stream exp &rest noise
-                         :around (let((*print-pretty* t))
-                                   (call-body))) ; => result
+(PPRINT-DEFINE-CONDITION stream exp &rest noise) ; => result
 
 ;;;; Arguments and Values:
 
@@ -489,7 +489,9 @@
   (:REPORT (LAMBDA (CONDITION STREAM) (PRINC CONDITION STREAM)))
   (:DEFAULT-INITARGS :FORMAT-CONTROL \"\"))"
 
-(requirements-about PPRINT-RESTART-CASE :doc-type function)
+(requirements-about PPRINT-RESTART-CASE :doc-type function
+                    :around (let ((*print-pretty* t))
+                              (call-body)))
 
 ;;;; Description:
 
@@ -552,7 +554,9 @@
       :INTERACTIVE (LAMBDA () (LIST (READ-EXPECTED)))
     EXPECTED))"
 
-(requirements-about PPRINT-WITH-OPEN-FILE :doc-type function)
+(requirements-about PPRINT-WITH-OPEN-FILE :doc-type function
+                    :around (let((*print-pretty* t))
+                              (call-body)))
 
 ;;;; Description:
 
