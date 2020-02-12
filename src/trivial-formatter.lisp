@@ -271,7 +271,7 @@
 
 ;;;; PRETTY PRINTERS
 
-(defparameter *pprint-dispatch*
+(defun init-table ()
   (let ((*print-pprint-dispatch* (copy-pprint-dispatch)))
     (set-pprint-dispatch '(eql #\Space)
                          (lambda (stream object)
@@ -290,6 +290,8 @@
                          'pprint-with-open-file)
     (set-pprint-dispatch '(cons (member ftype)) 'pprint-ftype)
     *print-pprint-dispatch*))
+
+(defparameter *pprint-dispatch* *print-pprint-dispatch*)
 
 (defun pprint-ftype (stream exp)
   (setf stream (or stream *standard-output*))
@@ -506,7 +508,8 @@
 
 (defun string-as-code (exp)
   (let* ((*print-case* :downcase)
-         (*print-pprint-dispatch* (copy-pprint-dispatch *pprint-dispatch*))
+         (*print-pprint-dispatch* (init-table))
+         (*pprint-dispatch* (init-table))
          (*print-pretty* t))
     (set-pprint-dispatch 'list 'pprint-list)
     (prin1-to-string exp)))
