@@ -18,15 +18,14 @@
 ;;;; FMT
 
 (declaim
- (ftype
-  (function
-   ((or symbol string asdf:system) &optional
-    (member nil :append
-            :supersede :rename
-            :error :new-version
-            :rename-and-delete :overwrite))
-   (values null &optional))
-  fmt))
+ (ftype (function
+         ((or symbol string asdf:system) &optional
+          (member nil :append
+                  :supersede :rename
+                  :error :new-version
+                  :rename-and-delete :overwrite))
+         (values null &optional))
+        fmt))
 
 (defun fmt (system &optional (if-exists nil supplied-p))
   (asdf:load-system system)
@@ -36,7 +35,8 @@
         (let ((string
                (with-output-to-string (*standard-output*)
                  (debug-printer component))))
-          (with-open-file (*standard-output* (asdf:component-pathname component)
+          (with-open-file (*standard-output* (asdf:component-pathname
+                                               component)
                            :direction :output
                            :if-does-not-exist :create
                            :if-exists if-exists)
@@ -45,10 +45,9 @@
 ;;;; READ-AS-CODE
 
 (declaim
- (ftype
-  (function (&optional (or null stream) boolean t boolean)
-   (values t &optional))
-  read-as-code))
+ (ftype (function (&optional (or null stream) boolean t boolean)
+         (values t &optional))
+        read-as-code))
 
 (defun read-as-code
        (&optional stream (eof-error-p t) (eof-value nil) (recursive-p nil))
@@ -516,7 +515,7 @@
 
 (declaim
  (ftype (function (t &optional (or null stream)) (values null &optional))
-  print-as-code))
+        print-as-code))
 
 (defun print-as-code (exp &optional stream)
   (let ((*standard-output* (or stream *standard-output*)))
@@ -728,10 +727,9 @@
     (otherwise (values (car list) (cdr list)))))
 
 (declaim
- (ftype
-  (function (nestable (or clause null) list)
-   (values nestable list &optional nil))
-  make-nest))
+ (ftype (function (nestable (or clause null) list)
+         (values nestable list &optional nil))
+        make-nest))
 
 (defun make-nest (when first rest)
   (typecase first
