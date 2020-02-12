@@ -274,6 +274,10 @@
 
 ;;;; PRETTY PRINTERS
 
+(defun pprint-ftype (stream exp)
+  (setf stream (or stream *standard-output*))
+  (format stream "~:<~W~1I~^ ~@_~:I~^~W~^ ~_~@{~W~^ ~_~}~:>" exp))
+
 (defun shortest-package-name (package)
   (reduce
     (lambda (champion challenger)
@@ -425,6 +429,7 @@
     (set-pprint-dispatch '(cons (member cond)) 'pprint-cond)
     (set-pprint-dispatch '(cons (member with-open-file))
                          'pprint-with-open-file)
+    (set-pprint-dispatch '(cons (member ftype)) 'pprint-ftype)
     *print-pprint-dispatch*))
 
 (defun pprint-list (stream exp)
