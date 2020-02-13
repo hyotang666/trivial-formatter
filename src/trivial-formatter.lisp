@@ -11,7 +11,9 @@
            #:fmt
            ;; Useful helpers
            #:read-as-code
-           #:print-as-code))
+           #:print-as-code
+           ;; Readtable name.
+           #:as-code))
 
 (in-package :trivial-formatter)
 
@@ -51,7 +53,11 @@
 
 (defun read-as-code
        (&optional stream (eof-error-p t) (eof-value nil) (recursive-p nil))
-  (let* ((*readtable* (named-readtables:find-readtable 'as-code))
+  (let* ((*readtable*
+          (handler-bind ((named-readtables:reader-macro-conflict #'continue))
+            (named-readtables:merge-readtables-into (copy-readtable)
+                                                    (named-readtables:copy-named-readtable
+                                                      'as-code))))
          (*standard-input* (or stream *standard-input*))
          (char (peek-char t nil eof-error-p eof-value)))
     (if (eq char eof-value)
