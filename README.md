@@ -1,4 +1,4 @@
-# TRIVIAL-FORMATTER 3.31.3
+# TRIVIAL-FORMATTER 4.0.0
 ## What is this?
 Code formatter for common lisp.
 
@@ -11,9 +11,33 @@ Code formatter for common lisp.
 For detail, see spec files.
 
 ## From developer
+### Reader.
+Trivial-formatter heavily depends on readtable especially [NAMED-READTABLES](https://github.com/melisgl/named-readtables).
+You can extend reader with ordinary common lisp way.
+
+```lisp
+(let ((*readtable* (named-readtables:copy-named-readtable 'as-code)))
+  (set-macro-character #\! (lambda (stream char) `(list ,char ,(read stream))))
+  (read-as-code))
+!hoge
+=> (LIST #\! HOGE)
+```
+
+For details, see [CLHS](http://www.lispworks.com/documentation/HyperSpec/Body/c_reader.htm)
+and [NAMED-READTABLES](https://github.com/melisgl/named-readtables).
+
+### Printer.
 Trivial-formatter heavily depends on pretty printing system.
 You can extend code format with ordinary common lisp way.
-For detail, see CLHS.
+
+```lisp
+(defun your-printer (stream exp)
+  ...)
+(set-pprint-dispatch '(cons (member your-fun)) 'your-printer)
+(print-as-code '(your-fun ...))
+```
+
+For detail, see [CLHS](http://www.lispworks.com/documentation/HyperSpec/Body/22_bb.htm).
 
 ### Product's goal
 
