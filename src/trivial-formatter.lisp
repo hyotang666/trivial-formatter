@@ -65,7 +65,7 @@
         (if (get-macro-character char)
             (read *standard-input* eof-error-p eof-value recursive-p)
             (let* ((notation
-                    (string-downcase
+                    (canonicalize-case
                       (read-as-string:read-as-string nil eof-error-p eof-value
                                                      recursive-p))))
               (handler-case
@@ -81,6 +81,37 @@
                       (error c)))
                 (package-error ()
                   (make-broken-symbol notation))))))))
+
+(defun canonicalize-case (string)
+  (flet ((convert-all (converter)
+           (uiop:reduce/strcat
+             (uiop:while-collecting (acc)
+               (do ((index 0))
+                   ((not (array-in-bounds-p string index)))
+                 (case (char string index)
+                   (#\\ ; single escape.
+                    (acc (char string index))
+                    (acc (char string (incf index)))
+                    (incf index))
+                   (#\| ; multiple escape.
+                    (acc (char string index))
+                    (incf index)
+                    (do ((char (char string index) (char string index)))
+                        ((char= #\| char)
+                         (acc (char string index))
+                         (incf index))
+                      (case char
+                        (#\\ ; single escape.
+                         (acc char)
+                         (acc (char string (incf index)))
+                         (incf index))
+                        (otherwise (acc char) (incf index)))))
+                   (otherwise
+                    (acc (funcall converter (char string index)))
+                    (incf index))))))))
+    (ecase (readtable-case *readtable*)
+      ((:upcase :downcase) (convert-all #'char-downcase))
+      ((:preserve :invert) string))))
 
 (defvar *brokens* nil)
 
