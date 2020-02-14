@@ -84,6 +84,9 @@ If your project does not have backquote, trivial-formatter will work fine.
 
 => (LIST* 'A (LIST* (CDR '(1 2 3)) '(B)))
 ```
+#### Reader.
+When reader macro conflicts, such reader macros are ignored silently.
+You can add new reader macros, but con not modify already existing reader macros.
 
 ## Installation
 
