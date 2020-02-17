@@ -135,8 +135,8 @@
       (and (nth-value 1 (find-symbol (symbol-name thing)))
            (or (not (find #\: notation)) ; Please do not use #\: as package or
                                          ; symbol name!
-               (string-equal (package-name (symbol-package thing)) notation
-                             :end2 (position #\: notation))))))
+               (every #'char-equal (package-name (symbol-package thing))
+                      notation)))))
 
 ;;;; META-OBJECT
 ;;; DOT
