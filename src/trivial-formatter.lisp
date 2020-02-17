@@ -382,7 +382,7 @@
           :else :if (= 2 (length form))
             :do (apply #'format stream "(~W ~:A)" form)
           :else
-            :do (apply #'format stream "(~1:I~W ~:A~^~:@_~@{~W~^ ~@_~})" form)
+            :do (apply #'format stream "(~1:I~W ~:A~^~:@_~@{~W~^ ~:_~})" form)
           :do (pprint-exit-if-list-exhausted)
               (pprint-indent :block 1 stream)
               (pprint-newline :mandatory stream))))
