@@ -58,10 +58,13 @@
             (named-readtables:merge-readtables-into (copy-readtable)
                                                     (named-readtables:copy-named-readtable
                                                       'as-code))))
-         (*standard-input* (or stream *standard-input*))
-         (char (peek-char t nil eof-error-p eof-value)))
-    (if (eq char eof-value)
-        eof-value
+         (*standard-input* (or stream *standard-input*)))
+    (handler-case (peek-char t)
+      (end-of-file (c)
+        (if eof-error-p
+            (error c)
+            eof-value))
+      (:no-error (char)
         (if (get-macro-character char)
             (read *standard-input* eof-error-p eof-value recursive-p)
             (let* ((notation

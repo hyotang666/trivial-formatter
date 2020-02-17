@@ -137,6 +137,9 @@
                          (with-output-to-string(s)
                            (print-as-code result s)))))
 
+#?(with-input-from-string(s "hoge")
+    (read-as-code s nil #\h))
+=> HOGE
 ;;;; Affected By:
 
 ;;;; Side-Effects:
