@@ -82,7 +82,7 @@
                   (make-broken-symbol notation))
                 (:no-error (value)
                   (unless (valid-value-p value notation)
-                    (setf (get value 'notation) notation))
+                    (mark-it value notation))
                   value))))))))
 
 (defun canonicalize-case (string)
@@ -118,12 +118,15 @@
 
 (defvar *brokens* nil)
 
+(defun mark-it (symbol notation)
+  (setf (get symbol 'notation) notation)
+  (push symbol *brokens*)
+  symbol)
+
 (defun make-broken-symbol (notation)
   (let ((symbol (gensym)))
-    (setf (get symbol 'notation) notation
-          (symbol-function symbol) #'make-broken-symbol) ; as dummy.
-    (push symbol *brokens*)
-    symbol))
+    (setf (symbol-function symbol) #'make-broken-symbol) ; as dummy.
+    (mark-it symbol notation)))
 
 (defun valid-value-p (thing notation)
   (or (not (symbolp thing))
