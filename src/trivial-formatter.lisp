@@ -71,11 +71,7 @@
                     (canonicalize-case
                       (read-as-string:read-as-string nil eof-error-p eof-value
                                                      recursive-p))))
-              (handler-case
-                  (let ((value (read-from-string notation)))
-                    (unless (valid-value-p value notation)
-                      (setf (get value 'notation) notation))
-                    value)
+              (handler-case (values (read-from-string notation))
                 #+ecl
                 (error (c)
                   (if (search "There is no package with the name"
@@ -83,7 +79,11 @@
                       (make-broken-symbol notation)
                       (error c)))
                 (package-error ()
-                  (make-broken-symbol notation)))))))))
+                  (make-broken-symbol notation))
+                (:no-error (value)
+                  (unless (valid-value-p value notation)
+                    (setf (get value 'notation) notation))
+                  value))))))))
 
 (defun canonicalize-case (string)
   (flet ((convert-all (converter)
