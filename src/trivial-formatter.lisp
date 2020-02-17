@@ -83,7 +83,7 @@
                       (make-broken-symbol notation)
                       (error c)))
                 (package-error ()
-                  (make-broken-symbol notation))))))))
+                  (make-broken-symbol notation)))))))))
 
 (defun canonicalize-case (string)
   (flet ((convert-all (converter)
