@@ -31,6 +31,7 @@
 ; result := null
 
 ;;;; Affected By:
+; `*readtable*` `*print-pprint-dispatch*`
 
 ;;;; Side-Effects:
 ; Load asdf:system to lisp environment.
@@ -141,13 +142,13 @@
     (read-as-code s nil #\h))
 => HOGE
 ;;;; Affected By:
+; `*readtable*`
 
 ;;;; Side-Effects:
 ; Consume stream contents.
 
 ;;;; Notes:
 ;;; Known bug.
-; * Could not handle not standard reader macros.
 ; * Not support comment in #S, #A, #V reader macros.
 ; Comment will be discarded.
 ; * CCL could not print backquote due to CLL qackquote makes form in read time.
@@ -172,6 +173,7 @@
 ; result := null
 
 ;;;; Affected By:
+; `*print-pprint-dispatch*`
 
 ;;;; Side-Effects:
 ; Output to `STREAM`.
@@ -181,11 +183,6 @@
 ; It means defferent output in defferent implementation.
 
 ;;;; Exceptional-Situations:
-
-;;;; Guards for implementation specific hack.
-; When test below fails, sbcl specific pretty printer may should be removed.
-#+sbcl
-#?(pprint-dispatch '(handler-case)) => sb-pretty::pprint-macro-call
 
 ;;;; Tests.
 ; 1. After line comment, newline is required.
