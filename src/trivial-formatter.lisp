@@ -332,6 +332,7 @@
     (set-pprint-dispatch '(cons (member with-open-file))
                          'pprint-with-open-file)
     (set-pprint-dispatch '(cons (member ftype)) 'pprint-ftype)
+    (set-pprint-dispatch '(cons (member assert)) 'pprint-assert)
     *print-pprint-dispatch*))
 
 (defparameter *pprint-dispatch* *print-pprint-dispatch*)
@@ -488,6 +489,12 @@
 
 (defun pprint-when (stream exp)
   (format stream (formatter "~:<~W~3I~^ ~@_~W~^ ~1I~:@_~@{~^~W~^ ~_~}~:>") exp))
+
+(defun pprint-assert (stream exp)
+  (setf stream (or stream *standard-output*))
+  (format stream
+          "~:<~{~W~1I~^ ~@_~W~^ ~@_~:S~^ ~@_~@{~W~^ ~@_~}~}~@[ ~:_~{~W ~@_~W~^ ~_~}~]~:>"
+          (multiple-value-list (split-keywords exp))))
 
 (defun pprint-restart-case (stream exp)
   (pprint-logical-block (stream nil :prefix "(" :suffix ")")
