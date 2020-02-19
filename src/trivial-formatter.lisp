@@ -271,12 +271,7 @@
                 :for exp = (read-as-code input nil tag) :then next
                 :with next
                 :until (eq exp tag)
-                :do (when (and (comment-p exp)
-                               (not
-                                 (uiop:string-prefix-p #\;
-                                                       (comment-content exp))))
-                      (write-char #\Space))
-                    (let* ((*macroexpand-hook*
+                :do (let* ((*macroexpand-hook*
                             (lambda (expander form env)
                               (if (typep form '(cons (eql in-package)))
                                   (eval (funcall expander form env))
