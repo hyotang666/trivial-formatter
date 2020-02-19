@@ -695,7 +695,7 @@
   (funcall
     (case (separation-keyword-p keyword)
       ((:for :with :as) #'make-var)
-      ((:if :when) #'make-nestable)
+      ((:if :when :unless) #'make-nestable)
       ((:do :doing :finally :initially) #'make-own-block)
       ((:else) #'make-else)
       ((:and) #'make-additional)
