@@ -154,7 +154,7 @@
 (defmethod print-object ((c line-comment) stream)
   (if (uiop:string-prefix-p #\; (comment-content c))
       (format stream "~:@_;~A" (comment-content c))
-      (format stream "; ~A" (comment-content c)))
+      (format stream "~:@_; ~A" (comment-content c)))
   (pprint-newline :mandatory stream)
   (write-char #\Nul stream))
 
