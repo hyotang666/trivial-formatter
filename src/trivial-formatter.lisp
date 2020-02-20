@@ -300,7 +300,8 @@
                              ((line-comment-p next)
                               (if (uiop:string-prefix-p #\;
                                                         (comment-content next))
-                                  (format t "~2%")))
+                                  (format t "~2%")
+                                  (write-char #\Space)))
                              (t (format t "~2%")))))))
       (setf *package* package)
       (loop :for symbol = (pop *brokens*)
