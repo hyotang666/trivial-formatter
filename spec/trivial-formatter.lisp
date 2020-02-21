@@ -442,6 +442,13 @@
                                    :DIRECTION :OUTPUT
                                    :IF-DOES-NOT-EXIST :CREATE
                                    :IF-EXISTS IF-EXISTS)"
+#?(pprint-fun-call nil '(asdf:component-pathname :direction :output
+                                                 :if-does-not-exist :create
+                                                 :if-exists if-exists))
+:outputs
+"(ASDF/COMPONENT:COMPONENT-PATHNAME :DIRECTION :OUTPUT
+                                   :IF-DOES-NOT-EXIST :CREATE
+                                   :IF-EXISTS IF-EXISTS)"
 #?(pprint-fun-call nil '(call :k v)) :outputs "(CALL :K V)"
 #?(pprint-fun-call nil '(member nil :append :supersede :rename :error :new-version))
 :outputs
