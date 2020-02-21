@@ -55,6 +55,7 @@
                 (rec (append (asdf:component-children first) rest) acc))
                (asdf:module
                 (rec (append (asdf:component-children first) rest) acc))
+               (asdf:static-file (rec rest acc))
                (otherwise (rec rest (cons first acc))))))
     (rec (list component) nil)))
 
