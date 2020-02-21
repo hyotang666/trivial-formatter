@@ -31,7 +31,7 @@
 
 (defun fmt (system &optional (if-exists nil supplied-p))
   (asdf:load-system system)
-  (dolist (component (asdf:component-children (asdf:find-system system)))
+  (dolist (component (component-children (asdf:find-system system)))
     (if (not supplied-p)
         (debug-printer component)
         (let ((string
@@ -43,6 +43,20 @@
                            :if-does-not-exist :create
                            :if-exists if-exists)
             (write-string string))))))
+
+(defun component-children (component)
+  (labels ((rec (list acc)
+             (if (endp list)
+                 acc
+                 (body (car list) (cdr list) acc)))
+           (body (first rest acc)
+             (typecase first
+               (asdf:system
+                (rec (append (asdf:component-children first) rest) acc))
+               (asdf:module
+                (rec (append (asdf:component-children first) rest) acc))
+               (otherwise (rec rest (cons first acc))))))
+    (rec (list component) nil)))
 
 ;;;; READ-AS-CODE
 
