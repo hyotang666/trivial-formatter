@@ -344,9 +344,25 @@
                          'pprint-with-open-file)
     (set-pprint-dispatch '(cons (member ftype)) 'pprint-ftype)
     (set-pprint-dispatch '(cons (member assert)) 'pprint-assert)
+    (set-pprint-dispatch '(cons (member defclass)) 'pprint-defclass)
     *print-pprint-dispatch*))
 
 (defparameter *pprint-dispatch* *print-pprint-dispatch*)
+
+(defun pprint-defclass (stream exp)
+  (setf stream (or stream *standard-output*))
+  (pprint-logical-block (stream nil :prefix "(" :suffix ")")
+    (apply #'format stream "~W~3I~^ ~@_~W~^ ~@_~:S~^~1I ~:_" exp)
+    (when (cdddr exp)
+      (if (listp (cadddr exp))
+          (if (every #'listp (cadddr exp))
+              (format stream
+                      "~:<~@{~/trivial-formatter::pprint-fun-call/~^ ~:_~}~:>"
+                      (cadddr exp))
+              (format stream "~:<~@{~W~^ ~_~}~:>" (cadddr exp)))
+          (format stream "~W" (cadddr exp))))
+    (when (cddddr exp)
+      (format stream "~:@_~{~W~^ ~_~}" (cddddr exp)))))
 
 (defun pprint-ftype (stream exp)
   (setf stream (or stream *standard-output*))
@@ -467,7 +483,8 @@
           (pprint-newline :mandatory stream)
           (format stream "~@[~{~W~^ ~_~}~]" (cddr exp))))))
 
-(defun pprint-fun-call (stream exp)
+(defun pprint-fun-call (stream exp &rest noise)
+  (declare (ignore noise))
   (setf stream (or stream *standard-output*))
   (multiple-value-bind (pre post)
       (split-keywords exp)
