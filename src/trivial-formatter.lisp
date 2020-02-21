@@ -472,18 +472,9 @@
   (multiple-value-bind (pre post)
       (split-keywords exp)
     (pprint-logical-block (stream nil :prefix "(" :suffix ")")
-      (write (car pre) :stream stream)
-      (when (or (cdr pre)
-                post)
-        (write-char #\Space stream)
-        (pprint-indent :block 1 stream)
-        (pprint-newline :fill stream)
-        (pprint-indent :current 0 stream))
-      (when (cdr pre)
-        (format stream "~{~W~^ ~:_~}" (cdr pre)))
-      (if (cdr pre)
-        (format stream "~@[ ~_~{~^~W ~@_~W~^ ~_~}~]" post)
-        (format stream "~@[~:_~{~^~W ~@_~W~^ ~_~}~]" post)))))
+      (apply #'format stream "~W~^ ~1I~:_~:I~@{~W~^ ~:_~}" pre)
+      (when post
+        (format stream " ~:[~:_~:I~;~_~]~{~^~W ~@_~W~^ ~_~}" (cdr pre) post)))))
 
 (defun pprint-list (stream exp)
   (if (and (symbolp (car exp))
