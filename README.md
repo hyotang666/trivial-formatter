@@ -1,4 +1,4 @@
-# TRIVIAL-FORMATTER 4.0.0
+# TRIVIAL-FORMATTER 5.1.0
 ## What is this?
 Code formatter for common lisp.
 
@@ -38,6 +38,47 @@ You can extend code format with ordinary common lisp way.
 ```
 
 For detail, see [CLHS](http://www.lispworks.com/documentation/HyperSpec/Body/22_bb.htm).
+
+### Load foreign formatters.
+Trivial-formatter can load foreign formatters.
+You can write extension codes as foreign formatters.
+
+Foreign formatters file must named as "formatters.lisp".
+Trivial-formatter search file from `*foreign-formatters-directories*`.
+The default is quicklisp's local-projects directory and roswell's local-projects directory.
+
+### Package trivial-formatter-user.
+In trivial-formatter-user, you can use deformatter and pprint-fun-call with ordinary common lisp symbols.
+
+#### PPRINT-FUN-CALL
+PPRINT-FUN-CALL care about key value pair.
+
+```lisp
+(pprint-fun-call nil '(asdf:component-pathname component
+                                               :direction :output
+                                               :if-does-not-exist :create
+                                               :if-exists if-exists))
+(ASDF:COMPONENT-PATHNAME COMPONENT
+                         :DIRECTION :OUTPUT
+                         :IF-DOES-NOT-EXIST :CREATE
+                         :IF-EXISTS IF-EXISTS))
+NIL
+```
+
+#### DEFORMATTER
+DEFORMATTER care about package exists and symbol confliction and set-pprint-dispatch.
+
+```lisp
+(macroexpand '(deformatter package symbol (stream exp)
+                (format stream "~A" exp)))
+
+(WHEN (FIND-PACKAGE "PACKAGE")
+  (DEFUN #:PPRINT-SYMBOL3440 (STREAM EXP) (FORMAT STREAM "~A" EXP))
+  (SET-PPRINT-DISPATCH
+   `(CONS (MEMBER ,(UIOP/PACKAGE:FIND-SYMBOL* "SYMBOL" "PACKAGE")))
+   '#:PPRINT-SYMBOL3440)
+  '#:PPRINT-SYMBOL3440)
+```
 
 ### Product's goal
 
