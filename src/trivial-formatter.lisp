@@ -13,9 +13,28 @@
            #:read-as-code
            #:print-as-code
            ;; Readtable name.
-           #:as-code))
+           #:as-code
+           ;; Special variable
+           #:*foreign-formatters-directories*))
 
 (in-package :trivial-formatter)
+
+;;;; *FOREIGN-FORMATTERS-PATHNAMES*
+
+(declaim (type list *foreign-formatters-directories*))
+
+(defparameter *foreign-formatters-directories*
+  `(,@(when (find-package :ql)
+        (symbol-value (uiop:find-symbol* "*LOCAL-PROJECT-DIRECTORIES*" :ql)))
+    ,@(when (find-package :roswell)
+        (symbol-value
+          (uiop:find-symbol* "*LOCAL-PROJECT-DIRECTORIES*" :roswell)))))
+
+(defun load-foreign-formatters ()
+  (loop :for directory :in *foreign-formatters-directories*
+        :for pathname := (merge-pathnames "formatters.lisp" directory)
+        :when (probe-file pathname)
+          :do (load pathname)))
 
 ;;;; FMT
 
@@ -31,6 +50,7 @@
 
 (defun fmt (system &optional (if-exists nil supplied-p))
   (asdf:load-system system)
+  (load-foreign-formatters)
   (dolist (component (component-children (asdf:find-system system)))
     (if (not supplied-p)
         (debug-printer component)
