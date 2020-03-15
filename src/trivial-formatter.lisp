@@ -17,6 +17,10 @@
            ;; Special variable
            #:*foreign-formatters-directories*))
 
+(defpackage :trivial-formatter-user
+  (:use :cl)
+  (:import-from :trivial-formatter #:deformatter #:pprint-fun-call))
+
 (in-package :trivial-formatter)
 
 ;;;; *FOREIGN-FORMATTERS-PATHNAMES*
@@ -35,6 +39,25 @@
         :for pathname := (merge-pathnames "formatters.lisp" directory)
         :when (probe-file pathname)
           :do (load pathname)))
+
+;;;; DEFORMTTER
+
+(defmacro deformatter (package symbol &body body)
+  (let ((pprinter (gensym (format nil "PPRINT-~A" symbol))))
+    `(when (find-package ,(string package))
+       (defun ,pprinter ,@body)
+       (set-pprint-dispatch
+         `(cons
+            (member ,(uiop:find-symbol* ,(string symbol) ,(string package))))
+         ',pprinter)
+       ',pprinter)))
+
+(defun pprint-deformatter (stream exp)
+  (setf stream (or stream *standard-output*))
+  (format stream "~:<~W~3I~^ ~@_~W~^ ~@_~W~^ ~@_~W~1I~^~@:_~@{~W~^~:@_~}~:>"
+          exp))
+
+(set-pprint-dispatch '(cons (member deformatter)) 'pprint-deformatter)
 
 ;;;; FMT
 
