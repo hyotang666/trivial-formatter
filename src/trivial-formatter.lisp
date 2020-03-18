@@ -17,10 +17,6 @@
            ;; Special variable
            #:*foreign-formatters-directories*))
 
-(defpackage :trivial-formatter-user
-  (:use :cl)
-  (:import-from :trivial-formatter #:deformatter #:pprint-fun-call))
-
 (in-package :trivial-formatter)
 
 ;;;; *FOREIGN-FORMATTERS-PATHNAMES*
@@ -918,3 +914,9 @@
     (format stream "~W~:[~; ~:I~]" (car list) (cdr list))
     (let ((*print-clause* t))
       (format stream "~{~W~^~:@_~}" (parse-loop-body (cdr list))))))
+
+;;;; Package TRIVIAL-FORMATTER-USER
+
+(defpackage :trivial-formatter-user
+  (:use :cl)
+  (:import-from :trivial-formatter #:deformatter #:pprint-fun-call))
