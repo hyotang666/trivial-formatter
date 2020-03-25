@@ -342,13 +342,17 @@
                         (macroexpand-all (read-from-string string nil)))
                       (write-string string))
                     (setf next (read-as-code input nil tag))
+                    (when (typep exp 'conditional)
+                      (terpri)
+                      (print-as-code next)
+                      (setf exp next
+                            next (read-as-code input nil tag)))
                     (typecase exp
                       (block-comment (format t "~2%"))
                       (line-comment
                        (terpri)
                        (when (not (comment-p next))
                          (terpri)))
-                      (conditional (terpri))
                       (t
                        (cond ((eq next tag)) ; Do nothing.
                              ((line-comment-p next)
