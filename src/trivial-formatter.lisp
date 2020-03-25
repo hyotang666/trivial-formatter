@@ -526,13 +526,18 @@
           (pprint-newline :mandatory stream)
           (format stream "~@[~{~W~^ ~_~}~]" (cddr exp))))))
 
-(defun pprint-fun-call (stream exp &rest noise)
+(defun pprint-fun-call (stream exp &optional colon? &rest noise)
   (declare (ignore noise))
   (setf stream (or stream *standard-output*))
   (multiple-value-bind (pre post)
       (split-keywords exp)
     (pprint-logical-block (stream nil :prefix "(" :suffix ")")
-      (apply #'format stream "~W~^ ~1I~:_~:I~@{~W~^ ~:_~}" pre)
+      (format stream "~W~1I" (car pre))
+      (when (cdr pre)
+        (if colon?
+            (format stream " ~:@_")
+            (format stream " ~:_"))
+        (apply #'format stream "~:I~@{~W~^ ~:_~}" (cdr pre)))
       (when post
         (format stream " ~:[~:_~:I~;~_~]~{~^~W ~@_~W~^ ~_~}" (cdr pre) post)))))
 
