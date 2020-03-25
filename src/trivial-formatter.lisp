@@ -533,13 +533,13 @@
       (split-keywords exp)
     (pprint-logical-block (stream nil :prefix "(" :suffix ")")
       (format stream "~W~1I" (car pre))
-      (when (cdr pre)
+      (when (or (cdr pre) post)
         (if colon?
             (format stream " ~:@_")
             (format stream " ~:_"))
-        (apply #'format stream "~:I~@{~W~^ ~:_~}" (cdr pre)))
+        (format stream "~@[~:I~{~W~^ ~:_~}~]" (cdr pre)))
       (when post
-        (format stream " ~:[~:_~:I~;~_~]~{~^~W ~@_~W~^ ~_~}" (cdr pre) post)))))
+        (format stream "~:[~:_~:I~; ~_~]~{~^~W ~@_~W~^ ~_~}" (cdr pre) post)))))
 
 (defun pprint-list (stream exp)
   (if (and (symbolp (car exp))
