@@ -245,6 +245,20 @@
 (defmethod print-object ((ref shared-reference) stream)
   (format stream "#~D#" (shared-reference-number ref)))
 
+;;; COMMA
+
+(defstruct comma sub-char form)
+
+(defmethod print-object ((c comma) stream)
+  (format stream ",~@[~C~]~W" (comma-sub-char c) (comma-form c)))
+
+;;; BACKQUOTE
+
+(defstruct backquote form)
+
+(defmethod print-object ((b backquote) stream)
+  (format stream "`~W" (backquote-form b)))
+
 ;;;; MACRO CHARS
 
 (defun |dot-reader| (stream character)
@@ -299,6 +313,17 @@
     (warn "Ignore numeric argument for #~D'." number))
   (list* 'function (list (read-as-code stream))))
 
+(defun |,reader| (stream character)
+  (declare (ignore character))
+  (let ((sub-char (peek-char t stream)))
+    (make-comma :sub-char (when (find sub-char '(#\. #\@))
+                            (read-char stream))
+                :form (read-as-code stream))))
+
+(defun |`reader| (stream character)
+  (declare (ignore character))
+  (make-backquote :form (read-as-code stream)))
+
 ;;;; NAMED-READTABLE
 
 (named-readtables:defreadtable as-code
@@ -307,6 +332,8 @@
   (:macro-char #\. '|dot-reader| t)
   (:macro-char #\; '|line-comment-reader|)
   (:macro-char #\' '|'reader|)
+  (:macro-char #\` '|`reader|)
+  (:macro-char #\, '|,reader|)
   (:dispatch-macro-char #\# #\| '|block-comment-reader|)
   (:dispatch-macro-char #\# #\+ '|#+-reader|)
   (:dispatch-macro-char #\# #\- '|#+-reader|)
