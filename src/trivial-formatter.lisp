@@ -545,7 +545,9 @@
   (if (and (symbolp (car exp))
            (fboundp (car exp))
            (not (special-operator-p (car exp)))
-           (not (macro-function (car exp))))
+           (not (macro-function (car exp)))
+           (eq (pprint-dispatch exp *pprint-dispatch*)
+               (pprint-dispatch exp nil)))
       (pprint-fun-call stream exp)
       (funcall (pprint-dispatch exp *pprint-dispatch*) stream exp)))
 
