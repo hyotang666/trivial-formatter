@@ -415,6 +415,8 @@
     (set-pprint-dispatch '(cons (member ftype)) 'pprint-ftype)
     (set-pprint-dispatch '(cons (member assert)) 'pprint-assert)
     (set-pprint-dispatch '(cons (member defclass)) 'pprint-defclass)
+    (set-pprint-dispatch '(cons (member define-compiler-macro))
+                         (pprint-dispatch '(defun) nil))
     *print-pprint-dispatch*))
 
 (defparameter *pprint-dispatch* *print-pprint-dispatch*)
