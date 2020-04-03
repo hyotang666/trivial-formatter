@@ -667,41 +667,49 @@
 
 (defun print-as-code (exp &optional stream)
   (let ((*standard-output* (or stream *standard-output*)))
-    (loop :for (first . rest)
-               :on (alignment (split-to-lines (string-as-code exp)))
-          :do (if (uiop:string-prefix-p "; " (string-left-trim " " (car rest)))
-                  (if (uiop:string-prefix-p "; " (string-left-trim " " first))
-                      ;; Both are single semicoloned line comment.
-                      ;; Integrate it as one for pritty printings.
-                      (setf (car rest) (format nil "~A ~A" first (car rest)))
-                      ;; Next one is single semicoloned line comment but FIRST.
-                      ;; Both should be printed in same line.
-                      (progn
-                       (format t "~A " first)
-                       (rplaca rest (string-left-trim " " (car rest)))))
-                  (if (uiop:string-prefix-p "; " (string-left-trim " " first))
-                      ;; Next is not single semicoloned line comment but FIRST.
-                      ;; Comment should be printed.
-                      (format t "~<; ~@;~@{~A~^ ~:_~}~:>~:[~;~%~]"
-                              (remove ""
-                                      (uiop:split-string first :separator "; ")
-                                      :test #'equal)
-                              rest) ; To avoid unneeded newline.
-                      ;; Both are not single semicoloned line comment.
-                      (if rest
-                          ;; To avoid unneeded newline. Especially for conditional.
-                          (if (= (1+ (length first))
-                                 (loop :for num :upfrom 0
-                                       :for char :across (car rest)
-                                       :while (char= #\Space char)
-                                       :finally (return num)))
-                              (rplaca rest
-                                      (format nil "~A ~A" first
-                                              (string-left-trim " "
-                                                                (car rest))))
-                              (write-line first))
-                          ;; Last line never need newline.
-                          (write-string first)))))))
+    (if (typep exp 'block-comment)
+        (tagbody (prin1 exp))
+        (loop :for (first . rest)
+                   :on (alignment (split-to-lines (string-as-code exp)))
+              :do (if (uiop:string-prefix-p "; "
+                                            (string-left-trim " " (car rest)))
+                      (if (uiop:string-prefix-p "; "
+                                                (string-left-trim " " first))
+                          ;; Both are single semicoloned line comment.
+                          ;; Integrate it as one for pritty printings.
+                          (setf (car rest)
+                                  (format nil "~A ~A" first (car rest)))
+                          ;; Next one is single semicoloned line comment but FIRST.
+                          ;; Both should be printed in same line.
+                          (progn
+                           (format t "~A " first)
+                           (rplaca rest (string-left-trim " " (car rest)))))
+                      (if (uiop:string-prefix-p "; "
+                                                (string-left-trim " " first))
+                          ;; Next is not single semicoloned line comment but FIRST.
+                          ;; Comment should be printed.
+                          (format t "~<; ~@;~@{~A~^ ~:_~}~:>~:[~;~%~]"
+                                  (remove ""
+                                          (uiop:split-string first
+                                                             :separator "; ")
+                                          :test #'equal)
+                                  rest) ; To avoid unneeded newline.
+                          ;; Both are not single semicoloned line comment.
+                          (if rest
+                              ;; To avoid unneeded newline. Especially for conditional.
+                              (if (= (1+ (length first))
+                                     (loop :for num :upfrom 0
+                                           :for char :across (car rest)
+                                           :while (char= #\Space char)
+                                           :finally (return num)))
+                                  (rplaca rest
+                                          (format nil "~A ~A" first
+                                                  (string-left-trim " "
+                                                                    (car
+                                                                      rest))))
+                                  (write-line first))
+                              ;; Last line never need newline.
+                              (write-string first))))))))
 
 ;;;; loop clause
 
