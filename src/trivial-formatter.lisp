@@ -633,7 +633,22 @@
                                            "")))
       (unless (every (lambda (char) (char= #\Space char)) line)
         (list line)))
-    (uiop:split-string string :separator '(#\Newline))))
+    (uiop:while-collecting (acc)
+      (with-input-from-string (stream string)
+        (loop :for char := (read-char stream nil nil)
+              :with line
+              :while char
+              :do (case char
+                    (#\\ (push char line) (push (read-char stream) line))
+                    (#\"
+                     (push (core-reader:read-delimited-string #\" stream)
+                           line))
+                    (#\Newline
+                     (acc (format nil "~{~A~}" (nreverse line)))
+                     (setf line nil))
+                    (otherwise (push char line)))
+              :finally (when line
+                         (acc (format nil "~{~A~}" (nreverse line)))))))))
 
 (defun alignment (list)
   (labels ((rec (list &optional acc)
