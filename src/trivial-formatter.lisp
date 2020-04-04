@@ -667,7 +667,7 @@
 
 (defun print-as-code (exp &optional stream)
   (let ((*standard-output* (or stream *standard-output*)))
-    (if (typep exp 'block-comment)
+    (if (typep exp '(or block-comment string))
         (tagbody (prin1 exp))
         (loop :for (first . rest)
                    :on (alignment (split-to-lines (string-as-code exp)))
