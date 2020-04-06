@@ -739,10 +739,19 @@
 (defmethod print-object ((o clause) stream)
   (if (null *print-clause*)
       (call-next-method)
-      (if (clause-keyword o)
-          (format stream "~W~@[ ~{~W~^ ~@_~}~]" (clause-keyword o)
-                  (clause-forms o))
-          (format stream "~{~W~^ ~_~}" (clause-forms o)))))
+      (let* ((into
+              (let ((last2 (last (clause-forms o) 2)))
+                (when (and (symbolp (car last2)) (string= "INTO" (car last2)))
+                  last2)))
+             (body
+              (if into
+                  (butlast (clause-forms o) 2)
+                  (clause-forms o))))
+        (if (clause-keyword o)
+            (format stream "~W~@[ ~{~W~^ ~@_~}~]~:[~; ~VI~:_~{~W ~W~}~VI~]"
+                    (clause-keyword o) body into (+ 2 *indent*) into *indent*)
+            (format stream "~{~W~^ ~_~}~:[~; ~VI~:_~{~W ~W~}~VI~]" body into
+                    (+ 2 *indent*) into *indent*)))))
 
 ;;; OPTIONAL
 
