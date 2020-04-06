@@ -865,7 +865,12 @@
                      (nreverse acc))
                  (body (car list) (cdr list) temp acc)))
            (body (first rest temp acc)
-             (if (separation-keyword-p first)
+             (if (and (separation-keyword-p first)
+                      (or (null temp)
+                          (not
+                            (and (symbolp (car (last (clause-forms temp))))
+                                 (string= "INTO"
+                                          (car (last (clause-forms temp))))))))
                  ;; Make new clause.
                  (rec rest (make-clause :keyword first)
                       (if temp
