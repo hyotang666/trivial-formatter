@@ -125,19 +125,21 @@
                     (canonicalize-case
                       (read-as-string:read-as-string nil eof-error-p eof-value
                                                      recursive-p))))
-              (handler-case (values (read-from-string notation))
-                #+ecl
-                (error (c)
-                  (if (search "There is no package with the name"
-                              (princ-to-string c))
-                      (make-broken-symbol notation)
-                      (error c)))
-                (package-error ()
-                  (make-broken-symbol notation))
-                (:no-error (value)
-                  (unless (valid-value-p value notation)
-                    (mark-it value notation))
-                  value))))))))
+              (if (string= "." notation)
+                  (make-dot)
+                  (handler-case (values (read-from-string notation))
+                    #+ecl
+                    (error (c)
+                      (if (search "There is no package with the name"
+                                  (princ-to-string c))
+                          (make-broken-symbol notation)
+                          (error c)))
+                    (package-error ()
+                      (make-broken-symbol notation))
+                    (:no-error (value)
+                      (unless (valid-value-p value notation)
+                        (mark-it value notation))
+                      value)))))))))
 
 (defun canonicalize-case (string)
   (flet ((convert-all (converter)
@@ -261,10 +263,6 @@
 
 ;;;; MACRO CHARS
 
-(defun |dot-reader| (stream character)
-  (declare (ignore stream character))
-  (make-dot))
-
 (defun |paren-reader| (stream character)
   (declare (ignore character))
   (loop :for char = (peek-char t stream)
@@ -329,7 +327,6 @@
 (named-readtables:defreadtable as-code
   (:merge :common-lisp)
   (:macro-char #\( '|paren-reader|)
-  (:macro-char #\. '|dot-reader| t)
   (:macro-char #\; '|line-comment-reader|)
   (:macro-char #\' '|'reader|)
   (:macro-char #\` '|`reader|)

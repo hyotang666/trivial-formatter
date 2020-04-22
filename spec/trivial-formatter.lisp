@@ -141,6 +141,15 @@
 #?(with-input-from-string(s "hoge")
     (read-as-code s nil #\h))
 => HOGE
+
+#?(with-input-from-string (s ".3")
+    (read-as-code s))
+=> 0.3
+
+#?(with-input-from-string (s ".symbol")
+    (read-as-code s))
+=> .SYMBOL
+
 ;;;; Affected By:
 ; `*readtable*`
 
