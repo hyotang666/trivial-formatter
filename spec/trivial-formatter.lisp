@@ -460,6 +460,13 @@
 :outputs "(LOOP FOR COUNT IN COUNTS
       COLLECT COUNT)"
 
+#?(trivial-formatter::make-loop-clauses '(for count in counts collect count))
+:satisfies
+(lambda (list)
+  (& (equalp list
+             (list (trivial-formatter::make-clause :keyword 'for :forms '(count in counts))
+                   (trivial-formatter::make-clause :keyword 'collect :forms '(count))))))
+
 (requirements-about SPLIT-KEYWORDS :doc-type function)
 
 ;;;; Description:
