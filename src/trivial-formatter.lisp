@@ -873,10 +873,13 @@
            (body (first rest temp acc)
              (if (and (separation-keyword-p first)
                       (or (null temp)
-                          (not
-                            (and (symbolp (car (last (clause-forms temp))))
-                                 (string= "INTO"
-                                          (car (last (clause-forms temp))))))))
+                          (optional-p temp)
+                          (end-p temp)
+                          (let ((last (car (last (clause-forms temp)))))
+                            (and last
+                                 (not
+                                   (and (symbolp last)
+                                        (string= "INTO" last)))))))
                  ;; Make new clause.
                  (rec rest (make-clause :keyword first)
                       (if temp
