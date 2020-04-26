@@ -383,6 +383,11 @@
             END
         AND DO (PRINC \" c\"))"
 
+;; Case symbol confliction with loop macro keywords.
+#?(pprint-extended-loop nil '(loop for count in counts collect count))
+:outputs "(LOOP FOR COUNT IN COUNTS
+      COLLECT COUNT)"
+
 (requirements-about SPLIT-KEYWORDS :doc-type function)
 
 ;;;; Description:
