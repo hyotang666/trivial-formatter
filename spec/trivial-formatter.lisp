@@ -366,7 +366,7 @@
       FINALLY (RETURN (VALUES FLOAT-NUMBERS OTHER-NUMBERS SYMBOL-LIST)))"
 
 ; CLHS 6.1.8.1
-#?(pprint-extended-loop nil '(loop for x from 0 to 3 
+#?(pprint-extended-loop nil '(loop for x from 0 to 3
                                    do (print x)
                                    if (zerop (mod x 2))
                                    do (princ " a")
@@ -382,6 +382,26 @@
               DO (PRINC \" b\")
             END
         AND DO (PRINC \" c\"))"
+
+#?(trivial-formatter::make-loop-clauses (cdr '(loop for x from 0 to 3
+                                   do (print x)
+                                   if (zerop (mod x 2))
+                                   do (princ " a")
+                                   and if (zerop (floor x 2))
+                                   do (princ " b")
+                                   end
+                                   and do (princ " c"))))
+:satisfies (lambda (list)
+             (& (equalp list (list (trivial-formatter::make-clause :keyword 'for :forms '(x from 0 to 3))
+                                   (trivial-formatter::make-clause :keyword 'do :forms '((print x)))
+                                   (trivial-formatter::make-nestable :keyword 'if :pred '(zerop (mod x 2)))
+                                   (trivial-formatter::make-clause :keyword 'do :forms '((princ " a")))
+                                   (trivial-formatter::make-clause :keyword 'and)
+                                   (trivial-formatter::make-nestable :keyword 'if :pred '(zerop (floor x 2)))
+                                   (trivial-formatter::make-clause :keyword 'do :forms '((princ " b")))
+                                   (trivial-formatter::make-clause :keyword 'end)
+                                   (trivial-formatter::make-clause :keyword 'and)
+                                   (trivial-formatter::make-clause :keyword 'do :forms '((princ " c")))))))
 
 ;; Case symbol confliction with loop macro keywords.
 #?(pprint-extended-loop nil '(loop for count in counts collect count))
