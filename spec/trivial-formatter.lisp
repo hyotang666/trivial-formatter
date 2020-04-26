@@ -340,6 +340,29 @@
         COLLECT I INTO EVEN-NUMBERS
       FINALLY (RETURN (VALUES ODD-NUMBERS EVEN-NUMBERS)))"
 
+#?(trivial-formatter::make-loop-clauses (cdr '(loop for i in '(1 324 2345 323 2 4 235 252)
+                                                    when (oddp i)
+                                                    do (print i *standard-output*)
+                                                    and collect i into odd-numbers
+                                                    and do (terpri)
+                                                    else                              ; I is even.
+                                                    collect i into even-numbers
+                                                    finally
+                                                    (return (values odd-numbers even-numbers)))))
+:satisfies
+(lambda (list)
+  (& (equalp list
+             (list (trivial-formatter::make-clause :keyword 'for :forms '(i in '(1 324 2345 323 2 4 235 252)))
+                   (trivial-formatter::make-nestable :keyword 'when :pred '(oddp i))
+                   (trivial-formatter::make-clause :keyword 'do :forms '((print i *standard-output*)))
+                   (trivial-formatter::make-clause :keyword 'and)
+                   (trivial-formatter::make-clause :keyword 'collect :forms '(i into odd-numbers))
+                   (trivial-formatter::make-clause :keyword 'and)
+                   (trivial-formatter::make-clause :keyword 'do :forms '((terpri)))
+                   (trivial-formatter::make-clause :keyword 'else)
+                   (trivial-formatter::make-clause :keyword 'collect :forms '(i into even-numbers))
+                   (trivial-formatter::make-clause :keyword 'finally :forms '((return (values odd-numbers even-numbers))))))))
+
 ; CLHS 6.1.8.1
 #?(pprint-extended-loop nil '(loop for i in list
                                    when (numberp i)
@@ -364,6 +387,35 @@
       ELSE
         DO (ERROR \"found a funny value in list ~S, value ~S~%\" LIST I)
       FINALLY (RETURN (VALUES FLOAT-NUMBERS OTHER-NUMBERS SYMBOL-LIST)))"
+
+#?(trivial-formatter::make-loop-clauses (cdr
+                                          '(loop for i in list
+                                                 when (numberp i)
+                                                 when (floatp i)
+                                                 collect i into float-numbers
+                                                 else                                  ; Not (floatp i)
+                                                 collect i into other-numbers
+                                                 else                                    ; Not (numberp i)
+                                                 when (symbolp i)
+                                                 collect i into symbol-list
+                                                 else                                  ; Not (symbolp i)
+                                                 do (error "found a funny value in list ~S, value ~S~%" list i)
+                                                 finally (return (values float-numbers other-numbers symbol-list)))))
+:satisfies
+(lambda (list)
+  (& (equalp list
+             (list (trivial-formatter::make-clause :keyword 'for :forms '(i in list))
+                   (trivial-formatter::make-nestable :keyword 'when :pred '(numberp i))
+                   (trivial-formatter::make-nestable :keyword 'when :pred '(floatp i))
+                   (trivial-formatter::make-clause :keyword 'collect :forms '(i into float-numbers))
+                   (trivial-formatter::make-clause :keyword 'else)
+                   (trivial-formatter::make-clause :keyword 'collect :forms '(i into other-numbers))
+                   (trivial-formatter::make-clause :keyword 'else)
+                   (trivial-formatter::make-nestable :keyword 'when :pred '(symbolp i))
+                   (trivial-formatter::make-clause :keyword 'collect :forms '(i into symbol-list))
+                   (trivial-formatter::make-clause :keyword 'else)
+                   (trivial-formatter::make-clause :keyword 'do :forms '((error "found a funny value in list ~S, value ~S~%" list i)))
+                   (trivial-formatter::make-clause :keyword 'finally :forms '((return (values float-numbers other-numbers symbol-list))))))))
 
 ; CLHS 6.1.8.1
 #?(pprint-extended-loop nil '(loop for x from 0 to 3
