@@ -519,6 +519,7 @@
 
 (defun pprint-flet (stream exp)
   (let ((printer (pprint-dispatch exp (copy-pprint-dispatch nil)))
+        (local-funs (mapcar #'car (second exp)))
         (*print-pprint-dispatch* (copy-pprint-dispatch)))
     (set-pprint-dispatch 'list
                          (lambda (stream exp &rest noise)
@@ -526,7 +527,8 @@
                            (if (and (symbolp (car exp))
                                     (not (keywordp (car exp)))
                                     (not (special-operator-p (car exp)))
-                                    (not (macro-function (car exp))))
+                                    (not (macro-function (car exp)))
+                                    (find (car exp) local-funs))
                                (pprint-fun-call stream exp)
                                (funcall (pprint-dispatch exp *pprint-dispatch*)
                                         stream exp))))
