@@ -598,7 +598,7 @@
 (defun pprint-assert (stream exp)
   (setf stream (or stream *standard-output*))
   (format stream
-          "~:<~{~W~1I~^ ~@_~W~^ ~@_~:S~^ ~_~@{~W~^ ~@_~}~}~@[ ~:_~{~W ~@_~W~^ ~_~}~]~:>"
+          "~:<~{~W~1I~^ ~@_~W~^ ~@_~:S~^ ~_~@{~W~^ ~@_~}~}~@[ ~:I~:_~{~W ~@_~W~^ ~_~}~]~:>"
           (multiple-value-list (split-keywords exp))))
 
 (defun pprint-restart-case (stream exp)
