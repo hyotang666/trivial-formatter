@@ -528,7 +528,11 @@
                                     (not (keywordp (car exp)))
                                     (not (special-operator-p (car exp)))
                                     (not (macro-function (car exp)))
-                                    (find (car exp) local-funs))
+                                    (or (find (car exp) local-funs)
+                                        (eq
+                                          (pprint-dispatch exp
+                                                           *pprint-dispatch*)
+                                          (pprint-dispatch exp nil))))
                                (pprint-fun-call stream exp)
                                (funcall (pprint-dispatch exp *pprint-dispatch*)
                                         stream exp))))
