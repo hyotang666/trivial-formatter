@@ -261,6 +261,13 @@
 (defmethod print-object ((b backquote) stream)
   (format stream "`~W" (backquote-form b)))
 
+;;;; RADIX
+
+(defstruct radix char radix number)
+
+(defmethod print-object ((r radix) stream)
+  (format stream "#~C~VR" (radix-char r) (radix-radix r) (radix-number r)))
+
 ;;;; MACRO CHARS
 
 (defun |paren-reader| (stream character)
@@ -311,6 +318,19 @@
     (warn "Ignore numeric argument for #~D'." number))
   (list* 'function (list (read-as-code stream))))
 
+(defun |radix-reader| (stream character number)
+  (let ((integer
+         (funcall
+           (get-dispatch-macro-character #\# character (copy-readtable nil))
+           stream character number)))
+    (make-radix :char (char-downcase character)
+                :radix (ecase character
+                         ((#\b #\B) 2)
+                         ((#\o #\O) 8)
+                         ((#\x #\X) 16)
+                         ((#\r #\R) number))
+                :number integer)))
+
 (defun |,reader| (stream character)
   (declare (ignore character))
   (let ((sub-char (peek-char t stream)))
@@ -337,7 +357,11 @@
   (:dispatch-macro-char #\# #\. '|#.reader|)
   (:dispatch-macro-char #\# #\' '|#'reader|)
   (:dispatch-macro-char #\# #\= '|#=reader|)
-  (:dispatch-macro-char #\# #\# '|##reader|))
+  (:dispatch-macro-char #\# #\# '|##reader|)
+  (:dispatch-macro-char #\# #\B '|radix-reader|)
+  (:dispatch-macro-char #\# #\O '|radix-reader|)
+  (:dispatch-macro-char #\# #\X '|radix-reader|)
+  (:dispatch-macro-char #\# #\R '|radix-reader|))
 
 ;;;; DEBUG-PRINTER
 
