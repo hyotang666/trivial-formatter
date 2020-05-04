@@ -378,6 +378,7 @@
                               (if (typep form '(cons (eql in-package)))
                                   (eval (funcall expander form env))
                                   (funcall expander form env))))
+                           (*print-length*)
                            (string
                             (with-output-to-string (s) (print-as-code exp s))))
                       (when (and ;; to ignore reading top level conditional.
