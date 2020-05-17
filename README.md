@@ -1,4 +1,4 @@
-# TRIVIAL-FORMATTER 5.1.0
+# TRIVIAL-FORMATTER 5.4.1
 ## What is this?
 Code formatter for common lisp.
 
@@ -17,10 +17,10 @@ You can extend reader with ordinary common lisp way.
 
 ```lisp
 (let ((*readtable* (named-readtables:copy-named-readtable 'as-code)))
-  (set-macro-character #\! (lambda (stream char) `(list ,char ,(read stream))))
+  (set-macro-character #\! (lambda (stream char) `(,char ,(read stream))))
   (read-as-code))
 !hoge
-=> (LIST #\! HOGE)
+=> (#\! HOGE)
 ```
 
 For details, see [CLHS](http://www.lispworks.com/documentation/HyperSpec/Body/c_reader.htm)
@@ -31,10 +31,11 @@ Trivial-formatter heavily depends on pretty printing system.
 You can extend code format with ordinary common lisp way.
 
 ```lisp
-(defun your-printer (stream exp)
-  ...)
-(set-pprint-dispatch '(cons (member your-fun)) 'your-printer)
-(print-as-code '(your-fun ...))
+(defun !-printer (stream exp)
+  (format stream "~<~A~S~:>" exp))
+(set-pprint-dispatch '(cons (eql #\!) (cons * null)) '!-printer)
+(print-as-code '(#\! hoge))
+=> !hoge
 ```
 
 For detail, see [CLHS](http://www.lispworks.com/documentation/HyperSpec/Body/22_bb.htm).
@@ -86,11 +87,11 @@ DEFORMATTER care about package exists and symbol confliction and set-pprint-disp
 MIT
 
 ### Developed with
-SBCL/2.0.0
+SBCL/2.0.2
 
 ### Tested with
-* SBCL/2.0.0
-* CCL/1.11.5
+* SBCL/2.0.2
+* CCL/1.12 ; Failed due to CCL violates ANSI standard.
 * ECL/16.1.3
 
 #### Note
@@ -116,15 +117,20 @@ CLISP is not supported.
 > The Lisp Pretty Printer implementation is not perfect yet.
 
 #### CCL
-CCL is not recommended due to backquote works in readtime.
-If your project does not have backquote, trivial-formatter will work fine.
+Currently we stop to support CCL temporally due to it violates ANSI standard.
 
 ```lisp
-#+ccl
-'`(a ,(cdr '(1 2 3)) b)
-
-=> (LIST* 'A (LIST* (CDR '(1 2 3)) '(B)))
+? (pprint-dispatch t nil)
+=> error
 ```
+
+[CLHS says](http://www.lispworks.com/documentation/HyperSpec/Body/f_ppr_di.htm)
+
+> table---a pprint dispatch table, or nil.
+
+Fortunately this issue is already fixed.
+Please wait next ccl release or build current ccl from source.
+
 #### Reader.
 When reader macro conflicts, such reader macros are ignored silently.
 You can add new reader macros, but con not modify already existing reader macros.
