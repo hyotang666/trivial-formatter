@@ -160,7 +160,6 @@
 ;;; Known bug.
 ; * Not support comment in #S, #A, #V reader macros.
 ; Comment will be discarded.
-; * CCL could not print backquote due to CLL qackquote makes form in read time.
 
 ;;;; Exceptional-Situations:
 
