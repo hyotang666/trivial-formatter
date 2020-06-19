@@ -2,7 +2,7 @@
 (in-package :asdf)
 (defsystem "trivial-formatter.test"
   :version
-  "1.6.12"
+  "1.6.13"
   :depends-on
   (:jingoh "trivial-formatter")
   :components

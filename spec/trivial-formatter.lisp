@@ -158,7 +158,7 @@
 
 ;;;; Notes:
 ;;; Known bug.
-; * Not support comment in #S, #A, #V reader macros.
+; * Not support comment in #S, #A, #( reader macros.
 ; Comment will be discarded.
 
 ;;;; Exceptional-Situations:
