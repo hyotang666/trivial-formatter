@@ -220,6 +220,10 @@
 "
 ,:test equal
 
+; Corner case with symbol.
+#?(print-as-code '|"|)
+:outputs "|\"|"
+
 (requirements-about PPRINT-EXTENDED-LOOP :doc-type function
                     :around(let((*print-pretty* t))
                              (call-body)))

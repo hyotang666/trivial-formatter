@@ -671,6 +671,9 @@
                     (#\"
                      (push (core-reader:read-delimited-string #\" stream)
                            line))
+                    (#\|
+                     (push (core-reader:read-delimited-string #\| stream)
+                           line))
                     (#\Newline
                      (acc (format nil "~{~A~}" (nreverse line)))
                      (setf line nil))
