@@ -375,19 +375,20 @@
                 :until (eq exp tag)
                 :do (let* ((*macroexpand-hook*
                             (lambda (expander form env)
-                              (if (typep form '(cons (eql in-package)))
-                                  (eval (funcall expander form env))
-                                  (funcall expander form env))))
+                              (cond
+                               ((typep form '(cons (eql in-package)))
+                                (eval (funcall expander form env)))
+                               ;; SBCL fails to macroexpand-all defun when
+                               ;; function declaimed as inline.
+                               ;; I beleave there is no in-package inside defun.
+                               ((typep form '(cons (eql defun))))
+                               (t (funcall expander form env)))))
                            (*print-length*)
                            (string
                             (with-output-to-string (s) (print-as-code exp s))))
-                      (when (and ;; to ignore reading top level conditional.
-                                 ;; We believe there is no case e.g. #+hoge (in-package :fuga)
-                                 (listp exp)
-                                 ;; SBCL fails to macroexpand-all defun when
-                                 ;; function declaimed as inline.
-                                 ;; I beleave there is no in-package inside defun.
-                                 (not (typep exp '(cons (eql defun)))))
+                      ;; to ignore reading top level conditional.
+                      ;; We believe there is no case e.g. #+hoge (in-package :fuga)
+                      (when (listp exp)
                         (macroexpand-all (read-from-string string nil)))
                       (write-string string))
                     (setf next (read-as-code input nil tag))
