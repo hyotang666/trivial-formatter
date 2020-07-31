@@ -1,7 +1,7 @@
 (defpackage :trivial-formatter.spec
   (:import-from :trivial-formatter #:pprint-extended-loop #:split-keywords
                 #:pprint-fun-call #:pprint-define-condition #:pprint-restart-case
-                #:pprint-with-open-file)
+                #:pprint-with-open-file #:split-to-lines)
   (:use :cl :jingoh :trivial-formatter))
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
@@ -701,3 +701,30 @@
 "(WITH-OPEN-FILE (*SPEC-OUTPUT* *DEFAULT-PATHNAME-DEFAULTS* :DIRECTION :OUTPUT
                  :IF-EXISTS :APPEND)
   (FUNCALL APPENDER))"
+
+(requirements-about SPLIT-TO-LINES :doc-type function)
+
+;;;; Description:
+
+#+syntax
+(SPLIT-TO-LINES string) ; => result
+
+;;;; Arguments and Values:
+
+; string := 
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
+;;;; Tests:
+
+#?(split-to-lines "; |")
+=> ("; |")
+,:test equalp
