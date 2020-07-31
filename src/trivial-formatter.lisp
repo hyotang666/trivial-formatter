@@ -545,7 +545,10 @@
 
 (defun pprint-flet (stream exp)
   (let ((printer (pprint-dispatch exp (copy-pprint-dispatch nil)))
-        (local-funs (mapcar #'car (second exp)))
+        (local-funs
+         (loop :for x :in (second exp)
+               :when (listp x)
+                 :collect (car x)))
         (*print-pprint-dispatch* (copy-pprint-dispatch)))
     (set-pprint-dispatch 'list
                          (lambda (stream exp &rest noise)
