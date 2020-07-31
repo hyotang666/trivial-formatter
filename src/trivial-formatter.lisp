@@ -713,7 +713,7 @@
         print-as-code))
 
 (defun print-as-code (exp &optional stream)
-  (let ((*standard-output* (or stream *standard-output*)))
+  (let ((*standard-output* (or stream *standard-output*)) (*print-circle*))
     (if (typep exp '(or block-comment string))
         (tagbody (prin1 exp))
         (loop :for (first . rest)
