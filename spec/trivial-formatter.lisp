@@ -224,6 +224,11 @@
 #?(print-as-code '|"|)
 :outputs "|\"|"
 
+; Corner case of declare with comma. Especially for SBCL.
+#?(with-input-from-string (s "`(declare ,'nil)")
+    (print-as-code (read-as-code s)))
+:outputs "`(declare ,'nil)"
+
 (requirements-about PPRINT-EXTENDED-LOOP :doc-type function
                     :around(let((*print-pretty* t))
                              (call-body)))

@@ -252,7 +252,8 @@
 (defstruct comma sub-char form)
 
 (defmethod print-object ((c comma) stream)
-  (format stream ",~@[~C~]~W" (comma-sub-char c) (comma-form c)))
+  (let (#+sbcl (sb-pretty:*pprint-quote-with-syntactic-sugar* t))
+    (format stream ",~@[~C~]~W" (comma-sub-char c) (comma-form c))))
 
 ;;; BACKQUOTE
 
