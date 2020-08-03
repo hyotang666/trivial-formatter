@@ -189,6 +189,9 @@
       (keywordp thing)
       (null (symbol-package thing))
       (and (nth-value 1 (find-symbol (symbol-name thing)))
+           ;; If programmer specify :: explicity, there may a reason.
+           ;; We should keep it.
+           (not (search "::" notation))
            (or (not (find #\: notation)) ; Please do not use #\: as package or
                                          ; symbol name!
                (every #'char-equal (package-name (symbol-package thing))

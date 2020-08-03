@@ -122,6 +122,15 @@
              (&(eq result 'asdf:find-system)
                (equal "asdf:find-system" (get result 'trivial-formatter::notation))))
 
+; * If explicitly specify it is internal symbol (i.e. p::s), such symbol is marked
+; because there may a reason.
+; E.g. It is external after compile but internal in compile time.
+#?(with-input-from-string (s "asdf::defsystem")
+    (read-as-code s))
+:satisfies (lambda (result)
+             (& (eq result 'asdf:defsystem)
+                (equal "asdf::defsystem" (get result 'trivial-formatter::notation))))
+
 #?(with-input-from-string(s "; line comment.")
     (read-as-code s))
 :be-the trivial-formatter::line-comment
