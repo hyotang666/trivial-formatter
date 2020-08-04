@@ -756,18 +756,25 @@
                                   rest) ; To avoid unneeded newline.
                           ;; Both are not single semicoloned line comment.
                           (if rest
-                              ;; To avoid unneeded newline. Especially for conditional.
-                              (if (= (1+ (length first))
-                                     (loop :for num :upfrom 0
-                                           :for char :across (car rest)
-                                           :while (char= #\Space char)
-                                           :finally (return num)))
+                              ;; To avoid unneeded newline. Especially &KEY.
+                              (if (uiop:string-suffix-p first "(")
                                   (rplaca rest
-                                          (format nil "~A ~A" first
+                                          (format nil "~A~A" first
                                                   (string-left-trim " "
                                                                     (car
                                                                       rest))))
-                                  (write-line first))
+                                  ;; To avoid unneeded newline. Especially for conditional.
+                                  (if (= (1+ (length first))
+                                         (loop :for num :upfrom 0
+                                               :for char :across (car rest)
+                                               :while (char= #\Space char)
+                                               :finally (return num)))
+                                      (rplaca rest
+                                              (format nil "~A ~A" first
+                                                      (string-left-trim " "
+                                                                        (car
+                                                                          rest))))
+                                      (write-line first)))
                               ;; Last line never need newline.
                               (write-string first))))))))
 
