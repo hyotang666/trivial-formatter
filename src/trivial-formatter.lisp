@@ -179,6 +179,10 @@
   (push symbol *brokens*)
   symbol)
 
+(defun cleanup-brokens ()
+  (dolist (symbol *brokens*) (remf (symbol-plist symbol) 'notation))
+  (setf *brokens* nil))
+
 (defun make-broken-symbol (notation)
   (let ((symbol (gensym)))
     (setf (symbol-function symbol) #'make-broken-symbol) ; as dummy.
@@ -389,7 +393,9 @@
                                (t (funcall expander form env)))))
                            (*print-length*)
                            (string
-                            (with-output-to-string (s) (print-as-code exp s))))
+                            (with-output-to-string (s)
+                              (unwind-protect (print-as-code exp s)
+                                (cleanup-brokens)))))
                       ;; to ignore reading top level conditional.
                       ;; We believe there is no case e.g. #+hoge (in-package :fuga)
                       (when (listp exp)
@@ -398,7 +404,7 @@
                     (setf next (read-as-code input nil tag))
                     (when (typep exp 'conditional)
                       (terpri)
-                      (print-as-code next)
+                      (unwind-protect (print-as-code next) (cleanup-brokens))
                       (setf exp next
                             next (read-as-code input nil tag)))
                     (typecase exp
@@ -415,10 +421,7 @@
                                   (format t "~2%")
                                   (write-char #\Space)))
                              (t (format t "~2%")))))))
-      (setf *package* package)
-      (loop :for symbol = (pop *brokens*)
-            :while symbol
-            :do (remf (symbol-plist symbol) 'notation)))))
+      (setf *package* package))))
 
 ;;;; PRETTY PRINTERS
 
