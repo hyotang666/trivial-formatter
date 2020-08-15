@@ -1,7 +1,7 @@
 (defpackage :trivial-formatter.spec
   (:import-from :trivial-formatter #:pprint-extended-loop #:split-keywords
                 #:pprint-fun-call #:pprint-define-condition #:pprint-restart-case
-                #:pprint-with-open-file #:split-to-lines)
+                #:pprint-with-open-file #:split-to-lines #:pprint-cond)
   (:use :cl :jingoh :trivial-formatter))
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
@@ -742,3 +742,28 @@
 #?(split-to-lines "; |")
 => ("; |")
 ,:test equalp
+
+(requirements-about PPRINT-COND :doc-type function)
+
+;;;; Description:
+
+#+syntax
+(PPRINT-COND stream exp) ; => result
+
+;;;; Arguments and Values:
+
+; stream := 
+
+; exp := 
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
+#?(PPRINT-COND *STANDARD-OUTPUT* '(COND NIL NIL)) :outputs "(COND NIL NIL)"

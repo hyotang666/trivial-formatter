@@ -575,7 +575,7 @@
     (funcall printer stream exp)))
 
 (defun pprint-cond (stream exp)
-  (format stream "~:<~W ~:_~:I~@{~W~^~_~}~:>" exp))
+  (format stream "~:<~W ~:_~:I~@{~W~^ ~_~}~:>" exp))
 
 (defun pprint-with-open-file (stream exp)
   (setf stream (or stream *standard-output*))
