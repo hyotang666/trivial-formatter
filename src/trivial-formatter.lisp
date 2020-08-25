@@ -835,13 +835,17 @@
 
 ;;; NESTABLE
 
-(defstruct (nestable (:include clause)) pred else end)
+(unless (boundp '+unbound+)
+  (defconstant +unbound+ '#:unbound))
+
+(defstruct (nestable (:include clause)) (pred +unbound+) else end)
 
 (defmethod print-object ((c nestable) stream)
   (if (null *print-clause*)
       (call-next-method)
       (progn
-       (format stream "~2:I~W ~W" (clause-keyword c) (nestable-pred c))
+       (format stream "~2:I~W~:[ ~W~;~]" (clause-keyword c)
+               (eq +unbound+ (nestable-pred c)) (nestable-pred c))
        (when (clause-forms c)
          (let ((*indent* (+ 2 *indent*)))
            (loop :for form :in (clause-forms c)
@@ -932,11 +936,11 @@
                       (or (null temp)
                           (optional-p temp)
                           (end-p temp)
-                          (let ((last (car (last (clause-forms temp)))))
+                          (let ((last (last (clause-forms temp))))
                             (and last
                                  (not
-                                   (and (symbolp last)
-                                        (string= "INTO" last)))))))
+                                   (and (symbolp (car last))
+                                        (string= "INTO" (car last))))))))
                  ;; Make new clause.
                  (rec rest (make-clause :keyword first)
                       (if temp

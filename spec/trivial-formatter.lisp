@@ -484,6 +484,22 @@
              (list (trivial-formatter::make-clause :keyword 'for :forms '(count in counts))
                    (trivial-formatter::make-clause :keyword 'collect :forms '(count))))))
 
+;; Corner case. If after nil.
+#?(pprint-extended-loop nil '(loop :with flag = nil :if))
+:outputs "(LOOP :WITH FLAG = NIL
+      :IF)"
+
+#?(pprint-extended-loop nil '(loop :with flag = nil :if nil))
+:outputs "(LOOP :WITH FLAG = NIL
+      :IF NIL)"
+
+#?(trivial-formatter::make-loop-clauses '(with flag = nil if))
+:satisfies
+(lambda (list)
+  (& (equalp list
+             (list (trivial-formatter::make-clause :keyword 'with :forms '(flag = nil))
+                   (trivial-formatter::make-clause :keyword 'if)))))
+
 (requirements-about SPLIT-KEYWORDS :doc-type function)
 
 ;;;; Description:
