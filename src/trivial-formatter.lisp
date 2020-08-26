@@ -447,6 +447,7 @@
     (set-pprint-dispatch '(cons (member defclass)) 'pprint-defclass)
     (set-pprint-dispatch '(cons (member define-compiler-macro))
                          (pprint-dispatch '(defun) nil))
+    (set-pprint-dispatch '(cons (member defstruct)) 'pprint-defstruct)
     *print-pprint-dispatch*))
 
 (defparameter *pprint-dispatch* *print-pprint-dispatch*)
@@ -662,6 +663,27 @@
           :collect (car list) :into keys
           :collect (cadr list) :into keys
           :finally (return (list* pre keys list)))))
+
+(defun pprint-defstruct (stream exp)
+  (pprint-logical-block (stream exp :prefix "(" :suffix ")")
+    (write (pprint-pop) :stream stream)
+    (pprint-exit-if-list-exhausted)
+    (write-char #\Space stream)
+    (pprint-indent :block 3 stream)
+    (pprint-newline :miser stream)
+    (write (pprint-pop) :stream stream)
+    (pprint-exit-if-list-exhausted)
+    (write-char #\Space stream)
+    (pprint-indent :block 1 stream)
+    (pprint-newline :fill stream)
+    (loop :for elt := (pprint-pop)
+          :if (listp elt)
+            :do (pprint-fun-call stream elt)
+          :else
+            :do (write elt :stream stream)
+          :do (pprint-exit-if-list-exhausted)
+              (write-char #\Space stream)
+              (pprint-newline :linear stream))))
 
 ;;;; PRINT-AS-CODE
 
