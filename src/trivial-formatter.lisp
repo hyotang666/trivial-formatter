@@ -452,6 +452,7 @@
     (set-pprint-dispatch '(cons (member define-compiler-macro))
                          (pprint-dispatch '(defun) nil))
     (set-pprint-dispatch '(cons (member defstruct)) 'pprint-defstruct)
+    (set-pprint-dispatch '(cons (member defgeneric)) 'pprint-defgeneric)
     *print-pprint-dispatch*))
 
 (defparameter *pprint-dispatch* *print-pprint-dispatch*)
@@ -688,6 +689,10 @@
           :do (pprint-exit-if-list-exhausted)
               (write-char #\Space stream)
               (pprint-newline :linear stream))))
+
+(defun pprint-defgeneric (stream exp)
+  (funcall (formatter "~:<~W~^ ~3I~@_~W~^ ~@_~W~^ ~1I~:_~@{~W~^~_~}~:>") stream
+           exp))
 
 ;;;; PRINT-AS-CODE
 
