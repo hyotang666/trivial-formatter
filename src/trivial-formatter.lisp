@@ -392,7 +392,8 @@
                                ;; I beleave there is no in-package inside defun.
                                ((typep form
                                        '(cons
-                                          (member defun #+sbcl sb-c:xdefun))))
+                                          (member defun #+sbcl sb-c:xdefun)))
+                                nil)
                                (t (funcall expander form env)))))
                            (*print-length*)
                            (string
