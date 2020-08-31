@@ -783,7 +783,9 @@
                           ;; Both are not single semicoloned line comment.
                           (if rest
                               ;; To avoid unneeded newline. Especially &KEY.
-                              (if (uiop:string-suffix-p first "(")
+                              (if (and (uiop:string-suffix-p first "(")
+                                       (not
+                                         (uiop:string-suffix-p first "#\\(")))
                                   (rplaca rest
                                           (format nil "~A~A" first
                                                   (string-left-trim " "
