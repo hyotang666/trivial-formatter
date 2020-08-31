@@ -543,7 +543,10 @@
       (pprint-exit-if-list-exhausted)
       (pprint-indent :block 1 stream)
       (write-char #\Space stream)
-      (format stream "~:_~:<~@{~^~W~^ ~:@_~}~:>" (pprint-pop)) ; slots
+      (funcall
+        (formatter
+         "~:_~:<~@{~^~/trivial-formatter::pprint-fun-call/~^ ~:@_~}~:>")
+        stream (pprint-pop)) ; slots
       (pprint-exit-if-list-exhausted)
       (write-char #\Space stream)
       (pprint-newline :linear stream)
