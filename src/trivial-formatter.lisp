@@ -84,19 +84,21 @@
             (write-string string))))))
 
 (defun component-children (component)
-  (labels ((rec (list acc)
-             (if (endp list)
-                 acc
-                 (body (car list) (cdr list) acc)))
-           (body (first rest acc)
-             (typecase first
-               (asdf:system
-                (rec (append (asdf:component-children first) rest) acc))
-               (asdf:module
-                (rec (append (asdf:component-children first) rest) acc))
-               (asdf:static-file (rec rest acc))
-               (otherwise (rec rest (cons first acc))))))
-    (rec (list component) nil)))
+  (if (typep component 'asdf:package-inferred-system)
+      (warn "Currently package-inferred-system is not supported.")
+      (labels ((rec (list acc)
+                 (if (endp list)
+                     acc
+                     (body (car list) (cdr list) acc)))
+               (body (first rest acc)
+                 (typecase first
+                   (asdf:system
+                    (rec (append (asdf:component-children first) rest) acc))
+                   (asdf:module
+                    (rec (append (asdf:component-children first) rest) acc))
+                   (asdf:static-file (rec rest acc))
+                   (otherwise (rec rest (cons first acc))))))
+        (rec (list component) nil))))
 
 ;;;; READ-AS-CODE
 

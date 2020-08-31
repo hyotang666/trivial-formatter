@@ -135,5 +135,8 @@ Please wait next ccl release or build current ccl from source.
 When reader macro conflicts, such reader macros are ignored silently.
 You can add new reader macros, but con not modify already existing reader macros.
 
+#### PACKAGE-INFERRED-SYSTEM
+Currently package-inferred-system is not supported.
+
 ## Installation
 
