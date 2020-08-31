@@ -464,9 +464,10 @@
     (when (cdddr exp)
       (if (listp (cadddr exp))
           (if (every #'listp (cadddr exp))
-              (format stream
-                      "~:<~@{~/trivial-formatter::pprint-fun-call/~^ ~:_~}~:>"
-                      (cadddr exp))
+              (funcall
+                (formatter
+                 "~:<~@{~/trivial-formatter::pprint-fun-call/~^ ~_~}~:>")
+                stream (cadddr exp))
               (format stream "~:<~@{~W~^ ~_~}~:>" (cadddr exp)))
           (format stream "~W" (cadddr exp))))
     (when (cddddr exp)
