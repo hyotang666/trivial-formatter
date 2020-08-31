@@ -238,6 +238,11 @@
     (print-as-code (read-as-code s)))
 :outputs "`(declare ,'nil)"
 
+;; Corner case of dots, especially when *read-suppress* t.
+#?(with-input-from-string (s "(a ...)")
+    (print-as-code (read-as-code s)))
+:outputs "(a ...)"
+
 (requirements-about PPRINT-EXTENDED-LOOP :doc-type function
                     :around(let((*print-pretty* t))
                              (call-body)))

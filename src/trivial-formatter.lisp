@@ -125,8 +125,8 @@
                     (canonicalize-case
                       (read-as-string:read-as-string nil eof-error-p eof-value
                                                      recursive-p))))
-              (if (string= "." notation)
-                  (make-dot)
+              (if (every (lambda (c) (char= #\. c)) notation)
+                  (make-dot :notation notation)
                   (handler-case (values (read-from-string notation))
                     #+ecl
                     (error (c)
@@ -204,9 +204,10 @@
 ;;;; META-OBJECT
 ;;; DOT
 
-(defstruct dot)
+(defstruct dot notation)
 
-(defmethod print-object ((dot dot) stream) (princ #\. stream))
+(defmethod print-object ((dot dot) stream)
+  (write-string (dot-notation dot) stream))
 
 ;;; COMMENT
 
