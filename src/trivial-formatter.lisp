@@ -389,7 +389,9 @@
                                ;; SBCL fails to macroexpand-all defun when
                                ;; function declaimed as inline.
                                ;; I beleave there is no in-package inside defun.
-                               ((typep form '(cons (eql defun))))
+                               ((typep form
+                                       '(cons
+                                          (member defun #+sbcl sb-c:xdefun))))
                                (t (funcall expander form env)))))
                            (*print-length*)
                            (string
