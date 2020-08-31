@@ -862,3 +862,12 @@
                           LAMBDA-LIST
                         BODY)) :outputs "(DEFGENERIC NAME LAMBDA-LIST BODY)"
 
+#?(PPRINT-DEFGENERIC NIL
+                     '(DEFGENERIC 1
+                          2
+                        3
+                        4
+                        5
+                        6
+                        7))
+:outputs "(DEFGENERIC 1 2 3 4 5 6 7)"
