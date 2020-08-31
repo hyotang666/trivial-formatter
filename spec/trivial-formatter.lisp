@@ -628,6 +628,20 @@
   (:REPORT (LAMBDA (CONDITION STREAM) (PRINC CONDITION STREAM)))
   (:DEFAULT-INITARGS :FORMAT-CONTROL \"\"))"
 
+#?(PPRINT-DEFINE-CONDITION NIL '(DEFINE-CONDITION))
+:outputs "(DEFINE-CONDITION)"
+#?(PPRINT-DEFINE-CONDITION NIL '(DEFINE-CONDITION NAME))
+:outputs "(DEFINE-CONDITION NAME)"
+#?(PPRINT-DEFINE-CONDITION NIL
+                           '(DEFINE-CONDITION NAME
+                                SUPERCLASSES))
+:outputs "(DEFINE-CONDITION NAME SUPERCLASSES)"
+#?(PPRINT-DEFINE-CONDITION NIL
+                           '(DEFINE-CONDITION NAME
+                                SUPERCLASSES
+                                SLOTS))
+:outputs "(DEFINE-CONDITION NAME SUPERCLASSES SLOTS)"
+
 (requirements-about PPRINT-RESTART-CASE :doc-type function
                     :around (let ((*print-pretty* t))
                               (call-body)))
@@ -847,3 +861,4 @@
                      '(DEFGENERIC NAME
                           LAMBDA-LIST
                         BODY)) :outputs "(DEFGENERIC NAME LAMBDA-LIST BODY)"
+
