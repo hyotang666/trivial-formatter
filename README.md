@@ -138,5 +138,8 @@ You can add new reader macros, but con not modify already existing reader macros
 #### PACKAGE-INFERRED-SYSTEM
 Currently package-inferred-system is not supported.
 
+#### FORMAT-CONTROL
+Trivial-formatter can not adjust ~newline format control indentation.
+
 ## Installation
 
