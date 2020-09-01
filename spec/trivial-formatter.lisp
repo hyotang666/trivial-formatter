@@ -649,6 +649,17 @@
                                 SLOTS))
 :outputs "(DEFINE-CONDITION NAME SUPERCLASSES SLOTS)"
 
+#?(PPRINT-DEFINE-CONDITION NIL
+                           '(DEFINE-CONDITION NAME
+                                SUPERCLASSES
+                                SLOTS
+                              ADDITIONAL
+                              OPTIONS))
+:outputs "(DEFINE-CONDITION NAME SUPERCLASSES
+  SLOTS
+  ADDITIONAL
+  OPTIONS)"
+
 (requirements-about PPRINT-RESTART-CASE :doc-type function
                     :around (let ((*print-pretty* t))
                               (call-body)))

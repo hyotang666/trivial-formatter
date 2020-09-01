@@ -548,7 +548,7 @@
       (write-char #\Space stream)
       (funcall
         (formatter
-         "~:_~:<~@{~^~/trivial-formatter::pprint-fun-call/~^ ~:@_~}~:>")
+         "~_~:<~@{~^~/trivial-formatter::pprint-fun-call/~^ ~:@_~}~:>")
         stream (pprint-pop)) ; slots
       (pprint-exit-if-list-exhausted)
       (write-char #\Space stream)
