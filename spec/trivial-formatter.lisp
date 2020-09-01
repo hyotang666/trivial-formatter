@@ -168,8 +168,15 @@
 
 ;;;; Notes:
 ;;; Known bug.
-; * Not support comment in #S, #A, #( reader macros.
+; * Not support comment in #S, #A, reader macros.
 ; Comment will be discarded.
+
+; Comment in vector is supported.
+#?(with-input-from-string (s "#(;comment
+)")
+    (print-as-code (read-as-code s)))
+:outputs "#( ; comment
+  )"
 
 ;;;; Exceptional-Situations:
 
