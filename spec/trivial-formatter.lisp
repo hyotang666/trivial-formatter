@@ -2,7 +2,7 @@
   (:import-from :trivial-formatter #:pprint-extended-loop #:split-keywords
                 #:pprint-fun-call #:pprint-define-condition #:pprint-restart-case
                 #:pprint-with-open-file #:split-to-lines #:pprint-cond #:pprint-flet
-                #:pprint-defgeneric)
+                #:pprint-defgeneric #:pprint-defstruct)
   (:use :cl :jingoh :trivial-formatter))
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
@@ -878,3 +878,45 @@
                         6
                         7))
 :outputs "(DEFGENERIC 1 2 3 4 5 6 7)"
+
+(requirements-about PPRINT-DEFSTRUCT :doc-type function)
+
+;;;; Description:
+
+#+syntax (PPRINT-DEFSTRUCT stream exp) ; => result
+
+;;;; Arguments and Values:
+
+; stream := 
+
+; exp := 
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
+#?(PPRINT-DEFSTRUCT NIL '(DEFSTRUCT))
+:outputs "(DEFSTRUCT)"
+#?(PPRINT-DEFSTRUCT NIL '(DEFSTRUCT NAME))
+:outputs "(DEFSTRUCT NAME)"
+#?(PPRINT-DEFSTRUCT NIL '(DEFSTRUCT NAME SLOTS))
+:outputs "(DEFSTRUCT NAME SLOTS)"
+#?(PPRINT-DEFSTRUCT NIL '(DEFSTRUCT (NAME OPTIONS) SLOTS))
+:outputs "(DEFSTRUCT (NAME OPTIONS) SLOTS)"
+
+#?(PPRINT-DEFSTRUCT NIL
+                    '(DEFSTRUCT
+                         (NAME (:CONSTRUCTOR NIL) (:PREDICATE NIL)
+                          (:COPIER NIL) (:CONC-NAME NIL))
+                       SLOTS))
+:outputs "(DEFSTRUCT (NAME (:CONSTRUCTOR NIL)
+                 (:PREDICATE NIL)
+                 (:COPIER NIL)
+                 (:CONC-NAME NIL))
+  SLOTS)"

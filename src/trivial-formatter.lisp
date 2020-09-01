@@ -689,7 +689,7 @@
     (pprint-exit-if-list-exhausted)
     (write-char #\Space stream)
     (pprint-indent :block 1 stream)
-    (pprint-newline :fill stream)
+    (pprint-newline :linear stream)
     (loop :for elt := (pprint-pop)
           :if (listp elt)
             :do (pprint-fun-call stream elt)
