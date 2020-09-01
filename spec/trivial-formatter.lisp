@@ -902,6 +902,16 @@
   OPTIONS
   (:DOCUMENTATION \"doc\"))"
 
+#?(PPRINT-DEFGENERIC NIL
+                     '(DEFGENERIC NMI
+                          (OBJ)
+                        (:METHOD (OBJ) (STACK-PUSH (CPU-SR OBJ) OBJ)
+                         (SETF (CPU-PC OBJ) (GET-WORD 65530)))))
+:outputs "(DEFGENERIC NMI (OBJ)
+  (:METHOD (OBJ)
+    (STACK-PUSH (CPU-SR OBJ) OBJ)
+    (SETF (CPU-PC OBJ) (GET-WORD 65530))))"
+
 (requirements-about PPRINT-DEFSTRUCT :doc-type function)
 
 ;;;; Description:

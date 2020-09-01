@@ -700,9 +700,32 @@
               (pprint-newline :linear stream))))
 
 (defun pprint-defgeneric (stream exp)
-  ;;                      op         name   lambda-list  options
-  (funcall (formatter "~:<~W~^ ~3I~@_~W~^ ~@_~W~^ ~1I~_~@{~W~^ ~_~}~:>") stream
-           exp))
+  (pprint-logical-block (stream exp :prefix "(" :suffix ")")
+    ;; DEFGENERIC
+    (write (pprint-pop) :stream stream)
+    (pprint-exit-if-list-exhausted)
+    (write-char #\Space stream)
+    (pprint-indent :current 0 stream)
+    (pprint-newline :miser stream)
+    ;; name
+    (write (pprint-pop) :stream stream)
+    (pprint-exit-if-list-exhausted)
+    (write-char #\Space stream)
+    (pprint-newline :miser stream)
+    ;; lambda-list
+    (write (pprint-pop) :stream stream)
+    (pprint-exit-if-list-exhausted)
+    (pprint-indent :block 1 stream)
+    (write-char #\Space stream)
+    (pprint-newline :linear stream)
+    ;; options
+    (loop (let ((elt (pprint-pop)))
+            (if (or (atom elt) (not (eq :method (car elt))))
+                (write elt :stream stream)
+                (funcall (pprint-dispatch '(lambda)) stream elt)))
+          (pprint-exit-if-list-exhausted)
+          (write-char #\Space stream)
+          (pprint-newline :linear stream))))
 
 ;;;; PRINT-AS-CODE
 
