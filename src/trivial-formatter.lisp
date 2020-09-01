@@ -700,8 +700,9 @@
               (pprint-newline :linear stream))))
 
 (defun pprint-defgeneric (stream exp)
-  (funcall (formatter "~:<~W~^ ~3I~@_~W~^ ~@_~W~^ ~1I~:_~@{~W~^ ~_~}~:>")
-           stream exp))
+  ;;                      op         name   lambda-list  options
+  (funcall (formatter "~:<~W~^ ~3I~@_~W~^ ~@_~W~^ ~1I~_~@{~W~^ ~_~}~:>") stream
+           exp))
 
 ;;;; PRINT-AS-CODE
 

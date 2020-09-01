@@ -847,6 +847,7 @@
 
 #?(pprint-flet nil '(flet)) :outputs "(FLET)"
 #?(PPRINT-FLET NIL '(FLET T)) :outputs "(FLET T)"
+
 (requirements-about PPRINT-DEFGENERIC :doc-type function)
 
 ;;;; Description:
@@ -889,6 +890,17 @@
                         6
                         7))
 :outputs "(DEFGENERIC 1 2 3 4 5 6 7)"
+
+#?(PPRINT-DEFGENERIC NIL
+                     '(DEFGENERIC GENERIC-NAME
+                          (LAMBDA LIST)
+                        ADDITIONAL
+                        OPTIONS
+                        (:DOCUMENTATION "doc")))
+:outputs "(DEFGENERIC GENERIC-NAME (LAMBDA LIST)
+  ADDITIONAL
+  OPTIONS
+  (:DOCUMENTATION \"doc\"))"
 
 (requirements-about PPRINT-DEFSTRUCT :doc-type function)
 
