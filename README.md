@@ -1,14 +1,16 @@
-# TRIVIAL-FORMATTER 5.4.1
+# TRIVIAL-FORMATTER 5.8.9
 ## What is this?
 Code formatter for common lisp.
+Please see [trivial-formatter's source code](src/trivial-formatter.lisp).
+This file is formatted by trivial-formatter itself.
 
 ## Usage
 
 ```lisp
-(fmt :your-system :supersede)
+(trivial-formatter:fmt :your-system :supersede)
 ```
 
-For detail, see spec files.
+For detail, see [spec files](spec/trivial-formatter.lisp).
 
 ## From developer
 ### Reader.
@@ -87,10 +89,10 @@ DEFORMATTER care about package exists and symbol confliction and set-pprint-disp
 MIT
 
 ### Developed with
-SBCL/2.0.2
+SBCL/2.0.7
 
 ### Tested with
-* SBCL/2.0.2
+* SBCL/2.0.7
 * CCL/1.12 ; Failed due to CCL violates ANSI standard.
 * ECL/16.1.3
 
@@ -133,7 +135,7 @@ Please wait next ccl release or build current ccl from source.
 
 #### Reader.
 When reader macro conflicts, such reader macros are ignored silently.
-You can add new reader macros, but con not modify already existing reader macros.
+You can add new reader macros, but can not modify already existing reader macros.
 
 #### PACKAGE-INFERRED-SYSTEM
 Currently package-inferred-system is not supported.
@@ -142,4 +144,14 @@ Currently package-inferred-system is not supported.
 Trivial-formatter can not adjust ~newline format control indentation.
 
 ## Installation
+To install trivial-formatter, [roswell](https://github.com/roswell/roswell) is recommended.
 
+```shell
+$ ros install hyotang666/trivial-formatter
+```
+
+To load trivial-formatter to running lisp environment, evaluate below in the repl.
+
+```lisp
+* (ql:quickload :trivial-formatter)
+```
