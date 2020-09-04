@@ -441,7 +441,7 @@
     (set-pprint-dispatch '(cons (member loop)) 'pprint-extended-loop)
     (set-pprint-dispatch '(cons (member define-condition))
                          'pprint-define-condition)
-    (set-pprint-dispatch '(cons (member or and)) 'pprint-linear-elt)
+    (set-pprint-dispatch '(cons (member or and values)) 'pprint-linear-elt)
     (set-pprint-dispatch '(cons (member flet labels)) 'pprint-flet)
     (set-pprint-dispatch '(cons (member when unless)) 'pprint-when)
     (set-pprint-dispatch '(cons (member restart-case)) 'pprint-restart-case)
