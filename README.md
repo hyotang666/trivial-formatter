@@ -12,6 +12,16 @@ This file is formatted by trivial-formatter itself.
 
 For detail, see [spec files](spec/trivial-formatter.lisp).
 
+### Line width.
+The default depends on implementation.
+(Probably 80 though.)
+You can control it with ordinary common lisp pretty printing system way, i.e. using `*PRINT-RIGHT-MARGIN*`.
+
+```lisp
+(let ((*print-right-margin* 100)) ; <-- Specify line width with 100.
+  (trivial-formatter:fmt :your-system :supersede))
+```
+
 ## From developer
 ### Reader.
 Trivial-formatter heavily depends on readtable especially [NAMED-READTABLES](https://github.com/melisgl/named-readtables).
