@@ -1145,4 +1145,7 @@
 
 (defpackage :trivial-formatter-user
   (:use :cl)
-  (:import-from :trivial-formatter #:deformatter #:pprint-fun-call))
+  (:import-from :trivial-formatter
+                #:deformatter
+                #:pprint-fun-call
+                #:pprint-linear-elt))

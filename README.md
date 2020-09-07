@@ -61,20 +61,32 @@ Trivial-formatter search file from `*foreign-formatters-directories*`.
 The default is quicklisp's local-projects directory and roswell's local-projects directory.
 
 ### Package trivial-formatter-user.
-In trivial-formatter-user, you can use deformatter and pprint-fun-call with ordinary common lisp symbols.
+In trivial-formatter-user, you can use deformatter, pprint-fun-call and pprint-linear-elt with ordinary common lisp symbols.
 
 #### PPRINT-FUN-CALL
 PPRINT-FUN-CALL care about key value pair.
 
 ```lisp
-(pprint-fun-call nil '(asdf:component-pathname component
-                                               :direction :output
-                                               :if-does-not-exist :create
-                                               :if-exists if-exists))
+(pprint-fun-call nil '(asdf:component-pathname component :direction :output :if-does-not-exist :create :if-exists if-exists))
 (ASDF:COMPONENT-PATHNAME COMPONENT
                          :DIRECTION :OUTPUT
                          :IF-DOES-NOT-EXIST :CREATE
                          :IF-EXISTS IF-EXISTS))
+NIL
+```
+
+#### PPRINT-LINEAR-ELT
+`PPRINT-LINEAR-ELT` set indent current and put every `CDR` element with newline.
+
+```lisp
+(pprint-linear-elt nil '(asdf:component-pathname component :direction :output :if-does-not-exist :create :if-exists if-exists))
+(ASDF:COMPONENT-PATHNAME COMPONENT
+                         :DIRECTION
+                         :OUTPUT
+                         :IF-DOES-NOT-EXIST
+                         :CREATE
+                         :IF-EXISTS
+                         IF-EXISTS))
 NIL
 ```
 
