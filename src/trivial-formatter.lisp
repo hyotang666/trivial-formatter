@@ -1143,9 +1143,15 @@
 
 ;;;; Package TRIVIAL-FORMATTER-USER
 
+(defun set-pprint-dispatch* (type function)
+  (set-pprint-dispatch type function)
+  (setf *pprint-dispatch* (copy-pprint-dispatch *pprint-dispatch*))
+  (set-pprint-dispatch type function 0 *pprint-dispatch*))
+
 (defpackage :trivial-formatter-user
   (:use :cl)
   (:import-from :trivial-formatter
                 #:deformatter
                 #:pprint-fun-call
-                #:pprint-linear-elt))
+                #:pprint-linear-elt
+                #:set-pprint-dispatch*))

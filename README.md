@@ -105,6 +105,16 @@ DEFORMATTER care about package exists and symbol confliction and set-pprint-disp
   '#:PPRINT-SYMBOL3440)
 ```
 
+#### SET-PPRINT-DISPATCH\*
+When you want to set pretty printing function temporalilly, you need to bind `*PRINT-PPRINT-DISPATCH*` and use `SET-PPRINT-DISPATCH*` instead of `CL:SET-PPRINT-DISPATCH` otherwise temporal function never worked.
+
+```lisp
+(deformatter sxql where (stream exp)
+  (let ((*print-pprint-dispatch* (copy-pprint-dispatch)))
+    (set-pprint-dispatch* '(cons (member :and :or)) 'pprint-linear-elt)
+    (pprint-fun-call stream exp)))
+```
+
 ### Product's goal
 
 ### License
