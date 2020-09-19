@@ -464,14 +464,9 @@
   (pprint-logical-block (stream nil :prefix "(" :suffix ")")
     (apply #'format stream "~W~3I~^ ~@_~W~^ ~@_~:S~^~1I ~:_" exp)
     (when (cdddr exp)
-      (if (listp (cadddr exp))
-          (if (every #'listp (cadddr exp))
-              (funcall
-                (formatter
-                 "~:<~@{~/trivial-formatter::pprint-fun-call/~^ ~_~}~:>")
-                stream (cadddr exp))
-              (format stream "~:<~@{~W~^ ~_~}~:>" (cadddr exp)))
-          (format stream "~W" (cadddr exp))))
+      (funcall
+        (formatter "~:<~@{~/trivial-formatter::pprint-fun-call/~^ ~_~}~:>")
+        stream (cadddr exp)))
     (when (cddddr exp)
       (format stream "~:@_~{~W~^ ~_~}" (cddddr exp)))))
 
@@ -610,9 +605,9 @@
 (defun pprint-fun-call (stream exp &optional colon? &rest noise)
   (declare (ignore noise))
   (setf stream (or stream *standard-output*))
-  (multiple-value-bind (pre post)
-      (split-keywords exp)
-    (pprint-logical-block (stream nil :prefix "(" :suffix ")")
+  (pprint-logical-block (stream exp :prefix "(" :suffix ")")
+    (multiple-value-bind (pre post)
+        (split-keywords exp)
       (format stream "~W~1I" (car pre))
       (when (or (cdr pre) post)
         (if colon?
@@ -691,11 +686,8 @@
     (pprint-indent :block 1 stream)
     (pprint-newline :linear stream)
     (loop :for elt := (pprint-pop)
-          :if (listp elt)
-            :do (pprint-fun-call stream elt)
-          :else
-            :do (write elt :stream stream)
-          :do (pprint-exit-if-list-exhausted)
+          :do (pprint-fun-call stream elt)
+              (pprint-exit-if-list-exhausted)
               (write-char #\Space stream)
               (pprint-newline :linear stream))))
 

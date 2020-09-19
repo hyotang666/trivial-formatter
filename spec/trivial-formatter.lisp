@@ -2,7 +2,7 @@
   (:import-from :trivial-formatter #:pprint-extended-loop #:split-keywords
                 #:pprint-fun-call #:pprint-define-condition #:pprint-restart-case
                 #:pprint-with-open-file #:split-to-lines #:pprint-cond #:pprint-flet
-                #:pprint-defgeneric #:pprint-defstruct)
+                #:pprint-defgeneric #:pprint-defstruct #:pprint-defclass)
   (:use :cl :jingoh :trivial-formatter))
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
@@ -953,3 +953,37 @@
                  (:COPIER NIL)
                  (:CONC-NAME NIL))
   SLOTS)"
+(requirements-about PPRINT-DEFCLASS :doc-type function)
+
+;;;; Description:
+
+#+syntax (PPRINT-DEFCLASS stream exp) ; => result
+
+;;;; Arguments and Values:
+
+; stream := 
+
+; exp := 
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
+
+#?(PPRINT-DEFCLASS NIL '(DEFCLASS))
+:outputs "(DEFCLASS)"
+#?(PPRINT-DEFCLASS NIL '(DEFCLASS A))
+:outputs "(DEFCLASS A)"
+#?(PPRINT-DEFCLASS NIL '(DEFCLASS A SUPERCLASSES))
+:outputs "(DEFCLASS A SUPERCLASSES)"
+#?(PPRINT-DEFCLASS NIL '(DEFCLASS A SUPERCLASSES SLOTS))
+:outputs "(DEFCLASS A SUPERCLASSES SLOTS)"
+#?(PPRINT-DEFCLASS NIL '(DEFCLASS A SUPERCLASSES SLOTS OPTIONS))
+:outputs "(DEFCLASS A SUPERCLASSES SLOTS
+  OPTIONS)"
