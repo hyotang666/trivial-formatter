@@ -50,8 +50,9 @@
 
 (defun pprint-deformatter (stream exp)
   (setf stream (or stream *standard-output*))
-  (format stream "~:<~W~3I~^ ~@_~W~^ ~@_~W~^ ~@_~W~1I~^~@:_~@{~W~^~:@_~}~:>"
-          exp))
+  (funcall
+    (formatter "~:<~W~3I~^ ~@_~W~^ ~@_~W~^ ~@_~W~1I~^~@:_~@{~W~^~:@_~}~:>")
+    stream exp))
 
 (set-pprint-dispatch '(cons (member deformatter)) 'pprint-deformatter)
 
@@ -219,43 +220,45 @@
 
 (defmethod print-object ((c line-comment) stream)
   (if (uiop:string-prefix-p #\; (comment-content c))
-      (format stream "~:@_;~A" (comment-content c))
-      (format stream "~:@_; ~A" (comment-content c)))
+      (funcall (formatter "~:@_;~A") stream (comment-content c))
+      (funcall (formatter "~:@_; ~A") stream (comment-content c)))
   (pprint-newline :mandatory stream)
   (write-char #\Nul stream))
 
 (defstruct (block-comment (:include comment)))
 
 (defmethod print-object ((c block-comment) stream)
-  (format stream "~A" (comment-content c)))
+  (funcall (formatter "~A") stream (comment-content c)))
 
 ;;; CONDITIONAL
 
 (defstruct conditional char condition)
 
 (defmethod print-object ((c conditional) stream)
-  (format stream "~_#~A~A" (conditional-char c) (conditional-condition c)))
+  (funcall (formatter "~_#~A~A") stream (conditional-char c)
+           (conditional-condition c)))
 
 ;;; READ-TIME-EVAL
 
 (defstruct read-time-eval form)
 
 (defmethod print-object ((form read-time-eval) stream)
-  (format stream "~<#.~;~W~:>" (list (read-time-eval-form form))))
+  (funcall (formatter "~<#.~;~W~:>") stream (list (read-time-eval-form form))))
 
 ;;; SHARED-OBJECT
 
 (defstruct shared-object number exp)
 
 (defmethod print-object ((obj shared-object) stream)
-  (format stream "#~D=~S" (shared-object-number obj) (shared-object-exp obj)))
+  (funcall (formatter "#~D=~S") stream (shared-object-number obj)
+           (shared-object-exp obj)))
 
 ;;; SHARED-REFERENCE
 
 (defstruct shared-reference number)
 
 (defmethod print-object ((ref shared-reference) stream)
-  (format stream "#~D#" (shared-reference-number ref)))
+  (funcall (formatter "#~D#") stream (shared-reference-number ref)))
 
 ;;; COMMA
 
@@ -263,21 +266,23 @@
 
 (defmethod print-object ((c comma) stream)
   (let (#+sbcl (sb-pretty:*pprint-quote-with-syntactic-sugar* t))
-    (format stream ",~@[~C~]~W" (comma-sub-char c) (comma-form c))))
+    (funcall (formatter ",~@[~C~]~W") stream (comma-sub-char c)
+             (comma-form c))))
 
 ;;; BACKQUOTE
 
 (defstruct backquote form)
 
 (defmethod print-object ((b backquote) stream)
-  (format stream "`~W" (backquote-form b)))
+  (funcall (formatter "`~W") stream (backquote-form b)))
 
 ;;;; RADIX
 
 (defstruct radix char radix number)
 
 (defmethod print-object ((r radix) stream)
-  (format stream "#~C~VR" (radix-char r) (radix-radix r) (radix-number r)))
+  (funcall (formatter "#~C~VR") stream (radix-char r) (radix-radix r)
+           (radix-number r)))
 
 ;;;; MACRO CHARS
 
@@ -433,9 +438,7 @@
 
 (defun init-table ()
   (let ((*print-pprint-dispatch* (copy-pprint-dispatch)))
-    (set-pprint-dispatch '(eql #\Space)
-                         (lambda (stream object)
-                           (format stream "#\\~:C" object)))
+    (set-pprint-dispatch '(eql #\Space) (formatter "#\\~:C"))
     (set-pprint-dispatch 'symbol 'symbol-printer)
     (set-pprint-dispatch '(cons (member handler-case)) 'pprint-handler-case)
     (set-pprint-dispatch '(cons (member loop)) 'pprint-extended-loop)
@@ -462,17 +465,17 @@
 (defun pprint-defclass (stream exp)
   (setf stream (or stream *standard-output*))
   (pprint-logical-block (stream nil :prefix "(" :suffix ")")
-    (apply #'format stream "~W~3I~^ ~@_~W~^ ~@_~:S~^~1I ~:_" exp)
+    (apply (formatter "~W~3I~^ ~@_~W~^ ~@_~:S~^~1I ~:_") stream exp)
     (when (cdddr exp)
       (funcall
         (formatter "~:<~@{~/trivial-formatter::pprint-fun-call/~^ ~_~}~:>")
         stream (cadddr exp)))
     (when (cddddr exp)
-      (format stream "~:@_~{~W~^ ~_~}" (cddddr exp)))))
+      (funcall (formatter "~:@_~{~W~^ ~_~}") stream (cddddr exp)))))
 
 (defun pprint-ftype (stream exp)
   (setf stream (or stream *standard-output*))
-  (format stream "~:<~W~1I~^ ~@_~:I~^~W~^ ~_~@{~W~^ ~_~}~:>" exp))
+  (funcall (formatter "~:<~W~1I~^ ~@_~:I~^~W~^ ~_~@{~W~^ ~_~}~:>") stream exp))
 
 (defun shortest-package-name (package)
   (reduce
@@ -520,9 +523,10 @@
           :else :if (= 1 (length form))
             :do (format stream "~W" form)
           :else :if (= 2 (length form))
-            :do (apply #'format stream "(~W ~:A)" form)
+            :do (apply (formatter "(~W ~:A)") stream form)
           :else
-            :do (apply #'format stream "(~1:I~W ~:A~^~:@_~@{~W~^ ~:_~})" form)
+            :do (apply (formatter "(~1:I~W ~:A~^~:@_~@{~W~^ ~:_~})") stream
+                       form)
           :do (pprint-exit-if-list-exhausted)
               (pprint-indent :block 1 stream)
               (pprint-newline :mandatory stream))))
@@ -537,7 +541,7 @@
       (output) ; operater
       (output) ; name
       (pprint-indent :block 3 stream)
-      (format stream "~@_~:<~@{~W~^ ~}~:>" (pprint-pop)) ; superclasses
+      (funcall (formatter "~@_~:<~@{~W~^ ~}~:>") stream (pprint-pop)) ; superclasses
       (pprint-exit-if-list-exhausted)
       (pprint-indent :block 1 stream)
       (write-char #\Space stream)
@@ -555,7 +559,7 @@
 (defun pprint-linear-elt (stream exp &rest noise)
   (declare (ignore noise))
   (setf stream (or stream *standard-output*))
-  (format stream "~:<~W~^~1:I ~@{~W~^ ~_~}~:>" exp))
+  (funcall (formatter "~:<~W~^~1:I ~@{~W~^ ~_~}~:>") stream exp))
 
 (defun pprint-flet (stream exp)
   (let ((printer (pprint-dispatch exp (copy-pprint-dispatch nil)))
@@ -583,12 +587,12 @@
     (funcall printer stream exp)))
 
 (defun pprint-cond (stream exp)
-  (format stream "~:<~W ~:_~:I~@{~W~^ ~_~}~:>" exp))
+  (funcall (formatter "~:<~W ~:_~:I~@{~W~^ ~_~}~:>") stream exp))
 
 (defun pprint-with-open-file (stream exp)
   (setf stream (or stream *standard-output*))
   (if (or (null (cdr exp)) (atom (cadr exp)))
-      (format stream "~:<~@{~W~^ ~@_~}~:>" exp)
+      (funcall (formatter "~:<~@{~W~^ ~@_~}~:>") stream exp)
       (multiple-value-bind (pre post)
           (split-keywords (cadr exp))
         (pprint-logical-block (stream nil :prefix "(" :suffix ")")
@@ -596,11 +600,12 @@
           (write-char #\Space stream)
           (pprint-newline :miser stream)
           (pprint-indent :block 3 stream)
-          (format stream "~:<~@[~{~W~^ ~@_~}~]~@[ ~:_~{~W~^ ~@_~W~^ ~_~}~]~:>"
-                  (list pre post))
+          (funcall
+            (formatter "~:<~@[~{~W~^ ~@_~}~]~@[ ~:_~{~W~^ ~@_~W~^ ~_~}~]~:>")
+            stream (list pre post))
           (pprint-indent :block 1 stream)
           (pprint-newline :mandatory stream)
-          (format stream "~@[~{~W~^ ~_~}~]" (cddr exp))))))
+          (funcall (formatter "~@[~{~W~^ ~_~}~]") stream (cddr exp))))))
 
 (defun pprint-fun-call (stream exp &optional colon? &rest noise)
   (declare (ignore noise))
@@ -608,14 +613,15 @@
   (pprint-logical-block (stream exp :prefix "(" :suffix ")")
     (multiple-value-bind (pre post)
         (split-keywords exp)
-      (format stream "~W~1I" (car pre))
+      (funcall (formatter "~W~1I") stream (car pre))
       (when (or (cdr pre) post)
         (if colon?
-            (format stream " ~:@_")
-            (format stream " ~:_"))
-        (format stream "~@[~:I~{~W~^ ~:_~}~]" (cdr pre)))
+            (funcall (formatter " ~:@_") stream)
+            (funcall (formatter " ~:_") stream))
+        (funcall (formatter "~@[~:I~{~W~^ ~:_~}~]") stream (cdr pre)))
       (when post
-        (format stream "~:[~:_~:I~; ~_~]~{~^~W ~@_~W~^ ~_~}" (cdr pre) post)))))
+        (funcall (formatter "~:[~:_~:I~; ~_~]~{~^~W ~@_~W~^ ~_~}") stream
+                 (cdr pre) post)))))
 
 (defun pprint-list (stream exp)
   (if (and (symbolp (car exp))
@@ -637,27 +643,29 @@
         (return (values (reverse list) post)))))
 
 (defun pprint-when (stream exp)
-  (format stream (formatter "~:<~W~3I~^ ~@_~W~^ ~1I~:@_~@{~^~W~^ ~_~}~:>") exp))
+  (funcall (formatter "~:<~W~3I~^ ~@_~W~^ ~1I~:@_~@{~^~W~^ ~_~}~:>") stream
+           exp))
 
 (defun pprint-assert (stream exp)
   (setf stream (or stream *standard-output*))
-  (format stream
-          ;;    op         form     var     format                    key   value
-          "~:<~{~W~1I~^ ~@_~W~^ ~:_~:S~^ ~_~@{~W~^ ~:_~}~}~@[ ~:I~:_~{~W ~@_~W~^ ~_~}~]~:>"
-          (multiple-value-list (split-keywords exp))))
+  (funcall
+    (formatter ;;    op         form     var     format                    key   value
+               "~:<~{~W~1I~^ ~@_~W~^ ~:_~:S~^ ~_~@{~W~^ ~:_~}~}~@[ ~:I~:_~{~W ~@_~W~^ ~_~}~]~:>")
+    stream (multiple-value-list (split-keywords exp))))
 
 (defun pprint-restart-case (stream exp)
   (pprint-logical-block (stream nil :prefix "(" :suffix ")")
-    (format stream "~W" (car exp))
+    (funcall (formatter "~W") stream (car exp))
     (when (cdr exp)
-      (format stream " ~3I~@_~W" (cadr exp))
+      (funcall (formatter " ~3I~@_~W") stream (cadr exp))
       (if (cddr exp)
           (if (some #'atom (cddr exp))
-              (format stream " ~@_~{~W~^ ~@_~}" (cddr exp))
+              (funcall (formatter " ~@_~{~W~^ ~@_~}") stream (cddr exp))
               (dolist (clause (cddr exp))
-                (format stream
-                        " ~1I~:_~:<~{~W~^ ~@_~:S~^ ~@_~}~@[ ~3I~{~_~W~^ ~@_~W~^ ~}~]~^ ~1I~_~@{~W~^ ~:_~}~:>"
-                        (parse-restart-clause clause))))))))
+                (funcall
+                  (formatter
+                   " ~1I~:_~:<~{~W~^ ~@_~:S~^ ~@_~}~@[ ~3I~{~_~W~^ ~@_~W~^ ~}~]~^ ~1I~_~@{~W~^ ~:_~}~:>")
+                  stream (parse-restart-clause clause))))))))
 
 (defun parse-restart-clause (clause)
   (let ((pre
@@ -828,12 +836,12 @@
                                                 (string-left-trim " " first))
                           ;; Next is not single semicoloned line comment but FIRST.
                           ;; Comment should be printed.
-                          (format t "~<; ~@;~@{~A~^ ~:_~}~:>~:[~;~%~]"
-                                  (remove ""
-                                          (uiop:split-string first
-                                                             :separator "; ")
-                                          :test #'equal)
-                                  rest) ; To avoid unneeded newline.
+                          (funcall
+                            (formatter "~<; ~@;~@{~A~^ ~:_~}~:>~:[~;~%~]") nil
+                            (remove ""
+                                    (uiop:split-string first :separator "; ")
+                                    :test #'equal)
+                            rest) ; To avoid unneeded newline.
                           ;; Both are not single semicoloned line comment.
                           (if rest
                               ;; To avoid unneeded newline. Especially &KEY.
@@ -882,10 +890,11 @@
                   (butlast (clause-forms o) 2)
                   (clause-forms o))))
         (if (clause-keyword o)
-            (format stream "~W~@[ ~{~W~^ ~@_~}~]~:[~; ~VI~:_~{~W ~W~}~VI~]"
-                    (clause-keyword o) body into (+ 2 *indent*) into *indent*)
-            (format stream "~{~W~^ ~_~}~:[~; ~VI~:_~{~W ~W~}~VI~]" body into
-                    (+ 2 *indent*) into *indent*)))))
+            (funcall
+              (formatter "~W~@[ ~{~W~^ ~@_~}~]~:[~; ~VI~:_~{~W ~W~}~VI~]")
+              stream (clause-keyword o) body into (+ 2 *indent*) into *indent*)
+            (funcall (formatter "~{~W~^ ~_~}~:[~; ~VI~:_~{~W ~W~}~VI~]") stream
+                     body into (+ 2 *indent*) into *indent*)))))
 
 ;;; OPTIONAL
 
@@ -900,8 +909,8 @@
       (call-next-method)
       (let ((*indent*
              (+ 1 (length (prin1-to-string (clause-keyword c))) *indent*)))
-        (format stream "~VI~W~^ ~{~W~^ ~@_~}~5I" *indent* (clause-keyword c)
-                (clause-forms c)))))
+        (funcall (formatter "~VI~W~^ ~{~W~^ ~@_~}~5I") stream *indent*
+                 (clause-keyword c) (clause-forms c)))))
 
 ;;; VAR
 
@@ -910,7 +919,7 @@
 (defmethod print-object ((v var) stream)
   (if (null *print-clause*)
       (call-next-method)
-      (apply #'format stream "~W~^ ~:I~W~@{~^ ~:_~W~^ ~W~}~5I"
+      (apply (formatter "~W~^ ~:I~W~@{~^ ~:_~W~^ ~W~}~5I") stream
              (clause-keyword v) (clause-forms v))))
 
 ;;; NESTABLE
@@ -924,17 +933,18 @@
   (if (null *print-clause*)
       (call-next-method)
       (progn
-       (format stream "~2:I~W~:[ ~W~;~]" (clause-keyword c)
-               (eq +unbound+ (nestable-pred c)) (nestable-pred c))
+       (funcall (formatter "~2:I~W~:[ ~W~;~]") stream (clause-keyword c)
+                (eq +unbound+ (nestable-pred c)) (nestable-pred c))
        (when (clause-forms c)
          (let ((*indent* (+ 2 *indent*)))
            (loop :for form :in (clause-forms c)
-                 :do (format stream "~VI~:@_~W" *indent* form))))
+                 :do (funcall (formatter "~VI~:@_~W") stream *indent* form))))
        (when (nestable-else c)
          (let ((current-indent *indent*) (*indent* (+ 2 *indent*)))
-           (format stream "~VI~:@_~W" current-indent (nestable-else c))))
+           (funcall (formatter "~VI~:@_~W") stream current-indent
+                    (nestable-else c))))
        (when (nestable-end c)
-         (format stream "~VI~:@_~W" *indent* (nestable-end c)))
+         (funcall (formatter "~VI~:@_~W") stream *indent* (nestable-end c)))
        (pprint-indent :block 5 stream))))
 
 ;;; ELSE
@@ -946,11 +956,11 @@
       (call-next-method)
       (if (nestable-p (car (clause-forms c)))
           (let ((*indent* (- *indent* 2)))
-            (format stream "~2:I~W ~:_~W~@[~:@_~{~W~^~:@_~}~]~5I"
-                    (clause-keyword c) (car (clause-forms c))
-                    (cdr (clause-forms c))))
-          (format stream "~2:I~W~:@_~{~W~^~:@_~}~5I" (clause-keyword c)
-                  (clause-forms c)))))
+            (funcall (formatter "~2:I~W ~:_~W~@[~:@_~{~W~^~:@_~}~]~5I") stream
+                     (clause-keyword c) (car (clause-forms c))
+                     (cdr (clause-forms c))))
+          (funcall (formatter "~2:I~W~:@_~{~W~^~:@_~}~5I") stream
+                   (clause-keyword c) (clause-forms c)))))
 
 ;;; END
 
@@ -963,8 +973,8 @@
 (defmethod print-object ((c own-block) stream)
   (if (null *print-clause*)
       (call-next-method)
-      (format stream "~W~@[ ~:I~{~W~^~:@_~}~]~5I" (clause-keyword c)
-              (clause-forms c))))
+      (funcall (formatter "~W~@[ ~:I~{~W~^~:@_~}~]~5I") stream
+               (clause-keyword c) (clause-forms c))))
 
 ;;; CONSTRUCTOR
 
@@ -1129,9 +1139,10 @@
 
 (defun pprint-extended-loop (stream list)
   (pprint-logical-block (stream nil :prefix "(" :suffix ")")
-    (format stream "~W~:[~; ~:I~]" (car list) (cdr list))
+    (funcall (formatter "~W~:[~; ~:I~]") stream (car list) (cdr list))
     (let ((*print-clause* t))
-      (format stream "~{~W~^~:@_~}" (parse-loop-body (cdr list))))))
+      (funcall (formatter "~{~W~^~:@_~}") stream
+               (parse-loop-body (cdr list))))))
 
 ;;;; Package TRIVIAL-FORMATTER-USER
 
