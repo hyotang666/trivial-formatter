@@ -182,7 +182,7 @@
   symbol)
 
 (defun cleanup-brokens ()
-  (dolist (symbol *brokens*) (remf (symbol-plist symbol) 'notation))
+  (dolist (symbol *brokens*) (remprop symbol 'notation))
   (setf *brokens* nil))
 
 (defun make-broken-symbol (notation)
