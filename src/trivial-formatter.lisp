@@ -667,25 +667,20 @@
           :finally (return (list* pre keys list)))))
 
 (defun pprint-defstruct (stream exp)
-  (pprint-logical-block (stream exp :prefix "(" :suffix ")")
-    (write (pprint-pop) :stream stream)
-    (pprint-exit-if-list-exhausted)
-    (write-char #\Space stream)
-    (pprint-indent :block 3 stream)
-    (pprint-newline :miser stream)
-    (let ((name&options (pprint-pop)))
-      (if (atom name&options)
-          (write name&options :stream stream)
-          (pprint-linear-elt stream name&options)))
-    (pprint-exit-if-list-exhausted)
-    (write-char #\Space stream)
-    (pprint-indent :block 1 stream)
-    (pprint-newline :linear stream)
-    (loop :for elt := (pprint-pop)
-          :do (pprint-fun-call stream elt)
-              (pprint-exit-if-list-exhausted)
-              (write-char #\Space stream)
-              (pprint-newline :linear stream))))
+  (funcall
+    (formatter
+     #.(apply #'concatenate 'string
+              (alexandria:flatten
+                (list "~:<" ; pprint-logical-block.
+                      "~W~^~1I ~@_" ; op
+                      (list "~:<" ; name&options.
+                            "~W~^ ~:I~@_" ; name
+                            "~@{~W~^ ~_~}" ; options
+                            "~:>~^ ~_")
+                      ;; documentation and slots.
+                      "~@{~/trivial-formatter::pprint-fun-call/~^ ~_~}"
+                      "~:>"))))
+    stream exp))
 
 (defun pprint-defgeneric (stream exp)
   (pprint-logical-block (stream exp :prefix "(" :suffix ")")
