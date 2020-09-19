@@ -464,14 +464,16 @@
 
 (defun pprint-defclass (stream exp)
   (setf stream (or stream *standard-output*))
-  (pprint-logical-block (stream nil :prefix "(" :suffix ")")
-    (apply (formatter "~W~3I~^ ~@_~W~^ ~@_~:S~^~1I ~:_") stream exp)
-    (when (cdddr exp)
-      (funcall
-        (formatter "~:<~@{~/trivial-formatter::pprint-fun-call/~^ ~_~}~:>")
-        stream (cadddr exp)))
-    (when (cddddr exp)
-      (funcall (formatter "~:@_~{~W~^ ~_~}") stream (cddddr exp)))))
+  (funcall
+    (formatter
+     #.(concatenate 'string "~:<" ; pprint-block.
+                    "~W~^~3I ~@_" ; operator
+                    "~W~^ ~@_" ; class-name
+                    "~:<~@{~W~^ ~@_~}~:>~^~1I ~:_" ; superclasses
+                    "~:<~@{~/trivial-formatter::pprint-fun-call/~^ ~_~}~:>~^ ~_" ; slots
+                    "~@{~W~^ ~_~}" ; options
+                    "~:>"))
+    stream exp))
 
 (defun pprint-ftype (stream exp)
   (setf stream (or stream *standard-output*))
