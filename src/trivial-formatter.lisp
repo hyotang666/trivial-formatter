@@ -528,28 +528,22 @@
 
 (defun pprint-define-condition (stream exp &rest noise)
   (declare (ignore noise))
-  (pprint-logical-block (stream exp :prefix "(" :suffix ")")
-    (flet ((output ()
-             (write (pprint-pop) :stream stream)
-             (pprint-exit-if-list-exhausted)
-             (write-char #\Space stream)))
-      (output) ; operater
-      (output) ; name
-      (pprint-indent :block 3 stream)
-      (funcall (formatter "~@_~:<~@{~W~^ ~}~:>") stream (pprint-pop)) ; superclasses
-      (pprint-exit-if-list-exhausted)
-      (pprint-indent :block 1 stream)
-      (write-char #\Space stream)
-      (funcall
-        (formatter
-         "~_~:<~@{~^~/trivial-formatter::pprint-fun-call/~^ ~:@_~}~:>")
-        stream (pprint-pop)) ; slots
-      (pprint-exit-if-list-exhausted)
-      (write-char #\Space stream)
-      (pprint-newline :linear stream)
-      (loop (write (pprint-pop) :stream stream)
-            (pprint-exit-if-list-exhausted)
-            (pprint-newline :mandatory stream)))))
+  (funcall
+    (formatter
+     #.(apply #'concatenate 'string
+              (alexandria:flatten
+                (list "~:<" ; pprint-logical-block.
+                      "~W~^ ~@_" ; op
+                      "~W~^~3I ~@_" ; name
+                      "~:<~@{~W~^ ~@_~}~:>~^ ~1I~_" ; superclasses.
+                      (list "~:<" ; slots.
+                            (list "~@{" ; each slot.
+                                  "~/trivial-formatter::pprint-fun-call/~^ ~:@_"
+                                  "~}")
+                            "~:>~^ ~_")
+                      "~@{~W~^ ~_~}" ; options.
+                      "~:>"))))
+    stream exp))
 
 (defun pprint-linear-elt (stream exp &rest noise)
   (declare (ignore noise))
