@@ -692,31 +692,25 @@
     ;; DEFGENERIC
     (write (pprint-pop) :stream stream)
     (pprint-exit-if-list-exhausted)
-    (write-char #\Space stream)
-    (pprint-indent :current 0 stream)
-    (pprint-newline :miser stream)
+    (funcall (formatter " ~:I~@_") stream)
     ;; name
     (write (pprint-pop) :stream stream)
     (pprint-exit-if-list-exhausted)
-    (write-char #\Space stream)
-    (pprint-newline :miser stream)
+    (funcall (formatter " ~@_") stream)
     ;; lambda-list
     (write (pprint-pop) :stream stream)
     (pprint-exit-if-list-exhausted)
-    (pprint-indent :block 1 stream)
-    (write-char #\Space stream)
-    (pprint-newline :linear stream)
+    (funcall (formatter "~1I ~_") stream)
     ;; options
-    (loop (let ((elt (pprint-pop)))
-            (if (or (atom elt) (not (eq :method (car elt))))
-                (write elt :stream stream)
-                (pprint-logical-block (stream elt :prefix "(" :suffix ")")
+    (loop :for elt := (pprint-pop)
+          :if (or (atom elt) (not (eq :method (car elt))))
+            :do (write elt :stream stream)
+          :else
+            :do (pprint-logical-block (stream elt :prefix "(" :suffix ")")
                   ;; :method
                   (write (pprint-pop) :stream stream)
                   (pprint-exit-if-list-exhausted)
-                  (write-char #\Space stream)
-                  (pprint-indent :block 1 stream)
-                  (pprint-newline :miser stream)
+                  (funcall (formatter " ~1I~@_") stream)
                   (let ((elt (pprint-pop)))
                     (write elt :stream stream)
                     (pprint-exit-if-list-exhausted)
@@ -732,10 +726,10 @@
                   (loop (write (pprint-pop) :stream stream)
                         (pprint-exit-if-list-exhausted)
                         (write-char #\Space stream)
-                        (pprint-newline :linear stream)))))
-          (pprint-exit-if-list-exhausted)
-          (write-char #\Space stream)
-          (pprint-newline :linear stream))))
+                        (pprint-newline :linear stream)))
+          :do (pprint-exit-if-list-exhausted)
+              (write-char #\Space stream)
+              (pprint-newline :linear stream))))
 
 ;;;; PRINT-AS-CODE
 
