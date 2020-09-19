@@ -2,7 +2,7 @@
 (in-package :asdf)
 (defsystem "trivial-formatter"
   :version
-  "7.0.4"
+  "7.0.5"
   :description "Code formatter for common lisp."
   :license "MIT"
   :depends-on
@@ -13,6 +13,7 @@
    #.(or ; to avoid #-
        #+ecl "agnostic-lizard"
        "trivial-macroexpand-all") ; As default macroexpand all.
+   "alexandria" ; Public domain utilities.
    )
   :pathname
   "src/"

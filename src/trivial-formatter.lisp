@@ -509,29 +509,22 @@
 
 (defun pprint-handler-case (stream exp &rest noise)
   (declare (ignore noise))
-  (pprint-logical-block (stream exp :prefix "(" :suffix ")")
-    (write (pprint-pop) :stream stream)
-    (pprint-indent :block 3 stream)
-    (pprint-exit-if-list-exhausted)
-    (write-char #\Space stream)
-    (pprint-newline :fill stream)
-    (write (pprint-pop) :stream stream)
-    (pprint-exit-if-list-exhausted)
-    (pprint-indent :block 1 stream)
-    (pprint-newline :mandatory stream)
-    (loop :for form = (pprint-pop)
-          :if (atom form)
-            :do (write form :stream stream)
-          :else :if (= 1 (length form))
-            :do (format stream "~W" form)
-          :else :if (= 2 (length form))
-            :do (apply (formatter "(~W ~:A)") stream form)
-          :else
-            :do (apply (formatter "(~1:I~W ~:A~^~:@_~@{~W~^ ~:_~})") stream
-                       form)
-          :do (pprint-exit-if-list-exhausted)
-              (pprint-indent :block 1 stream)
-              (pprint-newline :mandatory stream))))
+  (funcall
+    (formatter
+     #.(apply #'concatenate 'string
+              (alexandria:flatten
+                (list "~:<" ; pprint-logical-block
+                      "~W~^~3I ~:_" ; operator
+                      "~W~^~1I~_" ; form
+                      (list "~@{" ; cluases.
+                            (list "~:<" ; each clause logical-block.
+                                  "~W~^ ~@_" ; condition.
+                                  "~:<~@{~W~^ ~@_~}~:>~^~1I ~:@_" ; lambda-list
+                                  "~@{~W~^ ~:_~}" ; clause-body
+                                  "~:>")
+                            "~^ ~_~}")
+                      "~:>"))))
+    stream exp))
 
 (defun pprint-define-condition (stream exp &rest noise)
   (declare (ignore noise))
