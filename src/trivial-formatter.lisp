@@ -600,6 +600,7 @@
   (declare (ignore noise))
   (setf stream (or stream *standard-output*))
   (pprint-logical-block (stream exp :prefix "(" :suffix ")")
+    (pprint-exit-if-list-exhausted)
     (multiple-value-bind (pre post)
         (split-keywords exp)
       (funcall (formatter "~W~1I") stream (car pre))

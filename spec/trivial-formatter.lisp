@@ -593,6 +593,9 @@
 :outputs
 "(MEMBER NIL :APPEND :SUPERSEDE :RENAME :ERROR :NEW-VERSION)"
 
+#?(PPRINT-FUN-CALL NIL NIL)
+:outputs "()"
+
 (requirements-about PPRINT-DEFINE-CONDITION :doc-type function
                     :around (let((*print-pretty* t))
                               (call-body)))
