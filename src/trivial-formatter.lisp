@@ -580,24 +580,22 @@
 
 (defun pprint-with-open-file (stream exp)
   (setf stream (or stream *standard-output*))
-  (if (or (null (cdr exp)) (atom (cadr exp)))
-      (funcall (formatter "~:<~@{~W~^ ~@_~}~:>") stream exp)
-      (multiple-value-bind (pre post)
-          (split-keywords (cadr exp))
-        (pprint-logical-block (stream nil :prefix "(" :suffix ")")
-          (write (car exp) :stream stream)
-          (write-char #\Space stream)
-          (pprint-newline :miser stream)
-          (pprint-indent :block 3 stream)
-          (funcall
-            (formatter "~:<~@[~{~W~^ ~@_~}~]~@[ ~:_~{~W~^ ~@_~W~^ ~_~}~]~:>")
-            stream (list pre post))
-          (pprint-indent :block 1 stream)
-          (pprint-newline :mandatory stream)
-          (funcall (formatter "~@[~{~W~^ ~_~}~]") stream (cddr exp))))))
+  (funcall
+    (formatter
+     #.(apply #'concatenate 'string
+              (alexandria:flatten
+                (list "~:<" "~W~^~3I ~@_" ; operator
+                      (list "~:<~^" ; Open spec.
+                            "~W~^ ~@_" ; var
+                            "~W~^ ~:_" ; path
+                            "~@{~W~^ ~@_~W~^ ~_~}" ; options.
+                            "~:>~^~1I ~_")
+                      "~@{~W~^ ~_~}" ; body
+                      "~:>"))))
+    stream exp))
 
-(defun pprint-fun-call (stream exp &optional colon? &rest noise)
-  (declare (ignore noise))
+(defun pprint-fun-call (stream exp &optional colon? &rest args)
+  (declare (ignore args))
   (setf stream (or stream *standard-output*))
   (pprint-logical-block (stream exp :prefix "(" :suffix ")")
     (pprint-exit-if-list-exhausted)

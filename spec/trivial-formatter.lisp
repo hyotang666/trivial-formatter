@@ -750,7 +750,7 @@
 #?(pprint-with-open-file nil '(with-open-file :not-list))
 :outputs "(WITH-OPEN-FILE :NOT-LIST)"
 #?(pprint-with-open-file nil '(with-open-file nil))
-:outputs "(WITH-OPEN-FILE NIL)"
+:outputs "(WITH-OPEN-FILE ())"
 #?(pprint-with-open-file nil '(with-open-file
                                 (*standard-output* #P"hoge" :direction
                                                    :output :if-does-not-exist :create :if-exists if-exists)
