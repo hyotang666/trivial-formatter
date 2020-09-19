@@ -637,8 +637,18 @@
 (defun pprint-assert (stream exp)
   (setf stream (or stream *standard-output*))
   (funcall
-    (formatter ;;    op         form     var     format                    key   value
-               "~:<~{~W~1I~^ ~@_~W~^ ~:_~:S~^ ~_~@{~W~^ ~:_~}~}~@[ ~:I~:_~{~W ~@_~W~^ ~_~}~]~:>")
+    (formatter
+     #.(apply #'concatenate 'string
+              (alexandria:flatten
+                (list "~:<" ; pprint-logical-block.
+                      (list "~{" ; Pre args.
+                            "~W~^~1I ~@_" ; op
+                            "~W~^ ~:_" ; form
+                            "~:<~@{~W~^ ~@_~}~:>~^ ~_" ; lambda-list
+                            "~@{~W~^ ~:_~}" ; pre body.
+                            "~}")
+                      "~@[ ~:I~:_~{~W ~@_~W~^ ~_~}~]" ; key-value pairs.
+                      "~:>"))))
     stream (multiple-value-list (split-keywords exp))))
 
 (defun pprint-restart-case (stream exp)
