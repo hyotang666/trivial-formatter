@@ -548,7 +548,7 @@
 (defun pprint-linear-elt (stream exp &rest noise)
   (declare (ignore noise))
   (setf stream (or stream *standard-output*))
-  (funcall (formatter "~:<~W~^~1:I ~@{~W~^ ~_~}~:>") stream exp))
+  (funcall (formatter "~:<~^~W~^~1:I ~@{~W~^ ~_~}~:>") stream exp))
 
 (defun pprint-flet (stream exp)
   (let ((printer (pprint-dispatch exp (copy-pprint-dispatch nil)))
