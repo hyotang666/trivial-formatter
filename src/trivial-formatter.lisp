@@ -515,7 +515,7 @@
               (alexandria:flatten
                 (list "~:<" ; pprint-logical-block
                       "~W~^~3I ~:_" ; operator
-                      "~W~^~1I~_" ; form
+                      "~W~^ ~1I~_" ; form
                       (list "~@{" ; cluases.
                             (list "~:<" ; each clause logical-block.
                                   "~W~^ ~@_" ; condition.

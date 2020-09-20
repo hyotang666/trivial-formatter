@@ -2,7 +2,7 @@
   (:import-from :trivial-formatter #:pprint-extended-loop #:split-keywords
                 #:pprint-fun-call #:pprint-define-condition #:pprint-restart-case
                 #:pprint-with-open-file #:split-to-lines #:pprint-cond #:pprint-flet
-                #:pprint-defgeneric #:pprint-defstruct #:pprint-defclass)
+                #:pprint-defgeneric #:pprint-defstruct #:pprint-defclass #:pprint-handler-case)
   (:use :cl :jingoh :trivial-formatter))
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
@@ -986,3 +986,45 @@
 :outputs "(DEFCLASS A SUPERCLASSES SLOTS)"
 #?(PPRINT-DEFCLASS NIL '(DEFCLASS A SUPERCLASSES SLOTS OPTIONS))
 :outputs "(DEFCLASS A SUPERCLASSES SLOTS OPTIONS)"
+(requirements-about PPRINT-HANDLER-CASE :doc-type function)
+
+;;;; Description:
+
+#+syntax (PPRINT-HANDLER-CASE stream exp &rest noise) ; => result
+
+;;;; Arguments and Values:
+
+; stream := 
+
+; exp := 
+
+; noise := 
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
+#?(PPRINT-HANDLER-CASE NIL '(HANDLER-CASE))
+:outputs "(HANDLER-CASE)"
+#?(PPRINT-HANDLER-CASE NIL '(HANDLER-CASE 0))
+:outputs "(HANDLER-CASE 0)"
+#?(PPRINT-HANDLER-CASE NIL '(HANDLER-CASE 0 1))
+:outputs "(HANDLER-CASE 0 1)"
+#?(PPRINT-HANDLER-CASE NIL '(HANDLER-CASE FORM CLAUSE1 CLAUSE2))
+:outputs "(HANDLER-CASE FORM CLAUSE1 CLAUSE2)"
+#?(PPRINT-HANDLER-CASE NIL '(HANDLER-CASE FORM (CONDITION)))
+:outputs "(HANDLER-CASE FORM (CONDITION))"
+#?(PPRINT-HANDLER-CASE NIL '(HANDLER-CASE FORM (CONDITION VAR)))
+:outputs "(HANDLER-CASE FORM (CONDITION VAR))"
+#?(PPRINT-HANDLER-CASE NIL '(HANDLER-CASE FORM (CONDITION (VAR VAR2))))
+:outputs "(HANDLER-CASE FORM (CONDITION (VAR VAR2)))"
+#?(PPRINT-HANDLER-CASE NIL '(HANDLER-CASE FORM (CONDITION (VAR) BODY)))
+:outputs "(HANDLER-CASE FORM
+  (CONDITION (VAR)
+    BODY))"
