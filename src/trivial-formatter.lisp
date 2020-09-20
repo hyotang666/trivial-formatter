@@ -51,7 +51,7 @@
 (defun pprint-deformatter (stream exp)
   (setf stream (or stream *standard-output*))
   (funcall
-    (formatter "~:<~W~3I~^ ~@_~W~^ ~@_~W~^ ~@_~W~1I~^~@:_~@{~W~^~:@_~}~:>")
+    (formatter "~:<~W~^ ~3I~@_~W~^ ~@_~W~^ ~@_~W~1I~^~@:_~@{~W~^~:@_~}~:>")
     stream exp))
 
 (set-pprint-dispatch '(cons (member deformatter)) 'pprint-deformatter)
@@ -467,9 +467,9 @@
   (funcall
     (formatter
      #.(concatenate 'string "~:<" ; pprint-block.
-                    "~W~^~3I ~@_" ; operator
+                    "~W~^ ~3I~@_" ; operator
                     "~W~^ ~@_" ; class-name
-                    "~:<~@{~W~^ ~@_~}~:>~^~1I ~:_" ; superclasses
+                    "~:<~@{~W~^ ~@_~}~:>~^ ~1I~:_" ; superclasses
                     "~:<~@{~/trivial-formatter::pprint-fun-call/~^ ~_~}~:>~^ ~_" ; slots
                     "~@{~W~^ ~_~}" ; options
                     "~:>"))
@@ -477,7 +477,7 @@
 
 (defun pprint-ftype (stream exp)
   (setf stream (or stream *standard-output*))
-  (funcall (formatter "~:<~W~1I~^ ~@_~:I~^~W~^ ~_~@{~W~^ ~_~}~:>") stream exp))
+  (funcall (formatter "~:<~W~^ ~1I~@_~:I~^~W~^ ~_~@{~W~^ ~_~}~:>") stream exp))
 
 (defun shortest-package-name (package)
   (reduce
@@ -514,12 +514,12 @@
      #.(apply #'concatenate 'string
               (alexandria:flatten
                 (list "~:<" ; pprint-logical-block
-                      "~W~^~3I ~:_" ; operator
+                      "~W~^ ~3I~:_" ; operator
                       "~W~^ ~1I~_" ; form
                       (list "~@{" ; cluases.
                             (list "~:<" ; each clause logical-block.
                                   "~W~^ ~@_" ; condition.
-                                  "~:<~@{~W~^ ~@_~}~:>~^~1I ~:@_" ; lambda-list
+                                  "~:<~@{~W~^ ~@_~}~:>~^ ~1I~:@_" ; lambda-list
                                   "~@{~W~^ ~:_~}" ; clause-body
                                   "~:>")
                             "~^ ~_~}")
@@ -534,7 +534,7 @@
               (alexandria:flatten
                 (list "~:<" ; pprint-logical-block.
                       "~W~^ ~@_" ; op
-                      "~W~^~3I ~@_" ; name
+                      "~W~^ ~3I~@_" ; name
                       "~:<~@{~W~^ ~@_~}~:>~^ ~1I~_" ; superclasses.
                       (list "~:<" ; slots.
                             (list "~@{" ; each slot.
@@ -548,7 +548,7 @@
 (defun pprint-linear-elt (stream exp &rest noise)
   (declare (ignore noise))
   (setf stream (or stream *standard-output*))
-  (funcall (formatter "~:<~^~W~^~1:I ~@{~W~^ ~_~}~:>") stream exp))
+  (funcall (formatter "~:<~^~W~^ ~:I~@{~W~^ ~_~}~:>") stream exp))
 
 (defun pprint-flet (stream exp)
   (let ((printer (pprint-dispatch exp (copy-pprint-dispatch nil)))
@@ -584,12 +584,12 @@
     (formatter
      #.(apply #'concatenate 'string
               (alexandria:flatten
-                (list "~:<" "~W~^~3I ~@_" ; operator
+                (list "~:<" "~W~^ ~3I~@_" ; operator
                       (list "~:<~^" ; Open spec.
                             "~W~^ ~@_" ; var
                             "~W~^ ~:_" ; path
                             "~@{~W~^ ~@_~W~^ ~_~}" ; options.
-                            "~:>~^~1I ~_")
+                            "~:>~^ ~1I~_")
                       "~@{~W~^ ~_~}" ; body
                       "~:>"))))
     stream exp))
@@ -631,7 +631,7 @@
         (return (values (reverse list) post)))))
 
 (defun pprint-when (stream exp)
-  (funcall (formatter "~:<~W~3I~^ ~@_~W~^ ~1I~:@_~@{~^~W~^ ~_~}~:>") stream
+  (funcall (formatter "~:<~W~^ ~3I~@_~W~^ ~1I~:@_~@{~^~W~^ ~_~}~:>") stream
            exp))
 
 (defun pprint-assert (stream exp)
@@ -642,7 +642,7 @@
               (alexandria:flatten
                 (list "~:<" ; pprint-logical-block.
                       (list "~{" ; Pre args.
-                            "~W~^~1I ~@_" ; op
+                            "~W~^ ~1I~@_" ; op
                             "~W~^ ~:_" ; form
                             "~:<~@{~W~^ ~@_~}~:>~^ ~_" ; lambda-list
                             "~@{~W~^ ~:_~}" ; pre body.
@@ -682,7 +682,7 @@
      #.(apply #'concatenate 'string
               (alexandria:flatten
                 (list "~:<" ; pprint-logical-block.
-                      "~W~^~1I ~@_" ; op
+                      "~W~^ ~1I~@_" ; op
                       (list "~:<" ; name&options.
                             "~W~^ ~:I~@_" ; name
                             "~@{~W~^ ~_~}" ; options
@@ -705,7 +705,7 @@
     ;; lambda-list
     (write (pprint-pop) :stream stream)
     (pprint-exit-if-list-exhausted)
-    (funcall (formatter "~1I ~_") stream)
+    (funcall (formatter " ~1I~_") stream)
     ;; options
     (loop :for elt := (pprint-pop)
           :if (or (atom elt) (not (eq :method (car elt))))
