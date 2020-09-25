@@ -820,7 +820,23 @@
 
 ;;;; Exceptional-Situations:
 
-#?(PPRINT-COND *STANDARD-OUTPUT* '(COND NIL NIL)) :outputs "(COND NIL NIL)"
+#?(PPRINT-COND *STANDARD-OUTPUT* '(COND NIL NIL)) :outputs "(COND () ())"
+#?(PPRINT-COND NIL '(COND))
+:outputs "(COND)"
+#?(PPRINT-COND NIL '(COND CLAUSE))
+:outputs "(COND CLAUSE)"
+#?(PPRINT-COND NIL '(COND CLAUSE CLAUSE2))
+:outputs "(COND CLAUSE CLAUSE2)"
+#?(PPRINT-COND NIL '(COND CLAUSE (T)))
+:outputs "(COND CLAUSE (T))"
+#?(PPRINT-COND NIL
+               '(COND ((EVENP I) (DO-IT-FOR-EVEN I))
+                      ((ODDP I) (DO-IT-FOR-ODD I)) (T (DO-IT) (FOR-OTHERS))))
+:outputs "(COND ((EVENP I) (DO-IT-FOR-EVEN I))
+      ((ODDP I) (DO-IT-FOR-ODD I))
+      (T
+       (DO-IT)
+       (FOR-OTHERS)))"
 
 (requirements-about PPRINT-FLET :doc-type function)
 

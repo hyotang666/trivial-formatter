@@ -576,7 +576,21 @@
     (funcall printer stream exp)))
 
 (defun pprint-cond (stream exp)
-  (funcall (formatter "~:<~W ~:_~:I~@{~W~^ ~_~}~:>") stream exp))
+  (funcall
+    (formatter
+     #.(apply #'concatenate 'string
+              (alexandria:flatten
+                (list "~:<" ; pprint-logical-block.
+                      "~W~^ ~:_~:I" ; op.
+                      (list "~@{" ; clauses.
+                            (list "~:<~^" ; each clause logical block.
+                                  "~W~^ ~_" ; pred.
+                                  "~W~^ ~:@_" ; first body.
+                                  "~@{~W~^ ~_~}" ; rest body.
+                                  "~:>~^ ~_")
+                            "~}")
+                      "~:>"))))
+    stream exp))
 
 (defun pprint-with-open-file (stream exp)
   (setf stream (or stream *standard-output*))
@@ -1059,7 +1073,8 @@
     (null (values when nil))
     (end
      (cond
-      ((null (nestable-end when)) (setf (nestable-end when) first)
+      ((null (nestable-end when))
+       (setf (nestable-end when) first)
        (values when rest))
       (t (values when (cons first rest)))))
     (nestable
@@ -1101,12 +1116,14 @@
       (t (values when (cons first rest)))))
     (else
      (cond
-      ((null (nestable-else when)) (setf (nestable-else when) first)
+      ((null (nestable-else when))
+       (setf (nestable-else when) first)
        (make-nest when (car rest) (cdr rest)))
       (t (values when (cons first rest)))))
     (otherwise
      (cond
-      ((null (clause-forms when)) (setf (clause-forms when) (list first))
+      ((null (clause-forms when))
+       (setf (clause-forms when) (list first))
        (make-nest when (car rest) (cdr rest)))
       ((and (additional-p (car (last (clause-forms when))))
             (null (clause-forms (car (last (clause-forms when))))))
