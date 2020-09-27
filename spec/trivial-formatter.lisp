@@ -513,6 +513,12 @@
              (list (trivial-formatter::make-clause :keyword 'with :forms '(flag = nil))
                    (trivial-formatter::make-clause :keyword 'if)))))
 
+#?(PPRINT-EXTENDED-LOOP NIL
+                        '(LOOP :NAMED NAME
+                               :FOR I :BELOW 10))
+:outputs "(LOOP :NAMED NAME
+      :FOR I :BELOW 10)"
+
 (requirements-about SPLIT-KEYWORDS :doc-type function)
 
 ;;;; Description:
@@ -1044,3 +1050,4 @@
 :outputs "(HANDLER-CASE FORM
   (CONDITION (VAR)
     BODY))"
+

@@ -1003,7 +1003,7 @@
                :nconc :nconcing :count :counting :sum :summing :maximize
                :maximizing :minimize :minimizing :if :when :unless :end :while
                :until :repeat :always :never :thereis :do :doing :initially
-               :finally :return :else)
+               :finally :return :else :named)
              :test #'string=)))
 
 (defun parse-loop-body (body)
