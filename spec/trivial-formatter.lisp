@@ -868,7 +868,14 @@
 ;;;; Exceptional-Situations:
 
 #?(pprint-flet nil '(flet)) :outputs "(FLET)"
-#?(PPRINT-FLET NIL '(FLET T)) :outputs "(FLET T)"
+#?(PPRINT-FLET NIL '(FLET T))
+:outputs #.(let ((*print-pretty* t))
+             (prin1-to-string '(flet t)))
+#+ecl ; as guard.
+#?(prin1-to-string '(flet t))
+=> "(FLET T
+  )"
+,:test equal
 
 (requirements-about PPRINT-DEFGENERIC :doc-type function)
 

@@ -126,7 +126,7 @@ SBCL/2.0.9
 ### Tested with
 * SBCL/2.0.9
 * CCL/1.12 ; Failed due to CCL violates ANSI standard.
-* ECL/16.1.3
+* ECL/20.4.24
 
 #### Note
 Trivial-formatter works portable at least above implementation.
