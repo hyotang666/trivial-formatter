@@ -458,6 +458,7 @@
                          (pprint-dispatch '(defun) nil))
     (set-pprint-dispatch '(cons (member defstruct)) 'pprint-defstruct)
     (set-pprint-dispatch '(cons (member defgeneric)) 'pprint-defgeneric)
+    (set-pprint-dispatch '(cons (member pushnew)) 'pprint-fun-call)
     *print-pprint-dispatch*))
 
 (defparameter *pprint-dispatch* *print-pprint-dispatch*)
