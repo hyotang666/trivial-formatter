@@ -45,6 +45,10 @@
 ; When specified system is not found, an error of asdf:missing-component is signaled.
 #?(fmt :no-such-system) :signals asdf:missing-component
 
+;;;; Guards.
+#?(macroexpand-all '(formatter "~<#.~;~W~:>"))
+:signals condition
+
 (requirements-about READ-AS-CODE :doc-type function)
 
 ;;;; Description:
