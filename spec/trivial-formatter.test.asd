@@ -2,9 +2,11 @@
 (in-package :asdf)
 (defsystem "trivial-formatter.test"
   :version
-  "1.12.3"
+  "1.12.4"
   :depends-on
-  (:jingoh "trivial-formatter")
+  (:jingoh "trivial-formatter"
+           #+ecl "trivial-macroexpand-all"
+           )
   :components
   ((:file "trivial-formatter"))
   :perform
