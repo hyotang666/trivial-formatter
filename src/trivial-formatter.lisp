@@ -84,22 +84,50 @@
                            :if-exists if-exists)
             (write-string string))))))
 
+(declaim
+ (ftype (function (asdf:component)
+         (values list ; of-type asdf:cl-source-file
+                 &optional))
+        component-children))
+
 (defun component-children (component)
-  (if (typep component 'asdf:package-inferred-system)
-      (warn "Currently package-inferred-system is not supported.")
-      (labels ((rec (list acc)
-                 (if (endp list)
-                     acc
-                     (body (car list) (cdr list) acc)))
-               (body (first rest acc)
-                 (typecase first
-                   (asdf:system
-                    (rec (append (asdf:component-children first) rest) acc))
-                   (asdf:module
-                    (rec (append (asdf:component-children first) rest) acc))
-                   (asdf:static-file (rec rest acc))
-                   (otherwise (rec rest (cons first acc))))))
-        (rec (list component) nil))))
+  (labels ((rec (list acc primary-system-name)
+             (if (endp list)
+                 acc
+                 (body (car list) (cdr list) acc primary-system-name)))
+           (body (first rest acc primary-system-name)
+             (typecase first
+               (asdf:package-inferred-system
+                (rec
+                  (loop :for system :in (asdf:system-depends-on first)
+                        :if (equal primary-system-name
+                                   (asdf:primary-system-name system))
+                          :collect (asdf:find-system system) :into result
+                        :finally (return (nconc result rest)))
+                  (if (and (asdf/component:module-default-component-class
+                             first)
+                           (eq 'asdf:cl-source-file
+                               (class-name
+                                 (asdf/component:module-default-component-class
+                                   first))))
+                      (union (asdf:component-children first) acc
+                             :test #'equal
+                             :key (lambda (c)
+                                    (slot-value c
+                                                'asdf/component:absolute-pathname)))
+                      acc)
+                  primary-system-name))
+               (asdf:system
+                (rec (append (asdf:component-children first) rest) acc
+                     primary-system-name))
+               (asdf:module
+                (rec (append (asdf:component-children first) rest) acc
+                     primary-system-name))
+               (asdf:static-file (rec rest acc primary-system-name))
+               (otherwise (rec rest (cons first acc) primary-system-name)))))
+    (rec (list component) nil
+         (when (typep component 'asdf:package-inferred-system)
+           (asdf:primary-system-name component)))))
 
 ;;;; READ-AS-CODE
 
