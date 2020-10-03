@@ -1,4 +1,4 @@
-# TRIVIAL-FORMATTER 5.8.9
+# TRIVIAL-FORMATTER 7.1.0
 ## What is this?
 Code formatter for common lisp.
 Please see [trivial-formatter's source code](src/trivial-formatter.lisp).
@@ -121,10 +121,10 @@ When you want to set pretty printing function temporalilly, you need to bind `*P
 MIT
 
 ### Developed with
-SBCL/2.0.7
+SBCL/2.0.9
 
 ### Tested with
-* SBCL/2.0.7
+* SBCL/2.0.9
 * CCL/1.12 ; Failed due to CCL violates ANSI standard.
 * ECL/16.1.3
 
@@ -168,9 +168,6 @@ Please wait next ccl release or build current ccl from source.
 #### Reader.
 When reader macro conflicts, such reader macros are ignored silently.
 You can add new reader macros, but can not modify already existing reader macros.
-
-#### PACKAGE-INFERRED-SYSTEM
-Currently package-inferred-system is not supported.
 
 #### FORMAT-CONTROL
 Trivial-formatter can not adjust ~newline format control indentation.
