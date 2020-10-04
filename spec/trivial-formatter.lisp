@@ -123,10 +123,11 @@
                 (equal "no-such-package:symbol" (get result 'trivial-formatter::notation))))
 ; ECL specific guard.
 #+ecl
-#?(eq 'simple-error
-      (type-of
-        (nth-value 1 (ignore-errors (read-from-string "no-such-package:symbol")))))
-=> T
+#?(subtypep
+    (type-of
+      (nth-value 1 (ignore-errors (read-from-string "no-such-package:symbol"))))
+    'package-error)
+=> NIL
 
 ; * If specified package name is different actual package name, such symbol is marked.
 ; This prevents e.g. closer-mop symbols becomes underlying implementation dependent symbol.
