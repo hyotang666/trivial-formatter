@@ -48,7 +48,7 @@
 
 ;;;; Guards.
 #+ecl
-#?(macroexpand-all '(formatter "~<#.~;~W~:>"))
+#?(trivial-macroexpand-all:macroexpand-all '(formatter "~<#.~;~W~:>"))
 :signals condition
 
 (requirements-about READ-AS-CODE :doc-type function)
