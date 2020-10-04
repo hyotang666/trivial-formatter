@@ -15,7 +15,8 @@
            ;; Readtable name.
            #:as-code
            ;; Special variable
-           #:*foreign-formatters-directories*))
+           #:*foreign-formatters-directories*
+           #:*strict-loop-keyword-p*))
 
 (in-package :trivial-formatter)
 
@@ -1008,6 +1009,10 @@
 
 ;;; CONSTRUCTOR
 
+(defparameter *strict-loop-keyword-p* nil)
+
+(declaim (type boolean *strict-loop-keyword-p*))
+
 (defun make-clause (&key keyword forms)
   (funcall
     (case (separation-keyword-p keyword)
@@ -1018,7 +1023,10 @@
       ((:and) #'make-additional)
       ((:end) #'make-end)
       (otherwise #'%make-clause))
-    :keyword keyword
+    :keyword (or (and *strict-loop-keyword-p*
+                      (or (separation-keyword-p keyword)
+                          (non-separation-keyword-p keyword)))
+                 keyword)
     :forms forms))
 
 (defun print-clause (thing)
@@ -1035,6 +1043,36 @@
                :finally :return :else :named)
              :test #'string=)))
 
+(defun non-separation-keyword-p (thing)
+  (and (symbolp thing)
+       (find thing
+             `(:using :being :the :each :hash-keys :hash-key :hash-values
+               :hash-value :in :on :by :from :then :upfrom :downfrom :across
+               :to :upto :downto :into :of-type :below := :into)
+             :test #'string=)))
+
+(defun force-to-keyword (clause)
+  (typecase clause
+    ((or null own-block) clause)
+    (nestable
+     (setf (clause-forms clause)
+             (mapcar #'force-to-keyword (clause-forms clause))
+           (nestable-else clause) (force-to-keyword (nestable-else clause)))
+     clause)
+    (optional
+     (setf (clause-forms clause)
+             (mapcar #'force-to-keyword (clause-forms clause)))
+     clause)
+    (t
+     (setf (clause-forms clause)
+             (loop :for (first . rest) :on (clause-forms clause) :by #'cddr
+                   :collect first
+                   :if rest
+                     :collect (or (separation-keyword-p (car rest))
+                                  (non-separation-keyword-p (car rest))
+                                  (car rest))))
+     clause)))
+
 (defun parse-loop-body (body)
   (labels ((rec (list &optional acc)
              (if (endp list)
@@ -1042,7 +1080,9 @@
                  (multiple-value-bind (obj rest)
                      (pick-clause list)
                    (rec rest (cons obj acc))))))
-    (rec (make-loop-clauses body))))
+    (if *strict-loop-keyword-p*
+        (mapcar #'force-to-keyword (rec (make-loop-clauses body)))
+        (rec (make-loop-clauses body)))))
 
 (defun make-loop-clauses (body)
   (labels ((rec (list &optional temp acc)

@@ -33,6 +33,7 @@
 
 ;;;; Affected By:
 ; `*readtable*` `*print-pprint-dispatch*`
+; `*strict-loop-keyword-p*`, when t loop macro keywrods are force to be keyword symbol.
 
 ;;;; Side-Effects:
 ; Load asdf:system to lisp environment.
@@ -211,6 +212,7 @@
 
 ;;;; Affected By:
 ; `*print-pprint-dispatch*`
+; `*strict-loop-keyword-p*`, when t loop macro keywrods are force to be keyword symbol.
 
 ;;;; Side-Effects:
 ; Output to `STREAM`.
@@ -281,6 +283,7 @@
 ; result := 
 
 ;;;; Affected By:
+; `*strict-loop-keyword-p*` when t loop macro keywords are force to be keyword symbol.
 
 ;;;; Side-Effects:
 
@@ -1070,3 +1073,30 @@
   (CONDITION (VAR)
     BODY))"
 
+(requirements-about *STRICT-LOOP-KEYWORD-P* :doc-type variable)
+
+;;;; Description:
+; Control forcing to loop macro keyword to keyword symbol.
+
+;;;; Value type is BOOLEAN
+#? *STRICT-LOOP-KEYWORD-P* :be-the boolean
+
+; Initial value is `NIL`
+
+;;;; Affected By:
+; fmt >> pprint-extended-loop >> parse-loop-body, make-clause.
+
+;;;; Notes:
+
+#?(LET ((*STRICT-LOOP-KEYWORD-P* T))
+    (PPRINT-EXTENDED-LOOP NIL
+                          '(LOOP FOR I BELOW 10
+                                 COLLECT I)))
+:outputs "(LOOP :FOR I :BELOW 10
+      :COLLECT I)"
+#?(LET ((*STRICT-LOOP-KEYWORD-P*))
+    (PPRINT-EXTENDED-LOOP NIL
+                          '(LOOP FOR I BELOW 10
+                                 COLLECT I)))
+:outputs "(LOOP FOR I BELOW 10
+      COLLECT I)"
