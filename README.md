@@ -1,4 +1,4 @@
-# TRIVIAL-FORMATTER 7.1.0
+# TRIVIAL-FORMATTER 8.0.0
 ## What is this?
 Code formatter for common lisp.
 Please see [trivial-formatter's source code](src/trivial-formatter.lisp).
@@ -20,6 +20,27 @@ You can control it with ordinary common lisp pretty printing system way, i.e. us
 ```lisp
 (let ((*print-right-margin* 100)) ; <-- Specify line width with 100.
   (trivial-formatter:fmt :your-system :supersede))
+```
+
+### Strict mode.
+When you invokes debugger, some implementations (e.g. ECL) into :cl-user package.
+In such case, `LOOP` macro backtrace form become ugly.
+
+```lisp
+(LOOP YOUR-PROJECT::FOR YOUR-PROJECT::I YOUR-PROJECT::UPFROM 0 ...)
+```
+
+Using keyword symbol as loop macro keywords avoids such ugly forms.
+
+```lisp
+(LOOP :FOR YOUR-PROJECT::I :UPFROM 0 ...)
+```
+In strict mode, trivial-formatter formats loop macro keywords into keyword symbols.
+To enable it, binds `*STRICT-LOOP-KEYWORD-P*` with `T`.
+
+```lisp
+* (let ((trivial-formatter:*strict-loop-keyword-p* t))
+    (trivial-formatter:fmt :your-system :supersede))
 ```
 
 ## From developer
