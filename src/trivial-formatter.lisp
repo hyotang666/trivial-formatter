@@ -421,16 +421,16 @@
                 :do (let* ((*macroexpand-hook*
                             (lambda (expander form env)
                               (cond
-                               ((typep form '(cons (eql in-package)))
-                                (eval (funcall expander form env)))
-                               ;; SBCL fails to macroexpand-all defun when
-                               ;; function declaimed as inline.
-                               ;; I beleave there is no in-package inside defun.
-                               ((typep form
-                                       '(cons
-                                          (member defun #+sbcl sb-c:xdefun)))
-                                nil)
-                               (t (funcall expander form env)))))
+                                ((typep form '(cons (eql in-package)))
+                                 (eval (funcall expander form env)))
+                                ;; SBCL fails to macroexpand-all defun when
+                                ;; function declaimed as inline.
+                                ;; I beleave there is no in-package inside defun.
+                                ((typep form
+                                        '(cons
+                                           (member defun #+sbcl sb-c:xdefun)))
+                                 nil)
+                                (t (funcall expander form env)))))
                            (*print-length*)
                            (string
                             (with-output-to-string (s)
@@ -611,7 +611,7 @@
      #.(apply #'concatenate 'string
               (alexandria:flatten
                 (list "~:<" ; pprint-logical-block.
-                      "~W~^ ~:_~:I" ; op.
+                      "~W~^ ~1I~:_~:I" ; op.
                       (list "~@{" ; clauses.
                             (list "~:<~^" ; each clause logical block.
                                   "~W~^ ~_" ; pred.
@@ -1142,73 +1142,74 @@
     (null (values when nil))
     (end
      (cond
-      ((null (nestable-end when))
-       (setf (nestable-end when) first)
-       (values when rest))
-      (t (values when (cons first rest)))))
+       ((null (nestable-end when))
+        (setf (nestable-end when) first)
+        (values when rest))
+       (t (values when (cons first rest)))))
     (nestable
      (cond
-      ((null (clause-forms when))
-       (multiple-value-bind (obj list)
-           (make-nest first (car rest) (cdr rest))
-         (setf (clause-forms when) (list obj))
-         (make-nest when (car list) (cdr list))))
-      ((and (additional-p (car (last (clause-forms when))))
-            (null (clause-forms (car (last (clause-forms when))))))
-       (multiple-value-bind (obj list)
-           (make-nest first (car rest) (cdr rest))
-         (setf (clause-forms (car (last (clause-forms when)))) (list obj))
-         (make-nest when (car list) (cdr list))))
-      ((and (nestable-else when) (null (clause-forms (nestable-else when))))
-       (multiple-value-bind (obj list)
-           (make-nest first (car rest) (cdr rest))
-         (setf (clause-forms (nestable-else when)) (list obj))
-         (make-nest when (car list) (cdr list))))
-      ((and (nestable-else when)
-            (additional-p (car (last (clause-forms (nestable-else when)))))
-            (null (car (last (clause-forms (nestable-else when))))))
-       (multiple-value-bind (obj list)
-           (make-nest first (car rest) (cdr rest))
-         (setf (clause-forms (nestable-else when))
-                 (append (clause-forms (nestable-else when)) (list obj)))
-         (make-nest when (car list) (cdr list))))
-      (t (values when (cons first rest)))))
+       ((null (clause-forms when))
+        (multiple-value-bind (obj list)
+            (make-nest first (car rest) (cdr rest))
+          (setf (clause-forms when) (list obj))
+          (make-nest when (car list) (cdr list))))
+       ((and (additional-p (car (last (clause-forms when))))
+             (null (clause-forms (car (last (clause-forms when))))))
+        (multiple-value-bind (obj list)
+            (make-nest first (car rest) (cdr rest))
+          (setf (clause-forms (car (last (clause-forms when)))) (list obj))
+          (make-nest when (car list) (cdr list))))
+       ((and (nestable-else when) (null (clause-forms (nestable-else when))))
+        (multiple-value-bind (obj list)
+            (make-nest first (car rest) (cdr rest))
+          (setf (clause-forms (nestable-else when)) (list obj))
+          (make-nest when (car list) (cdr list))))
+       ((and (nestable-else when)
+             (additional-p (car (last (clause-forms (nestable-else when)))))
+             (null (car (last (clause-forms (nestable-else when))))))
+        (multiple-value-bind (obj list)
+            (make-nest first (car rest) (cdr rest))
+          (setf (clause-forms (nestable-else when))
+                  (append (clause-forms (nestable-else when)) (list obj)))
+          (make-nest when (car list) (cdr list))))
+       (t (values when (cons first rest)))))
     (additional
      (cond
-      ((and (nestable-else when) (clause-forms (nestable-else when)))
-       (setf (clause-forms (nestable-else when))
-               (append (clause-forms (nestable-else when)) (list first)))
-       (make-nest when (car rest) (cdr rest)))
-      ((and (nestable-forms when) (null (nestable-else when)))
-       (setf (clause-forms when) (append (clause-forms when) (list first)))
-       (make-nest when (car rest) (cdr rest)))
-      (t (values when (cons first rest)))))
+       ((and (nestable-else when) (clause-forms (nestable-else when)))
+        (setf (clause-forms (nestable-else when))
+                (append (clause-forms (nestable-else when)) (list first)))
+        (make-nest when (car rest) (cdr rest)))
+       ((and (nestable-forms when) (null (nestable-else when)))
+        (setf (clause-forms when) (append (clause-forms when) (list first)))
+        (make-nest when (car rest) (cdr rest)))
+       (t (values when (cons first rest)))))
     (else
      (cond
-      ((null (nestable-else when))
-       (setf (nestable-else when) first)
-       (make-nest when (car rest) (cdr rest)))
-      (t (values when (cons first rest)))))
+       ((null (nestable-else when))
+        (setf (nestable-else when) first)
+        (make-nest when (car rest) (cdr rest)))
+       (t (values when (cons first rest)))))
     (otherwise
      (cond
-      ((null (clause-forms when))
-       (setf (clause-forms when) (list first))
-       (make-nest when (car rest) (cdr rest)))
-      ((and (additional-p (car (last (clause-forms when))))
-            (null (clause-forms (car (last (clause-forms when))))))
-       (setf (clause-forms (car (last (clause-forms when)))) (list first))
-       (make-nest when (car rest) (cdr rest)))
-      ((and (nestable-else when) (null (clause-forms (nestable-else when))))
-       (setf (clause-forms (nestable-else when)) (list first))
-       (make-nest when (car rest) (cdr rest)))
-      ((and (nestable-else when)
-            (additional-p (car (last (clause-forms (nestable-else when)))))
-            (null
-              (clause-forms (car (last (clause-forms (nestable-else when)))))))
-       (setf (clause-forms (car (last (clause-forms (nestable-else when)))))
-               (list first))
-       (make-nest when (car rest) (cdr rest)))
-      (t (values when (cons first rest)))))))
+       ((null (clause-forms when))
+        (setf (clause-forms when) (list first))
+        (make-nest when (car rest) (cdr rest)))
+       ((and (additional-p (car (last (clause-forms when))))
+             (null (clause-forms (car (last (clause-forms when))))))
+        (setf (clause-forms (car (last (clause-forms when)))) (list first))
+        (make-nest when (car rest) (cdr rest)))
+       ((and (nestable-else when) (null (clause-forms (nestable-else when))))
+        (setf (clause-forms (nestable-else when)) (list first))
+        (make-nest when (car rest) (cdr rest)))
+       ((and (nestable-else when)
+             (additional-p (car (last (clause-forms (nestable-else when)))))
+             (null
+               (clause-forms
+                 (car (last (clause-forms (nestable-else when)))))))
+        (setf (clause-forms (car (last (clause-forms (nestable-else when)))))
+                (list first))
+        (make-nest when (car rest) (cdr rest)))
+       (t (values when (cons first rest)))))))
 
 (defun pprint-extended-loop (stream list)
   (pprint-logical-block (stream nil :prefix "(" :suffix ")")
