@@ -535,6 +535,15 @@
 :outputs "(LOOP :NAMED NAME
       :FOR I :BELOW 10)"
 
+;; Corner case. Nested.
+#?(PRINT-AS-CODE
+   '(LOOP :WHEN (ODDP X)
+          :DO (LOOP :WHEN (ODDP Y)
+                    :DO (PRINT (LIST X Y)))))
+:outputs "(loop :when (oddp x)
+        :do (loop :when (oddp y)
+                    :do (print (list x y))))"
+
 (requirements-about SPLIT-KEYWORDS :doc-type function)
 
 ;;;; Description:

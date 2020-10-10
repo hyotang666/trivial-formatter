@@ -1214,7 +1214,7 @@
 (defun pprint-extended-loop (stream list)
   (pprint-logical-block (stream nil :prefix "(" :suffix ")")
     (funcall (formatter "~W~:[~; ~:I~]") stream (car list) (cdr list))
-    (let ((*print-clause* t))
+    (let ((*print-clause* t) (*indent* 5))
       (funcall (formatter "~{~W~^~:@_~}") stream
                (parse-loop-body (cdr list))))))
 
