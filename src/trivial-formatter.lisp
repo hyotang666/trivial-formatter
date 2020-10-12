@@ -696,18 +696,35 @@
     stream (multiple-value-list (split-keywords exp))))
 
 (defun pprint-restart-case (stream exp)
-  (pprint-logical-block (stream nil :prefix "(" :suffix ")")
-    (funcall (formatter "~W") stream (car exp))
-    (when (cdr exp)
-      (funcall (formatter " ~3I~@_~W") stream (cadr exp))
-      (if (cddr exp)
-          (if (some #'atom (cddr exp))
-              (funcall (formatter " ~@_~{~W~^ ~@_~}") stream (cddr exp))
-              (dolist (clause (cddr exp))
-                (funcall
-                  (formatter
-                   " ~1I~:_~:<~{~W~^ ~@_~:S~^ ~@_~}~@[ ~3I~{~_~W~^ ~@_~W~^ ~}~]~^ ~1I~_~@{~W~^ ~:_~}~:>")
-                  stream (parse-restart-clause clause))))))))
+  (funcall
+    (formatter
+     #.(apply #'concatenate 'string
+              (alexandria:flatten
+                (list "~:<" ; pprint-logical-block.
+                      "~W~^ ~1I~@_" ; operator.
+                      "~W~^ ~_" ; form.
+                      (list "~@{" ; clauses.
+                            "~/trivial-formatter:pprint-restart-case-clause/~^ ~_" ; each-clause
+                            "~}")
+                      "~:>"))))
+    stream exp))
+
+(defun pprint-restart-case-clause (stream exp &rest noise)
+  (declare (ignore noise))
+  (if (atom exp)
+      (write exp :stream stream)
+      (pprint-logical-block (stream exp :prefix "(" :suffix ")")
+        (pprint-exit-if-list-exhausted)
+        (apply
+          (formatter
+           #.(apply #'concatenate 'string
+                    (alexandria:flatten
+                      (list "~{~W~^ ~@_~:<~^~W~:>~}" ; pre.
+                            (list "~@[" ; if exists.
+                                  " ~3I~_~{~W~^ ~@_~W~^ ~_~}" ; keys
+                                  "~]")
+                            "~^ ~1I~_~@{~W~^ ~_~}")))) ; body.
+          stream (parse-restart-clause exp)))))
 
 (defun parse-restart-clause (clause)
   (let ((pre
