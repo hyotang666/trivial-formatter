@@ -723,7 +723,9 @@
                             (list "~@[" ; if exists.
                                   " ~3I~_~{~W~^ ~@_~W~^ ~_~}" ; keys
                                   "~]")
-                            "~^ ~1I~_~@{~W~^ ~_~}")))) ; body.
+                            "~^ ~1I" ; if exists body.
+                            "~:*~:[~_~;~:@_~]" ; mandatory newline when keys.
+                            "~@{~W~^ ~:@_~}")))) ; body.
           stream (parse-restart-clause exp)))))
 
 (defun parse-restart-clause (clause)

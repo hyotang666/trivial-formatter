@@ -750,6 +750,14 @@
       :INTERACTIVE #'READ
     EXPECTED))"
 
+#?(PPRINT-RESTART-CASE NIL
+                       '(RESTART-CASE NIL
+                          (TEST NIL :REPORT "this is report" (RETURN))))
+:outputs "(RESTART-CASE NIL
+  (TEST ()
+      :REPORT \"this is report\"
+    (RETURN)))"
+
 (requirements-about PPRINT-WITH-OPEN-FILE :doc-type function
                     :around (let((*print-pretty* t))
                               (call-body)))
