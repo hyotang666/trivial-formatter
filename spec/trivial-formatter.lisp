@@ -1048,6 +1048,7 @@
 :outputs "(DEFCLASS A SUPERCLASSES SLOTS)"
 #?(PPRINT-DEFCLASS NIL '(DEFCLASS A SUPERCLASSES SLOTS OPTIONS))
 :outputs "(DEFCLASS A SUPERCLASSES SLOTS OPTIONS)"
+
 (requirements-about PPRINT-HANDLER-CASE :doc-type function)
 
 ;;;; Description:
@@ -1091,6 +1092,15 @@
   (CONDITION (VAR)
     BODY))"
 
+#?(PPRINT-HANDLER-CASE NIL
+                       '(HANDLER-CASE FORM
+                                      (:NO-ERROR (&REST ARGS)
+                                       (DECLARE (IGNORE ARGS)) (VALUES))))
+:outputs "(HANDLER-CASE FORM
+  (:NO-ERROR (&REST ARGS)
+    (DECLARE (IGNORE ARGS))
+    (VALUES)))"
+
 (requirements-about *STRICT-LOOP-KEYWORD-P* :doc-type variable)
 
 ;;;; Description:
@@ -1118,3 +1128,4 @@
                                  COLLECT I)))
 :outputs "(LOOP FOR I BELOW 10
       COLLECT I)"
+

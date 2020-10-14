@@ -550,7 +550,7 @@
                             (list "~:<" ; each clause logical-block.
                                   "~W~^ ~@_" ; condition.
                                   "~:<~@{~W~^ ~@_~}~:>~^ ~1I~:@_" ; lambda-list
-                                  "~@{~W~^ ~:_~}" ; clause-body
+                                  "~@{~W~^ ~_~}" ; clause-body
                                   "~:>")
                             "~^ ~_~}")
                       "~:>"))))
