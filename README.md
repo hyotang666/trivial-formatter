@@ -1,4 +1,4 @@
-# TRIVIAL-FORMATTER 8.0.0
+# TRIVIAL-FORMATTER 9.0.0
 ## What is this?
 Code formatter for common lisp.
 Please see [trivial-formatter's source code](src/trivial-formatter.lisp).
@@ -126,13 +126,15 @@ DEFORMATTER care about package existence and symbol confliction and set-pprint-d
   '#:PPRINT-SYMBOL3440)
 ```
 
-#### SET-PPRINT-DISPATCH\*
-When you want to set pretty-printing functions temporarily, you need to bind `*PRINT-PPRINT-DISPATCH*` and use `SET-PPRINT-DISPATCH*` instead of `CL:SET-PPRINT-DISPATCH` otherwise temporal function never worked.
+#### TRIVIAL-FORMATTER-USER:SET-PPRINT-DISPATCH
+When you want to set pretty-printing functions temporarily, you need to bind `*PRINT-PPRINT-DISPATCH*` and use `TRIVIAL-FORMATTER-USER:SET-PPRINT-DISPATCH` instead of `CL:SET-PPRINT-DISPATCH` otherwise temporal function never worked.
+
+`CL:SET-PPRINT-DISPATCH` is shadowed in the package `:TRIVIAL-FORMATTER-USER`.
 
 ```lisp
 (deformatter sxql where (stream exp)
   (let ((*print-pprint-dispatch* (copy-pprint-dispatch)))
-    (set-pprint-dispatch* '(cons (member :and :or)) 'pprint-linear-elt)
+    (set-pprint-dispatch '(cons (member :and :or)) 'pprint-linear-elt)
     (pprint-fun-call stream exp)))
 ```
 
