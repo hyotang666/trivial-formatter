@@ -45,8 +45,9 @@ To enable it binds `*STRICT-LOOP-KEYWORD-P*` with `T`.
 
 ## From developer
 ### Reader.
-Trivial-formatter heavily depends on readtable especially [NAMED-READTABLES](https://github.com/melisgl/named-readtables).
-You can extend the reader with an ordinary common lisp way.
+If your source codes have special reader macros, trivial-foramtter signals an error about unknown reader macros.
+In such cases, you can extend the reader with an ordinary common lisp way because trivial-formatter heavily depends on readtable especially [NAMED-READTABLES](https://github.com/melisgl/named-readtables).
+To extend it, your reader macro functions must return an intermediate object.
 
 ```lisp
 (let ((*readtable* (named-readtables:copy-named-readtable 'as-code)))
@@ -60,8 +61,8 @@ For details, see [CLHS](http://www.lispworks.com/documentation/HyperSpec/Body/c_
 and [NAMED-READTABLES](https://github.com/melisgl/named-readtables).
 
 ### Printer.
-Trivial-formatter heavily depends on a pretty-printing system.
-You can extend code format with an ordinary common lisp way.
+When you make intermediate objects, you need to make pretty print functions for it.
+Trivial-formatter heavily depends on a pretty-printing system so you can extend with an ordinary common lisp way.
 
 ```lisp
 (defun !-printer (stream exp)
