@@ -15,7 +15,7 @@ For detail, see [spec files](spec/trivial-formatter.lisp).
 ### Line width.
 The default depends on implementation.
 (Probably 80 though.)
-You can control it with ordinary common lisp pretty printing system way, i.e. using `*PRINT-RIGHT-MARGIN*`.
+You can control it with an ordinary common lisp pretty printing system way, i.e. using `*PRINT-RIGHT-MARGIN*`.
 
 ```lisp
 (let ((*print-right-margin* 100)) ; <-- Specify line width with 100.
@@ -23,20 +23,20 @@ You can control it with ordinary common lisp pretty printing system way, i.e. us
 ```
 
 ### Strict mode.
-When you invokes debugger, some implementations (e.g. ECL) into :cl-user package.
-In such case, `LOOP` macro backtrace form become ugly.
+When you invoke debugger, some implementations (e.g. ECL) are into :cl-user package.
+In such cases, the `LOOP` macro backtrace form becomes ugly.
 
 ```lisp
 (LOOP YOUR-PROJECT::FOR YOUR-PROJECT::I YOUR-PROJECT::UPFROM 0 ...)
 ```
 
-Using keyword symbol as loop macro keywords avoids such ugly forms.
+Using keyword symbols as loop macro keywords avoid such ugly forms.
 
 ```lisp
 (LOOP :FOR YOUR-PROJECT::I :UPFROM 0 ...)
 ```
 In strict mode, trivial-formatter formats loop macro keywords into keyword symbols.
-To enable it, binds `*STRICT-LOOP-KEYWORD-P*` with `T`.
+To enable it binds `*STRICT-LOOP-KEYWORD-P*` with `T`.
 
 ```lisp
 * (let ((trivial-formatter:*strict-loop-keyword-p* t))
@@ -46,7 +46,7 @@ To enable it, binds `*STRICT-LOOP-KEYWORD-P*` with `T`.
 ## From developer
 ### Reader.
 Trivial-formatter heavily depends on readtable especially [NAMED-READTABLES](https://github.com/melisgl/named-readtables).
-You can extend reader with ordinary common lisp way.
+You can extend the reader with an ordinary common lisp way.
 
 ```lisp
 (let ((*readtable* (named-readtables:copy-named-readtable 'as-code)))
@@ -60,8 +60,8 @@ For details, see [CLHS](http://www.lispworks.com/documentation/HyperSpec/Body/c_
 and [NAMED-READTABLES](https://github.com/melisgl/named-readtables).
 
 ### Printer.
-Trivial-formatter heavily depends on pretty printing system.
-You can extend code format with ordinary common lisp way.
+Trivial-formatter heavily depends on a pretty-printing system.
+You can extend code format with an ordinary common lisp way.
 
 ```lisp
 (defun !-printer (stream exp)
@@ -73,19 +73,19 @@ You can extend code format with ordinary common lisp way.
 
 For detail, see [CLHS](http://www.lispworks.com/documentation/HyperSpec/Body/22_bb.htm).
 
-### Load foreign formatters.
-Trivial-formatter can load foreign formatters.
-You can write extension codes as foreign formatters.
+### Load external formatters.
+Trivial-formatter can load external formatters.
+You can write extension codes as external formatters.
 
-Foreign formatters file must named as "formatters.lisp".
-Trivial-formatter search file from `*foreign-formatters-directories*`.
+External formatters file must be named "formatters.lisp".
+Trivial-formatter searches file from `*foreign-formatters-directories*`.
 The default is quicklisp's local-projects directory and roswell's local-projects directory.
 
 ### Package trivial-formatter-user.
-In trivial-formatter-user, you can use deformatter, pprint-fun-call and pprint-linear-elt with ordinary common lisp symbols.
+In trivial-formatter-user, you can use deformatter, pprint-fun-call, and pprint-linear-elt with ordinary common lisp symbols.
 
 #### PPRINT-FUN-CALL
-PPRINT-FUN-CALL care about key value pair.
+PPRINT-FUN-CALL cares about key-value pairs.
 
 ```lisp
 (pprint-fun-call nil '(asdf:component-pathname component :direction :output :if-does-not-exist :create :if-exists if-exists))
@@ -97,7 +97,7 @@ NIL
 ```
 
 #### PPRINT-LINEAR-ELT
-`PPRINT-LINEAR-ELT` set indent current and put every `CDR` element with newline.
+`PPRINT-LINEAR-ELT` set indent current and put every `CDR` element with a newline.
 
 ```lisp
 (pprint-linear-elt nil '(asdf:component-pathname component :direction :output :if-does-not-exist :create :if-exists if-exists))
@@ -112,7 +112,7 @@ NIL
 ```
 
 #### DEFORMATTER
-DEFORMATTER care about package exists and symbol confliction and set-pprint-dispatch.
+DEFORMATTER care about package existence and symbol confliction and set-pprint-dispatch.
 
 ```lisp
 (macroexpand '(deformatter package symbol (stream exp)
@@ -127,7 +127,7 @@ DEFORMATTER care about package exists and symbol confliction and set-pprint-disp
 ```
 
 #### SET-PPRINT-DISPATCH\*
-When you want to set pretty printing function temporalilly, you need to bind `*PRINT-PPRINT-DISPATCH*` and use `SET-PPRINT-DISPATCH*` instead of `CL:SET-PPRINT-DISPATCH` otherwise temporal function never worked.
+When you want to set pretty-printing functions temporarily, you need to bind `*PRINT-PPRINT-DISPATCH*` and use `SET-PPRINT-DISPATCH*` instead of `CL:SET-PPRINT-DISPATCH` otherwise temporal function never worked.
 
 ```lisp
 (deformatter sxql where (stream exp)
@@ -150,10 +150,10 @@ SBCL/2.0.9
 * ECL/20.4.24
 
 #### Note
-Trivial-formatter works portable at least above implementation.
+Trivial-formatter works portable at least implementations above.
 But it never means works samely.
-For example, `IF` format is different.
-SBCL prints newline even if element is short, but others.
+For example, the `IF` format is different.
+SBCL prints a newline even if elements are short, but other implementations may not.
 
 ```lisp
 #+sbcl
@@ -172,7 +172,7 @@ CLISP is not supported.
 > The Lisp Pretty Printer implementation is not perfect yet.
 
 #### CCL
-Currently we stop to support CCL temporally due to it violates ANSI standard.
+Currently, we stop to support CCL temporally due to it violates the ANSI standard.
 
 ```lisp
 ? (pprint-dispatch t nil)
@@ -183,11 +183,11 @@ Currently we stop to support CCL temporally due to it violates ANSI standard.
 
 > table---a pprint dispatch table, or nil.
 
-Fortunately this issue is already fixed.
-Please wait next ccl release or build current ccl from source.
+Fortunately, this issue is already fixed.
+Please wait next ccl release or build the current ccl from the source.
 
 #### Reader.
-When reader macro conflicts, such reader macros are ignored silently.
+When the reader macro conflicts, such reader macros are ignored silently.
 You can add new reader macros, but can not modify already existing reader macros.
 
 #### FORMAT-CONTROL
@@ -200,7 +200,7 @@ To install trivial-formatter, [roswell](https://github.com/roswell/roswell) is r
 $ ros install hyotang666/trivial-formatter
 ```
 
-To load trivial-formatter to running lisp environment, evaluate below in the repl.
+To load trivial-formatter to running lisp environment, evaluate below in the REPL.
 
 ```lisp
 * (ql:quickload :trivial-formatter)
