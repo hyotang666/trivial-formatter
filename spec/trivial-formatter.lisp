@@ -975,6 +975,35 @@
     (STACK-PUSH (CPU-SR OBJ) OBJ)
     (SETF (CPU-PC OBJ) (GET-WORD 65530))))"
 
+#?(PPRINT-DEFGENERIC NIL
+                     '(DEFGENERIC TEST
+                          (O)
+                        (:METHOD (#'FUNCTION) FUNCTION)))
+:outputs "(DEFGENERIC TEST (O) (:METHOD ((FUNCTION FUNCTION)) FUNCTION))"
+
+#?(PPRINT-DEFGENERIC NIL
+                     '(DEFGENERIC TEST
+                          (O)
+                        (:METHOD :QUALIFIER (#'FUNCTION) FUNCTION)))
+:outputs "(DEFGENERIC TEST (O) (:METHOD :QUALIFIER ((FUNCTION FUNCTION)) FUNCTION))"
+
+#?(PPRINT-DEFGENERIC NIL
+                     '(DEFGENERIC TEST
+                          (O)
+                        (:METHOD :QUALIFIER-1 :QUALIFIER-2 (#'FUNCTION)
+                         FUNCTION)))
+:outputs "(DEFGENERIC TEST (O)
+  (:METHOD :QUALIFIER-1 :QUALIFIER-2 ((FUNCTION FUNCTION)) FUNCTION))"
+
+#?(PPRINT-DEFGENERIC NIL
+                     '(DEFGENERIC TEST
+                          (O)
+                        (:METHOD :QUALIFIER-1 :QUALIFIER-2 (#'FUNCTION)
+                         (FUNCALL FUNCTION *STANDARD-OUTPUT*))))
+:outputs "(DEFGENERIC TEST (O)
+  (:METHOD :QUALIFIER-1 :QUALIFIER-2 ((FUNCTION FUNCTION))
+    (FUNCALL FUNCTION *STANDARD-OUTPUT*)))"
+
 (requirements-about PPRINT-DEFSTRUCT :doc-type function)
 
 ;;;; Description:
@@ -1154,3 +1183,6 @@
 
 #?(PPRINT-METHOD-LAMBDA-LIST NIL '(#'FUNCTION))
 :outputs "((FUNCTION FUNCTION))"
+
+#?(PPRINT-METHOD-LAMBDA-LIST NIL :BEFORE)
+:outputs ":BEFORE"
