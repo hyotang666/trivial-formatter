@@ -2,7 +2,8 @@
   (:import-from :trivial-formatter #:pprint-extended-loop #:split-keywords
                 #:pprint-fun-call #:pprint-define-condition #:pprint-restart-case
                 #:pprint-with-open-file #:split-to-lines #:pprint-cond #:pprint-flet
-                #:pprint-defgeneric #:pprint-defstruct #:pprint-defclass #:pprint-handler-case)
+                #:pprint-defgeneric #:pprint-defstruct #:pprint-defclass #:pprint-handler-case
+                #:pprint-method-lambda-list)
   (:use :cl :jingoh :trivial-formatter))
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
@@ -1129,3 +1130,27 @@
 :outputs "(LOOP FOR I BELOW 10
       COLLECT I)"
 
+(requirements-about PPRINT-METHOD-LAMBDA-LIST :doc-type function)
+
+;;;; Description:
+
+#+syntax (PPRINT-METHOD-LAMBDA-LIST stream exp) ; => result
+
+;;;; Arguments and Values:
+
+; stream := 
+
+; exp := 
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
+#?(PPRINT-METHOD-LAMBDA-LIST NIL '(#'FUNCTION))
+:outputs "((FUNCTION FUNCTION))"

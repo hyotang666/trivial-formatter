@@ -787,7 +787,7 @@
                       ;; method-cobination.
                       (pprint-newline :miser stream)
                       ;; lambda-list
-                      (write (pprint-pop) :stream stream)
+                      (pprint-method-lambda-list stream (pprint-pop))
                       (pprint-exit-if-list-exhausted)
                       (write-char #\Space stream))
                     (pprint-newline :linear stream))
@@ -798,6 +798,24 @@
           :do (pprint-exit-if-list-exhausted)
               (write-char #\Space stream)
               (pprint-newline :linear stream))))
+
+(defun pprint-method-lambda-list (stream exp)
+  (pprint-logical-block (stream exp :prefix "(" :suffix ")")
+    (loop :for elt := (pprint-pop)
+          :if (find elt lambda-list-keywords)
+            :do (write elt :stream stream)
+                (pprint-exit-if-list-exhausted)
+                (write-char #\Space stream)
+                (pprint-newline :fill stream)
+                (loop (write (pprint-pop) :stream stream)
+                      (pprint-exit-if-list-exhausted)
+                      (write-char #\Space stream)
+                      (pprint-newline :fill stream))
+          :else
+            :do (funcall (formatter "~:<~@{~W~^ ~@_~}~:>") stream elt)
+                (pprint-exit-if-list-exhausted)
+                (write-char #\Space stream)
+                (pprint-newline :fill stream))))
 
 ;;;; PRINT-AS-CODE
 
