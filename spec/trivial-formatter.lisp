@@ -545,6 +545,14 @@
         :do (loop :when (oddp y)
                     :do (print (list x y))))"
 
+;; Corner case. Variable that is conflict with loop macro keyword.
+#?(PPRINT-EXTENDED-LOOP NIL
+                        '(LOOP :FOR I :UPFROM START :BELOW
+                               END
+                               :COLLECT I))
+:outputs "(LOOP :FOR I :UPFROM START :BELOW END
+      :COLLECT I)"
+
 (requirements-about SPLIT-KEYWORDS :doc-type function)
 
 ;;;; Description:

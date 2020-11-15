@@ -1137,7 +1137,9 @@
                             (and last
                                  (not
                                    (and (symbolp (car last))
-                                        (string= "INTO" (car last))))))))
+                                        (find (car last)
+                                              '(:into :below :upto :to :downto)
+                                              :test #'string=)))))))
                  ;; Make new clause.
                  (rec rest (make-clause :keyword first)
                       (if temp
