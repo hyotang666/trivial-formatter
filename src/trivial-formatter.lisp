@@ -477,6 +477,7 @@
     (set-pprint-dispatch '(cons (member flet labels)) 'pprint-flet)
     (set-pprint-dispatch '(cons (member when unless)) 'pprint-when)
     (set-pprint-dispatch '(cons (member restart-case)) 'pprint-restart-case)
+    (set-pprint-dispatch '(cons (member restart-bind)) 'pprint-restart-bind)
     (set-pprint-dispatch '(cons (member cond)) 'pprint-cond)
     (set-pprint-dispatch '(cons (member with-open-file))
                          'pprint-with-open-file)
@@ -638,8 +639,7 @@
                       "~:>"))))
     stream exp))
 
-(defun pprint-fun-call (stream exp &optional colon? &rest args)
-  (declare (ignore args))
+(defun pprint-fun-call (stream exp &optional colon? at?)
   (setf stream (or stream *standard-output*))
   (pprint-logical-block (stream exp :prefix "(" :suffix ")")
     (pprint-exit-if-list-exhausted)
@@ -652,6 +652,8 @@
             (funcall (formatter " ~:_") stream))
         (funcall (formatter "~@[~:I~{~W~^ ~:_~}~]") stream (cdr pre)))
       (when post
+        (when at?
+          (funcall (formatter "~1I") stream))
         (funcall (formatter "~:[~:_~:I~; ~_~]~{~^~W ~@_~W~^ ~_~}") stream
                  (cdr pre) post)))))
 
@@ -727,6 +729,23 @@
                             "~:*~:[~_~;~:@_~]" ; mandatory newline when keys.
                             "~@{~W~^ ~:@_~}")))) ; body.
           stream (parse-restart-clause exp)))))
+
+(defun pprint-restart-bind (stream exp)
+  (setf stream (or stream *standard-output*))
+  (funcall
+    (formatter
+     #.(apply #'concatenate 'string
+              (alexandria:flatten
+                (list "~:<" ; pprint-logical-block
+                      "~W~^ ~1I~@_" ; operator.
+                      (list "~:<" ; pprint-logical-block for bind.
+                            (list "~@{" ; Iterate each bind.
+                                  "~@/trivial-formatter:pprint-fun-call/~^ ~_"
+                                  "~}")
+                            "~:>~^ ~_")
+                      "~@{~W~^ ~_~}" ; body
+                      "~:>"))))
+    stream exp))
 
 (defun parse-restart-clause (clause)
   (let ((pre

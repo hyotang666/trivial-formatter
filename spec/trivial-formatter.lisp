@@ -3,7 +3,7 @@
                 #:pprint-fun-call #:pprint-define-condition #:pprint-restart-case
                 #:pprint-with-open-file #:split-to-lines #:pprint-cond #:pprint-flet
                 #:pprint-defgeneric #:pprint-defstruct #:pprint-defclass #:pprint-handler-case
-                #:pprint-method-lambda-list)
+                #:pprint-method-lambda-list #:pprint-restart-bind)
   (:use :cl :jingoh :trivial-formatter))
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
@@ -1194,3 +1194,40 @@
 
 #?(PPRINT-METHOD-LAMBDA-LIST NIL :BEFORE)
 :outputs ":BEFORE"
+
+(requirements-about PPRINT-RESTART-BIND :doc-type function)
+
+;;;; Description:
+
+#+syntax (PPRINT-RESTART-BIND stream exp) ; => result
+
+;;;; Arguments and Values:
+
+; stream := 
+
+; exp := 
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
+
+#?(PPRINT-RESTART-BIND "not stream" NIL) :signals TYPE-ERROR
+#?(PPRINT-RESTART-BIND NIL
+                       '(RESTART-BIND ((NAME (LAMBDA () :RETURN)))
+                          :BODY))
+:outputs "(RESTART-BIND ((NAME (LAMBDA () :RETURN))) :BODY)"
+
+#?(PPRINT-RESTART-BIND NIL
+                       '(RESTART-BIND ((NAME (LAMBDA () :RETURN) :TEST-FUNCTION
+                                        (LAMBDA (X) (TYPEP C 'CELL-ERROR))))
+                          :BODY))
+:outputs "(RESTART-BIND ((NAME (LAMBDA () :RETURN)
+                 :TEST-FUNCTION (LAMBDA (X) (TYPEP C 'CELL-ERROR))))
+  :BODY)"
