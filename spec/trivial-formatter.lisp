@@ -271,6 +271,11 @@
                     :around(let((*print-pretty* t))
                              (call-body)))
 
+;; Corner case of block-comment, especially reader-macro syntax in the comment.
+#?(with-input-from-string (s "#| '#0=(1 2 3 . #0#) |#")
+    (print-as-code (read-as-code s)))
+:outputs "#| '#0=(1 2 3 . #0#) |#"
+
 ;;;; Description:
 
 #+syntax
