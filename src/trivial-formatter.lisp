@@ -540,6 +540,7 @@
 
 (defun pprint-handler-case (stream exp &rest noise)
   (declare (ignore noise))
+  (setf stream (or stream *standard-output*))
   (funcall
     (formatter
      #.(apply #'concatenate 'string
@@ -559,6 +560,7 @@
 
 (defun pprint-define-condition (stream exp &rest noise)
   (declare (ignore noise))
+  (setf stream (or stream *standard-output*))
   (funcall
     (formatter
      #.(apply #'concatenate 'string
@@ -582,6 +584,7 @@
   (funcall (formatter "~:<~^~W~^ ~:I~@{~W~^ ~_~}~:>") stream exp))
 
 (defun pprint-flet (stream exp)
+  (setf stream (or stream *standard-output*))
   (let ((printer (pprint-dispatch exp (copy-pprint-dispatch nil)))
         (local-funs
          (and (listp (second exp))
@@ -607,6 +610,7 @@
     (funcall printer stream exp)))
 
 (defun pprint-cond (stream exp)
+  (setf stream (or stream *standard-output*))
   (funcall
     (formatter
      #.(apply #'concatenate 'string
@@ -658,6 +662,7 @@
                  (cdr pre) post)))))
 
 (defun pprint-list (stream exp)
+  (setf stream (or stream *standard-output*))
   (if (and (symbolp (car exp))
            (fboundp (car exp))
            (not (special-operator-p (car exp)))
@@ -677,6 +682,7 @@
         (return (values (reverse list) post)))))
 
 (defun pprint-when (stream exp)
+  (setf stream (or stream *standard-output*))
   (funcall (formatter "~:<~W~^ ~3I~@_~W~^ ~1I~:@_~@{~^~W~^ ~_~}~:>") stream
            exp))
 
@@ -698,6 +704,7 @@
     stream (multiple-value-list (split-keywords exp))))
 
 (defun pprint-restart-case (stream exp)
+  (setf stream (or stream *standard-output*))
   (funcall
     (formatter
      #.(apply #'concatenate 'string
@@ -713,6 +720,7 @@
 
 (defun pprint-restart-case-clause (stream exp &rest noise)
   (declare (ignore noise))
+  (setf stream (or stream *standard-output*))
   (if (atom exp)
       (write exp :stream stream)
       (pprint-logical-block (stream exp :prefix "(" :suffix ")")
@@ -759,6 +767,7 @@
           :finally (return (list* pre keys list)))))
 
 (defun pprint-defstruct (stream exp)
+  (setf stream (or stream *standard-output*))
   (funcall
     (formatter
      #.(apply #'concatenate 'string
@@ -775,6 +784,7 @@
     stream exp))
 
 (defun pprint-defgeneric (stream exp)
+  (setf stream (or stream *standard-output*))
   (pprint-logical-block (stream exp :prefix "(" :suffix ")")
     ;; DEFGENERIC
     (write (pprint-pop) :stream stream)
@@ -819,6 +829,7 @@
               (pprint-newline :linear stream))))
 
 (defun pprint-method-lambda-list (stream exp)
+  (setf stream (or stream *standard-output*))
   (pprint-logical-block (stream exp :prefix "(" :suffix ")")
     (loop :for elt := (pprint-pop)
           :if (find elt lambda-list-keywords)
