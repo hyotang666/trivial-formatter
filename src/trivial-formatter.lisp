@@ -924,7 +924,8 @@
                           ;; Next is not single semicoloned line comment but FIRST.
                           ;; Comment should be printed.
                           (funcall
-                            (formatter "~<; ~@;~@{~A~^ ~:_~}~:>~:[~;~%~]") nil
+                            (formatter "~<; ~@;~@{~A~^ ~:_~}~:>~:[~;~%~]")
+                            *standard-output*
                             (remove ""
                                     (uiop:split-string first :separator "; ")
                                     :test #'equal)
