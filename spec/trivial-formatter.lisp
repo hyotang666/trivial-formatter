@@ -1212,7 +1212,9 @@
 #?(PPRINT-METHOD-LAMBDA-LIST NIL :BEFORE)
 :outputs ":BEFORE"
 
-(requirements-about PPRINT-RESTART-BIND :doc-type function)
+(requirements-about PPRINT-RESTART-BIND :doc-type function
+                    :around (let ((*print-pretty* t))
+                              (call-body)))
 
 ;;;; Description:
 
@@ -1234,17 +1236,18 @@
 
 ;;;; Exceptional-Situations:
 
-
 #?(PPRINT-RESTART-BIND "not stream" NIL) :signals TYPE-ERROR
+; NOTE: nullary lambda form print differently depending on implementation.
+; e.g. (lambda ()), (lambda nil).
 #?(PPRINT-RESTART-BIND NIL
                        '(RESTART-BIND ((NAME (LAMBDA () :RETURN)))
                           :BODY))
-:outputs "(RESTART-BIND ((NAME (LAMBDA () :RETURN))) :BODY)"
+:outputs #.(format nil "(RESTART-BIND ((NAME ~A)) :BODY)" (prin1-to-string '(lambda () :return)))
 
 #?(PPRINT-RESTART-BIND NIL
                        '(RESTART-BIND ((NAME (LAMBDA () :RETURN) :TEST-FUNCTION
                                         (LAMBDA (X) (TYPEP C 'CELL-ERROR))))
                           :BODY))
-:outputs "(RESTART-BIND ((NAME (LAMBDA () :RETURN)
+:outputs #.(format nil "(RESTART-BIND ((NAME ~A
                  :TEST-FUNCTION (LAMBDA (X) (TYPEP C 'CELL-ERROR))))
-  :BODY)"
+  :BODY)" (prin1-to-string '(lambda () :return)))
