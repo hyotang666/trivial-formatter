@@ -254,8 +254,10 @@
 ,:test equal
 
 ; Corner case with symbol.
+; The result is different depending on implementation.
+; e.g. "|\"|" or "\\\\"".
 #?(print-as-code '|"|)
-:outputs "|\"|"
+:outputs #.(prin1-to-string '|"|)
 
 ; Corner case of declare with comma. Especially for SBCL.
 #?(with-input-from-string (s "`(declare ,'nil)")
