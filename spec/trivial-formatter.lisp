@@ -1242,7 +1242,9 @@
 #?(PPRINT-RESTART-BIND NIL
                        '(RESTART-BIND ((NAME (LAMBDA () :RETURN)))
                           :BODY))
-:outputs #.(format nil "(RESTART-BIND ((NAME ~A)) :BODY)" (prin1-to-string '(lambda () :return)))
+:outputs #.(format nil "(RESTART-BIND ((NAME ~A)) :BODY)"
+                   (let ((*print-pretty* t))
+                     (prin1-to-string '(lambda () :return))))
 
 #?(PPRINT-RESTART-BIND NIL
                        '(RESTART-BIND ((NAME (LAMBDA () :RETURN) :TEST-FUNCTION
@@ -1250,4 +1252,5 @@
                           :BODY))
 :outputs #.(format nil "(RESTART-BIND ((NAME ~A
                  :TEST-FUNCTION (LAMBDA (X) (TYPEP C 'CELL-ERROR))))
-  :BODY)" (prin1-to-string '(lambda () :return)))
+  :BODY)" (let ((*print-pretty* t))
+            (prin1-to-string '(lambda () :return))))
