@@ -1,4 +1,4 @@
-# TRIVIAL-FORMATTER 9.0.0
+# TRIVIAL-FORMATTER 9.2.2
 ## What is this?
 Code formatter for common lisp.
 Please see [trivial-formatter's source code](src/trivial-formatter.lisp).
@@ -145,11 +145,11 @@ When you want to set pretty-printing functions temporarily, you need to bind `*P
 MIT
 
 ### Developed with
-SBCL/2.0.9
+SBCL/2.1.4
 
 ### Tested with
-* SBCL/2.0.9
-* CCL/1.12 ; Failed due to CCL violates ANSI standard.
+* SBCL/2.1.4
+* CCL/1.12.1
 * ECL/20.4.24
 
 #### Note
@@ -173,21 +173,6 @@ CLISP is not supported.
 [CLISP say](https://clisp.sourceforge.io/impnotes.html#clpp)
 
 > The Lisp Pretty Printer implementation is not perfect yet.
-
-#### CCL
-Currently, we stop to support CCL temporally due to it violates the ANSI standard.
-
-```lisp
-? (pprint-dispatch t nil)
-=> error
-```
-
-[CLHS says](http://www.lispworks.com/documentation/HyperSpec/Body/f_ppr_di.htm)
-
-> table---a pprint dispatch table, or nil.
-
-Fortunately, this issue is already fixed.
-Please wait next ccl release or build the current ccl from the source.
 
 #### Reader.
 When the reader macro conflicts, such reader macros are ignored silently.
