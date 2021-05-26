@@ -852,7 +852,9 @@
 => ("; |")
 ,:test equalp
 
-(requirements-about PPRINT-COND :doc-type function)
+(requirements-about PPRINT-COND :doc-type function
+                    :around (let ((*print-pretty* t))
+                              (call-body)))
 
 ;;;; Description:
 
@@ -926,7 +928,9 @@
   )"
 ,:test equal
 
-(requirements-about PPRINT-DEFGENERIC :doc-type function)
+(requirements-about PPRINT-DEFGENERIC :doc-type function
+                    :around (let ((*print-pretty* t))
+                              (call-body)))
 
 ;;;; Description:
 
@@ -1019,7 +1023,9 @@
   (:METHOD :QUALIFIER-1 :QUALIFIER-2 ((FUNCTION FUNCTION))
     (FUNCALL FUNCTION *STANDARD-OUTPUT*)))"
 
-(requirements-about PPRINT-DEFSTRUCT :doc-type function)
+(requirements-about PPRINT-DEFSTRUCT :doc-type function
+                    :around (let ((*print-pretty* t))
+                              (call-body)))
 
 ;;;; Description:
 
@@ -1094,7 +1100,9 @@
 #?(PPRINT-DEFCLASS NIL '(DEFCLASS A SUPERCLASSES SLOTS OPTIONS))
 :outputs "(DEFCLASS A SUPERCLASSES SLOTS OPTIONS)"
 
-(requirements-about PPRINT-HANDLER-CASE :doc-type function)
+(requirements-about PPRINT-HANDLER-CASE :doc-type function
+                    :around (let ((*print-pretty* t))
+                              (call-body)))
 
 ;;;; Description:
 
@@ -1146,7 +1154,9 @@
     (DECLARE (IGNORE ARGS))
     (VALUES)))"
 
-(requirements-about *STRICT-LOOP-KEYWORD-P* :doc-type variable)
+(requirements-about *STRICT-LOOP-KEYWORD-P* :doc-type variable
+                    :around (let ((*print-pretty* t))
+                              (call-body)))
 
 ;;;; Description:
 ; Control forcing to loop macro keyword to keyword symbol.
