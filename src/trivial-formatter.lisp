@@ -1046,7 +1046,7 @@
       (call-next-method)
       (if (nestable-p (car (clause-forms c)))
           (let ((*indent* (- *indent* 2)))
-            (funcall (formatter "~2:I~W ~:_~W~@[~:@_~{~W~^~:@_~}~]~5I") stream
+            (funcall (formatter "~2:I~W ~@_~W~@[~:@_~{~W~^~:@_~}~]~5I") stream
                      (clause-keyword c) (car (clause-forms c))
                      (cdr (clause-forms c))))
           (funcall (formatter "~2:I~W~:@_~{~W~^~:@_~}~5I") stream
