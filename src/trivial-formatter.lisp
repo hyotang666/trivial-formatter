@@ -176,31 +176,23 @@
 
 (defun canonicalize-case (string)
   (flet ((convert-all (converter)
-           (uiop:reduce/strcat
-             (uiop:while-collecting (acc)
-               (do ((index 0))
-                   ((not (array-in-bounds-p string index)))
-                 (case (char string index)
-                   (#\\ ; single escape.
-                    (acc (char string index))
-                    (acc (char string (incf index)))
-                    (incf index))
-                   (#\| ; multiple escape.
-                    (acc (char string index))
-                    (incf index)
-                    (do ((char (char string index) (char string index)))
-                        ((char= #\| char)
-                         (acc (char string index))
-                         (incf index))
-                      (case char
-                        (#\\ ; single escape.
-                         (acc char)
-                         (acc (char string (incf index)))
-                         (incf index))
-                        (otherwise (acc char) (incf index)))))
-                   (otherwise
-                    (acc (funcall converter (char string index)))
-                    (incf index))))))))
+           (do ((new (copy-seq string))
+                (index 0))
+               ((not (array-in-bounds-p string index)) new)
+             (case (char string index)
+               (#\\ ; single escape.
+                (incf index 2))
+               (#\| ; multiple escape.
+                (incf index)
+                (do ((char (char string index) (char string index)))
+                    ((char= #\| char) (incf index))
+                  (incf index
+                        (if (char= #\\ char) ; single escape.
+                            2
+                            1))))
+               (otherwise
+                (setf (aref new index) (funcall converter (char string index)))
+                (incf index))))))
     (ecase (readtable-case *readtable*)
       ((:upcase :downcase) (convert-all #'char-downcase))
       ((:preserve :invert) string))))
