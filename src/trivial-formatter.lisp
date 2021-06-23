@@ -154,10 +154,10 @@
       (:no-error (char)
         (if (get-macro-character char)
             (read *standard-input* eof-error-p eof-value recursive-p)
-            (let* ((notation
-                    (canonicalize-case
-                      (read-as-string:read-as-string nil eof-error-p eof-value
-                                                     recursive-p))))
+            (let ((notation
+                   (canonicalize-case
+                     (read-as-string:read-as-string nil eof-error-p eof-value
+                                                    recursive-p))))
               (if (every (lambda (c) (char= #\. c)) notation)
                   (make-dot :notation notation)
                   (handler-case (values (read-from-string notation))
