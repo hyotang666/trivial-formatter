@@ -98,28 +98,27 @@
              (if (endp list)
                  acc
                  (body (car list) (cdr list) acc primary-system-name)))
+           (secondary-systems (first primary-system-name)
+             (loop :for system :in (asdf:system-depends-on first)
+                   :if (equal primary-system-name
+                              (asdf:primary-system-name system))
+                     :collect (asdf:find-system system)))
+           (cl-source-file-p (first)
+             (let ((class
+                    (asdf/component:module-default-component-class first)))
+               (and class (eq 'asdf:cl-source-file (class-name class)))))
+           (absolute-pathname (c)
+             (slot-value c 'asdf/component:absolute-pathname))
            (body (first rest acc primary-system-name)
              (typecase first
                (asdf:package-inferred-system
-                (rec
-                  (loop :for system :in (asdf:system-depends-on first)
-                        :if (equal primary-system-name
-                                   (asdf:primary-system-name system))
-                          :collect (asdf:find-system system) :into result
-                        :finally (return (nconc result rest)))
-                  (if (and (asdf/component:module-default-component-class
-                             first)
-                           (eq 'asdf:cl-source-file
-                               (class-name
-                                 (asdf/component:module-default-component-class
-                                   first))))
-                      (union (asdf:component-children first) acc
-                             :test #'equal
-                             :key (lambda (c)
-                                    (slot-value c
-                                                'asdf/component:absolute-pathname)))
-                      acc)
-                  primary-system-name))
+                (rec (nconc (secondary-systems first primary-system-name) rest)
+                     (if (cl-source-file-p first)
+                         (union (asdf:component-children first) acc
+                                :test #'equal
+                                :key #'absolute-pathname)
+                         acc)
+                     primary-system-name))
                (asdf:system
                 (rec (append (asdf:component-children first) rest) acc
                      primary-system-name))
