@@ -76,6 +76,8 @@
     (if (not supplied-p)
         (debug-printer component)
         (let ((string
+               ;; In order to open file for superseding,
+               ;; we need to close it beforehand.
                (with-output-to-string (*standard-output*)
                  (debug-printer component))))
           (with-open-file (*standard-output* (asdf:component-pathname
