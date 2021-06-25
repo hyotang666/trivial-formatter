@@ -560,6 +560,16 @@
 :outputs "(LOOP :FOR I :UPFROM START :BELOW END
       :COLLECT I)"
 
+;; Comment in the loop.
+;; Line comment's indent should belong to the next line's indent.
+#?(let* ((source (format nil "(loop if pred ;; comment~%do (something))"))
+         (code (with-input-from-string (in source)
+                 (read-as-code in))))
+    (print-as-code code))
+:outputs "(loop if pred
+        ;; comment
+        do (something))"
+
 (requirements-about SPLIT-KEYWORDS :doc-type function)
 
 ;;;; Description:
