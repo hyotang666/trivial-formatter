@@ -1007,8 +1007,10 @@
 
 ;;; NESTABLE
 
-(unless (boundp '+unbound+)
-  (defconstant +unbound+ '#:unbound))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  ;; To muffle compiler note.
+  (unless (boundp '+unbound+)
+    (defconstant +unbound+ '#:unbound)))
 
 (defstruct (nestable (:include clause)) (pred +unbound+) else end)
 
