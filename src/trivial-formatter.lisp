@@ -2,11 +2,6 @@
 
 (defpackage :trivial-formatter
   (:use :cl)
-  (:import-from #.(or ; To avoid #-
-                      #+ecl
-                      '#:agnostic-lizard
-                      '#:trivial-macroexpand-all) ; As default.
-                #:macroexpand-all)
   (:export ;; Main api
            #:fmt
            ;; Useful helpers
@@ -411,28 +406,19 @@
                 :for exp = (read-as-code input nil tag) :then next
                 :with next
                 :until (eq exp tag)
-                :do (let* ((*macroexpand-hook*
-                            (lambda (expander form env)
-                              (cond
-                                ((typep form '(cons (eql in-package)))
-                                 (eval (funcall expander form env)))
-                                ;; SBCL fails to macroexpand-all defun when
-                                ;; function declaimed as inline.
-                                ;; I beleave there is no in-package inside defun.
-                                ((typep form
-                                        '(cons
-                                           (member defun #+sbcl sb-c:xdefun)))
-                                 nil)
-                                (t (funcall expander form env)))))
-                           (*print-length*)
+                :do (let* ((*print-length*)
                            (string
                             (with-output-to-string (s)
                               (unwind-protect (print-as-code exp s)
                                 (cleanup-brokens)))))
-                      ;; to ignore reading top level conditional.
-                      ;; We believe there is no case e.g. #+hoge (in-package :fuga)
-                      (when (listp exp)
-                        (macroexpand-all (read-from-string string nil)))
+                      ;; In order to refer macro symbol for correct indent,
+                      ;; we need to eval IN-PACKAGE.
+                      (when (listp exp) ; ignore top level conditional.
+                        (let ((exp (read-from-string string nil)))
+                          (when (typep exp '(cons (eql in-package)))
+                            ;; Eval only top-level IN-PACKAGE.
+                            ;; We believe no macro expanded into IN-PACKAGE.
+                            (eval exp))))
                       (write-string string))
                     (setf next (read-as-code input nil tag))
                     (when (typep exp 'conditional)

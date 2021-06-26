@@ -2,7 +2,7 @@
 (in-package :asdf)
 (defsystem "trivial-formatter"
   :version
-  "9.2.11"
+  "9.2.12"
   :description "Code formatter for common lisp."
   :license "MIT"
   :depends-on
@@ -10,9 +10,6 @@
    "read-as-string" ; Read S-Expression as string.
    "named-readtables" ; Readtable manager.
    "cl-ppcre" ; Pearl compatible regular expression.
-   #.(or ; to avoid #-
-       #+ecl "agnostic-lizard"
-       "trivial-macroexpand-all") ; As default macroexpand all.
    "alexandria" ; Public domain utilities.
    )
   :pathname
