@@ -426,20 +426,16 @@
                       (unwind-protect (print-as-code next) (cleanup-brokens))
                       (setf exp next
                             next (read-as-code input nil tag)))
-                    (typecase exp
-                      (block-comment (format t "~2%"))
-                      (line-comment
-                       (terpri)
-                       (when (not (comment-p next))
-                         (terpri)))
-                      (t
-                       (cond ((eq next tag)) ; Do nothing.
-                             ((line-comment-p next)
-                              (if (uiop:string-prefix-p #\;
-                                                        (comment-content next))
-                                  (format t "~2%")
-                                  (write-char #\Space)))
-                             (t (format t "~2%")))))))
+                    (cond ((block-comment-p exp) (format t "~2%"))
+                          ((line-comment-p exp)
+                           (terpri)
+                           (when (not (comment-p next))
+                             (terpri)))
+                          ((eq next tag)) ; Do nothing.
+                          ((not (line-comment-p next)) (format t "~2%"))
+                          ((uiop:string-prefix-p #\; (comment-content next))
+                           (format t "~2%"))
+                          (t (write-char #\Space)))))
       (setf *package* package))))
 
 ;;;; PRETTY PRINTERS
