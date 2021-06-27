@@ -428,9 +428,7 @@
                             next (read-as-code input nil tag)))
                     (cond ((block-comment-p exp) (format t "~2%"))
                           ((line-comment-p exp)
-                           (terpri)
-                           (when (not (comment-p next))
-                             (terpri)))
+                           (format t "~%~:[~%~;~]" (comment-p next)))
                           ((eq next tag)) ; Do nothing.
                           ((not (line-comment-p next)) (format t "~2%"))
                           ((uiop:string-prefix-p #\; (comment-content next))
