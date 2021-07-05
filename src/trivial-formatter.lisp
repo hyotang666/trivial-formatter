@@ -822,37 +822,59 @@
 
 ;;;; PRINT-AS-CODE
 
-(defun split-to-lines (string)
-  (mapcan
-    (lambda (line)
-      (setf line
-              (remove #\Nul
-                      (ppcre:regex-replace #.(format nil "~C " #\Nul) line
-                                           "")))
-      (unless (every (lambda (char) (char= #\Space char)) line)
-        (list line)))
-    (uiop:while-collecting (acc)
-      (with-input-from-string (stream string)
-        (loop :for char := (read-char stream nil nil)
-              :with line
-              :while char
-              :do (case char
-                    (#\\ (push char line) (push (read-char stream) line))
-                    (#\"
-                     (push (core-reader:read-delimited-string #\" stream)
-                           line))
-                    (#\|
-                     (push (core-reader:read-delimited-string #\| stream)
-                           line))
-                    (#\;
-                     (acc (format nil "~A~A" char (read-line stream)))
-                     (setf line nil))
-                    (#\Newline
-                     (acc (format nil "~{~A~}" (nreverse line)))
-                     (setf line nil))
-                    (otherwise (push char line)))
-              :finally (when line
-                         (acc (format nil "~{~A~}" (nreverse line)))))))))
+(defun delimited-position (delimiter string &key (start 0))
+  (do ((index start (1+ index)))
+      ((not (array-in-bounds-p string index))
+       (error "Missing delimiter ~S in ~S" delimiter string))
+    (let ((char (aref string index)))
+      (cond ((char= #\\ char) (incf index))
+            ((char= delimiter char) (return index))))))
+
+(let ((line (make-string-output-stream)) temp)
+  (defun split-to-lines (string)
+    (declare (optimize speed)
+             (type simple-string string))
+    (flet ((sieve (line)
+             (let ((line
+                    (delete #\Nul
+                            (the simple-string
+                                 (ppcre:regex-replace
+                                   #.(format nil "~C " #\Nul) line "")))))
+               (unless (every (lambda (char) (char= #\Space char)) line)
+                 (list line)))))
+      (declare
+        (ftype (function (simple-string) (values list &optional)) sieve))
+      (loop :for index :of-type (integer 0 #.most-positive-fixnum) = 0
+                 :then (1+ index)
+            :for char
+                 := (when (array-in-bounds-p string index)
+                      (aref string index))
+            :if (null char)
+              :if (and (setf temp (sieve (get-output-stream-string line)))
+                       (string= "" (the string (car temp))))
+                :do (loop-finish)
+              :else
+                :nconc temp
+                :and :do (loop-finish)
+            :else :if (char= #\\ char)
+              :do (write-char char line)
+                  (write-char (aref string (incf index)) line)
+            :else :if (find char "\"|")
+              :do (let ((end
+                         (delimited-position char string :start (1+ index))))
+                    (write-string string line :start index :end (1+ end))
+                    (setf index end))
+            :else :if (char= #\; char)
+              :nconc (let ((end (position #\Newline string :start (1+ index))))
+                       (prog1 (sieve (subseq string index end))
+                         (if end
+                             (setf index end)
+                             (setf index (1+ array-total-size-limit)))))
+              :and :do (get-output-stream-string line) ; discard gabage.
+            :else :if (char= #\Newline char)
+              :nconc (sieve (get-output-stream-string line))
+            :else
+              :do (write-char char line)))))
 
 (defun alignment (list)
   (labels ((rec (list &optional acc)
