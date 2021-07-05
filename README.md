@@ -4,6 +4,13 @@ Code formatter for common lisp.
 Please see [trivial-formatter's source code](src/trivial-formatter.lisp).
 This file is formatted by trivial-formatter itself.
 
+## Alternatives.
+### [cl-syntax](https://github.com/m2ym/cl-syntax) for SLIME user.
+> Reader Syntax Coventions for Common Lisp and SLIME 
+
+### [trivial-indent](ttps://github.com/Shinmera/trivial-indent) for SLIME user.
+> A very simple library to allow indentation hints for SWANK. 
+
 ## Usage
 
 ```lisp
