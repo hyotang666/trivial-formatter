@@ -10,27 +10,50 @@
            ;; Readtable name.
            #:as-code
            ;; Special variable
-           #:*foreign-formatters-directories*
+           #:*external-formatters-directories*
            #:*strict-loop-keyword-p*))
 
 (in-package :trivial-formatter)
 
-;;;; *FOREIGN-FORMATTERS-PATHNAMES*
+;;;; *EXTERNAL-FORMATTERS-DIRECTORIES*
 
-(declaim (type list *foreign-formatters-directories*))
+(declaim
+ (type list ; of-type directories.
+  *local-project-directories* *external-formatters-directories*))
 
-(defparameter *foreign-formatters-directories*
+(defvar *local-project-directories*
   `(,@(when (find-package :ql)
         (symbol-value (uiop:find-symbol* "*LOCAL-PROJECT-DIRECTORIES*" :ql)))
     ,@(when (find-package :roswell)
         (symbol-value
           (uiop:find-symbol* "*LOCAL-PROJECT-DIRECTORIES*" :roswell)))))
 
-(defun load-foreign-formatters ()
-  (loop :for directory :in *foreign-formatters-directories*
+(defparameter *external-formatters-directories*
+  (loop :for directory :in *local-project-directories*
+        :collect directory
+        :collect (merge-pathnames "external-formatter/" directory)))
+
+(defun check-deprecated (directory)
+  (let ((local-project-directory
+         (find (pathname-directory directory) *local-project-directories*
+               :test #'equal
+               :key #'pathname-directory)))
+    (when local-project-directory
+      (warn
+        (formatter
+         #.(concatenate 'string
+                        "Placing formatter.lisp to directly under ~S is deprecated from version 10."
+                        "~:@_Move it to ~S is recommended."))
+        local-project-directory
+        (merge-pathnames "external-formatter/" local-project-directory))
+      (sleep 1))))
+
+(defun load-external-formatters ()
+  (loop :for directory :in *external-formatters-directories*
         :for pathname := (merge-pathnames "formatters.lisp" directory)
         :when (probe-file pathname)
-          :do (load pathname)))
+          :do (check-deprecated pathname)
+              (load pathname)))
 
 ;;;; DEFORMTTER
 
@@ -66,7 +89,7 @@
 
 (defun fmt (system &optional (if-exists nil supplied-p))
   (asdf:load-system system)
-  (load-foreign-formatters)
+  (load-external-formatters)
   (dolist (component (component-children (asdf:find-system system)))
     (if (not supplied-p)
         (debug-printer component)

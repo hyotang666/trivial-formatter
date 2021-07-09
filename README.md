@@ -1,4 +1,4 @@
-# TRIVIAL-FORMATTER 9.2.2
+# TRIVIAL-FORMATTER 10.0.0
 ## What is this?
 Code formatter for common lisp.
 Please see [trivial-formatter's source code](src/trivial-formatter.lisp).
@@ -86,8 +86,16 @@ Trivial-formatter can load external formatters.
 You can write extension codes as external formatters.
 
 External formatters file must be named "formatters.lisp".
-Trivial-formatter searches file from `*foreign-formatters-directories*`.
-The default is quicklisp's local-projects directory and roswell's local-projects directory.
+Trivial-formatter searches file from `*external-formatters-directories*`.
+<del>The default is quicklisp's local-projects directory and roswell's local-projects directory.</del>
+
+Since to share and/or to control versions of external formatters file by a version control system (e.g. git),
+external-formatter directories that are directly under local-projects directories of quicklisp and roswell were
+added as the default search paths.
+(e.g. ~/.roswell/local-projects/external-formatter/)
+
+Hence external formatters file directly placed under local-projects directories of quicklisp or roswell is
+deprecated from version 10.
 
 ### Package trivial-formatter-user.
 In trivial-formatter-user, you can use deformatter, pprint-fun-call, and pprint-linear-elt with ordinary common lisp symbols.
