@@ -779,6 +779,17 @@
       :REPORT \"this is report\"
     (RETURN)))"
 
+#?(pprint-restart-case nil '(restart-case ()
+			      (use-value (&rest args) ; <--- Some elt in the lambda-list.
+				:report "report"
+				:interactive (lambda () (list (read *query-io*)))
+				args)))
+:outputs "(RESTART-CASE NIL
+  (USE-VALUE (&REST ARGS)
+      :REPORT \"report\"
+      :INTERACTIVE (LAMBDA () (LIST (READ *QUERY-IO*)))
+    ARGS))"
+
 (requirements-about PPRINT-WITH-OPEN-FILE :doc-type function
                     :around (let((*print-pretty* t))
                               (call-body)))

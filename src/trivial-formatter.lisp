@@ -725,7 +725,7 @@
           (formatter
            #.(apply #'concatenate 'string
                     (alexandria:flatten
-                      (list "~{~W~^ ~@_~:<~^~W~:>~}" ; pre.
+                      (list "~{~W~^ ~@_~:<~@{~W~^ ~@_~}~:>~}" ; pre.
                             (list "~@[" ; if exists.
                                   " ~3I~_~{~W~^ ~@_~W~^ ~_~}" ; keys
                                   "~]")
