@@ -1027,8 +1027,10 @@
 (defmethod print-object ((v var) stream)
   (if (null *print-clause*)
       (call-next-method)
-      (apply (formatter "~W~^ ~:I~W~@{~^ ~:_~W~^ ~W~}~5I") stream
-             (clause-keyword v) (clause-forms v))))
+      (progn
+       (apply (formatter "~W~^ ~:I~W~@{~^ ~:_~W~^ ~W~}") stream
+              (clause-keyword v) (clause-forms v))
+       (pprint-indent :block *indent* stream))))
 
 ;;; NESTABLE
 
