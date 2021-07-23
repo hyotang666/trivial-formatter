@@ -15,6 +15,8 @@
 
 (in-package :trivial-formatter)
 
+(declaim (optimize speed))
+
 ;;;; *EXTERNAL-FORMATTERS-DIRECTORIES*
 
 (declaim
@@ -58,6 +60,7 @@
 ;;;; DEFORMTTER
 
 (defmacro deformatter (package symbol &body body)
+  (declare (type symbol package symbol))
   (let ((pprinter (gensym (format nil "PPRINT-~A" symbol))))
     `(when (find-package ,(string package))
        (defun ,pprinter ,@body)
@@ -192,6 +195,10 @@
                         (mark-it value notation))
                       value)))))))))
 
+(declaim
+ (ftype (function (simple-string) (values simple-string &optional))
+        canonicalize-case))
+
 (defun canonicalize-case (string)
   (flet ((convert-all (converter)
            (do ((new (copy-seq string))
@@ -209,7 +216,10 @@
                             2
                             1))))
                (otherwise
-                (setf (aref new index) (funcall converter (char string index)))
+                (setf (aref new index)
+                        (locally ; due to not know base-char.
+                         (declare (optimize (speed 1)))
+                         (funcall converter (char string index))))
                 (incf index))))))
     (ecase (readtable-case *readtable*)
       ((:upcase :downcase) (convert-all #'char-downcase))
@@ -231,6 +241,9 @@
     (setf (symbol-function symbol) #'make-broken-symbol) ; as dummy.
     (mark-it symbol notation)))
 
+(declaim
+ (ftype (function (t simple-string) (values boolean &optional)) valid-value-p))
+
 (defun valid-value-p (thing notation)
   (or (not (symbolp thing))
       (keywordp thing)
@@ -241,8 +254,10 @@
            (not (search "::" notation))
            (or (not (find #\: notation)) ; Please do not use #\: as package or
                                          ; symbol name!
-               (every #'char-equal (package-name (symbol-package thing))
-                      notation)))))
+               (locally ; due to not known base-char
+                (declare (optimize (speed 1)))
+                (every #'char-equal (package-name (symbol-package thing))
+                       notation))))))
 
 ;;;; META-OBJECT
 ;;; DOT
@@ -339,12 +354,26 @@
 
 (defun |line-comment-reader| (stream character)
   (declare (ignore character))
-  (make-line-comment :content (string-trim " " (read-line stream))))
+  (make-line-comment :content (string-trim " "
+                                           (the simple-string
+                                                (read-line stream)))))
 
-(defun |block-comment-reader| (stream number character)
+(declaim
+ (ftype (function
+         (stream base-char (or null (integer 0 #.most-positive-fixnum)))
+         (values t &optional))
+        |block-comment-reader|
+        |#+-reader|
+        |#.reader|
+        |#=reader|
+        |##reader|
+        |#'reader|
+        |radix-reader|))
+
+(defun |block-comment-reader| (stream character number)
   (make-block-comment :content (with-output-to-string (*standard-output*)
                                  (funcall #'read-as-string::|#\|reader| stream
-                                          number character))))
+                                          character number))))
 
 (defun |#+-reader| (stream character number)
   (when number
@@ -378,7 +407,9 @@
 (defun |radix-reader| (stream character number)
   (let ((integer
          (funcall
-           (get-dispatch-macro-character #\# character (copy-readtable nil))
+           (coerce
+             (get-dispatch-macro-character #\# character (copy-readtable nil))
+             'function)
            stream character number)))
     (make-radix :char (char-downcase character)
                 :radix (ecase character
@@ -401,24 +432,27 @@
 
 ;;;; NAMED-READTABLE
 
-(named-readtables:defreadtable as-code
-  (:merge :common-lisp)
-  (:macro-char #\( '|paren-reader|)
-  (:macro-char #\; '|line-comment-reader|)
-  (:macro-char #\' '|'reader|)
-  (:macro-char #\` '|`reader|)
-  (:macro-char #\, '|,reader|)
-  (:dispatch-macro-char #\# #\| '|block-comment-reader|)
-  (:dispatch-macro-char #\# #\+ '|#+-reader|)
-  (:dispatch-macro-char #\# #\- '|#+-reader|)
-  (:dispatch-macro-char #\# #\. '|#.reader|)
-  (:dispatch-macro-char #\# #\' '|#'reader|)
-  (:dispatch-macro-char #\# #\= '|#=reader|)
-  (:dispatch-macro-char #\# #\# '|##reader|)
-  (:dispatch-macro-char #\# #\B '|radix-reader|)
-  (:dispatch-macro-char #\# #\O '|radix-reader|)
-  (:dispatch-macro-char #\# #\X '|radix-reader|)
-  (:dispatch-macro-char #\# #\R '|radix-reader|))
+(locally
+ ;; due to named-readtables, out of scope.
+ (declare (optimize (speed 1)))
+ (named-readtables:defreadtable as-code
+   (:merge :common-lisp)
+   (:macro-char #\( '|paren-reader|)
+   (:macro-char #\; '|line-comment-reader|)
+   (:macro-char #\' '|'reader|)
+   (:macro-char #\` '|`reader|)
+   (:macro-char #\, '|,reader|)
+   (:dispatch-macro-char #\# #\| '|block-comment-reader|)
+   (:dispatch-macro-char #\# #\+ '|#+-reader|)
+   (:dispatch-macro-char #\# #\- '|#+-reader|)
+   (:dispatch-macro-char #\# #\. '|#.reader|)
+   (:dispatch-macro-char #\# #\' '|#'reader|)
+   (:dispatch-macro-char #\# #\= '|#=reader|)
+   (:dispatch-macro-char #\# #\# '|##reader|)
+   (:dispatch-macro-char #\# #\B '|radix-reader|)
+   (:dispatch-macro-char #\# #\O '|radix-reader|)
+   (:dispatch-macro-char #\# #\X '|radix-reader|)
+   (:dispatch-macro-char #\# #\R '|radix-reader|)))
 
 ;;;; DEBUG-PRINTER
 
@@ -508,12 +542,16 @@
   (funcall (formatter "~:<~W~^ ~1I~@_~:I~^~W~^ ~_~@{~W~^ ~_~}~:>") stream exp))
 
 (defun shortest-package-name (package)
-  (reduce
-    (lambda (champion challenger)
-      (if (< (length champion) (length challenger))
-          champion
-          challenger))
-    (cons (package-name package) (package-nicknames package))))
+  (flet ((compare (champion challenger)
+           (if (< (length champion) (length challenger))
+               champion
+               challenger)))
+    (declare
+      (ftype (function (simple-string simple-string)
+              (values simple-string &optional))
+             compare))
+    (reduce #'compare
+            (cons (package-name package) (package-nicknames package)))))
 
 (let ((default-pprint-dispatch (copy-pprint-dispatch nil)))
   (defun symbol-printer (stream object)
@@ -534,7 +572,9 @@
                    stream)
                  (write-string default-style stream :start
                                ;; Please do not ever use collon as package name!
-                               (position #\: default-style)))))))))
+                               (locally ; KLUDGE: could not fix style-warning.
+                                (declare (optimize (speed 1)))
+                                (position #\: default-style))))))))))
 
 (defun pprint-handler-case (stream exp &rest noise)
   (declare (ignore noise))
@@ -583,13 +623,15 @@
 
 (defun pprint-flet (stream exp)
   (setf stream (or stream *standard-output*))
-  (let ((printer (pprint-dispatch exp (copy-pprint-dispatch nil)))
+  (let ((printer
+         (coerce (pprint-dispatch exp (copy-pprint-dispatch nil)) 'function))
         (local-funs
          (and (listp (second exp))
               (loop :for x :in (second exp)
                     :when (listp x)
                       :collect (car x))))
         (*print-pprint-dispatch* (copy-pprint-dispatch)))
+    (declare (type list local-funs))
     (set-pprint-dispatch 'list
                          (lambda (stream exp &rest noise)
                            (declare (ignore noise))
@@ -597,14 +639,18 @@
                                     (not (keywordp (car exp)))
                                     (not (special-operator-p (car exp)))
                                     (not (macro-function (car exp)))
-                                    (or (find (car exp) local-funs)
+                                    (or (find (the symbol (car exp))
+                                              local-funs)
                                         (eq
                                           (pprint-dispatch exp
                                                            *pprint-dispatch*)
                                           (pprint-dispatch exp nil))))
                                (pprint-fun-call stream exp)
-                               (funcall (pprint-dispatch exp *pprint-dispatch*)
-                                        stream exp))))
+                               (funcall
+                                 (coerce
+                                   (pprint-dispatch exp *pprint-dispatch*)
+                                   'function)
+                                 stream exp))))
     (funcall printer stream exp)))
 
 (defun pprint-cond (stream exp)
@@ -668,7 +714,8 @@
            (eq (pprint-dispatch exp *pprint-dispatch*)
                (pprint-dispatch exp nil)))
       (pprint-fun-call stream exp)
-      (funcall (pprint-dispatch exp *pprint-dispatch*) stream exp)))
+      (funcall (coerce (pprint-dispatch exp *pprint-dispatch*) 'function)
+               stream exp)))
 
 (defun split-keywords (exp)
   (do* ((list (reverse exp) (cddr list))
@@ -724,16 +771,18 @@
       (pprint-logical-block (stream exp :prefix "(" :suffix ")")
         (pprint-exit-if-list-exhausted)
         (apply
-          (formatter
-           #.(apply #'concatenate 'string
-                    (alexandria:flatten
-                      (list "~{~W~^ ~@_~:<~@{~W~^ ~@_~}~:>~}" ; pre.
-                            (list "~@[" ; if exists.
-                                  " ~3I~_~{~W~^ ~@_~W~^ ~_~}" ; keys
-                                  "~]")
-                            "~^ ~1I" ; if exists body.
-                            "~:*~:[~_~;~:@_~]" ; mandatory newline when keys.
-                            "~@{~W~^ ~:@_~}")))) ; body.
+          (locally ; due to formatter, out of scope.
+           (declare (optimize (speed 1)))
+           (formatter
+            #.(apply #'concatenate 'string
+                     (alexandria:flatten
+                       (list "~{~W~^ ~@_~:<~@{~W~^ ~@_~}~:>~}" ; pre.
+                             (list "~@[" ; if exists.
+                                   " ~3I~_~{~W~^ ~@_~W~^ ~_~}" ; keys
+                                   "~]")
+                             "~^ ~1I" ; if exists body.
+                             "~:*~:[~_~;~:@_~]" ; mandatory newline when keys.
+                             "~@{~W~^ ~:@_~}"))))) ; body.
           stream (parse-restart-clause exp)))))
 
 (defun pprint-restart-bind (stream exp)
@@ -847,10 +896,17 @@
 
 ;;;; PRINT-AS-CODE
 
+(declaim
+ (ftype (function
+         (character simple-string &key (:start (mod #.array-total-size-limit)))
+         (values (mod #.array-total-size-limit) &optional))
+        delimited-position))
+
 (defun delimited-position (delimiter string &key (start 0))
   (do ((index start (1+ index)))
       ((not (array-in-bounds-p string index))
        (error "Missing delimiter ~S in ~S" delimiter string))
+    (declare (type (mod #.array-total-size-limit) index))
     (let ((char (aref string index)))
       (cond ((char= #\\ char) (incf index))
             ((char= delimiter char) (return index))))))
@@ -907,7 +963,12 @@
                  acc
                  (body (car list) (cdr list) acc)))
            (body (first rest acc)
-             (if (uiop:string-prefix-p ";;" (string-left-trim " " (car rest)))
+             (if (and rest
+                      (uiop:string-prefix-p ";;"
+                                            (string-left-trim " "
+                                                              (the
+                                                               simple-string
+                                                               (car rest)))))
                  (rec (cons (set-align first (car rest)) (cdr rest))
                       (cons first acc))
                  (rec rest (cons first acc))))
@@ -917,6 +978,10 @@
                      :while (char= #\Space char)
                      :do (write-char char))
                (write-string (string-left-trim " " comment)))))
+    (declare
+      (ftype (function (simple-string simple-string)
+              (values simple-string &optional))
+             set-align))
     (rec (reverse list))))
 
 (defun string-as-code (exp)
@@ -935,9 +1000,12 @@
   (let ((*standard-output* (or stream *standard-output*)) (*print-circle*))
     (if (typep exp '(or block-comment string))
         (tagbody (prin1 exp))
-        (loop :for (first . rest)
+        (loop :for (first . rest) :of-type (simple-string . list)
                    :on (alignment (split-to-lines (string-as-code exp)))
-              :if (uiop:string-prefix-p "; " (string-left-trim " " (car rest)))
+              :if (when rest
+                    (let ((elt (car rest)))
+                      (declare (type simple-string elt))
+                      (uiop:string-prefix-p "; " (string-left-trim " " elt))))
                 :if (uiop:string-prefix-p "; " (string-left-trim " " first))
                   ;; Both are single semicoloned line comment.
                   ;; Integrate it as one for pritty printings.
@@ -946,7 +1014,9 @@
                   ;; Next one is single semicoloned line comment but FIRST.
                   ;; Both should be printed in same line.
                   :do (format t "~A " first)
-                      (rplaca rest (string-left-trim " " (car rest)))
+                      (rplaca rest
+                              (string-left-trim " "
+                                                (the simple-string (car rest))))
               :else :if (uiop:string-prefix-p "; " (string-left-trim " " first))
                 ;; Next is not single semicoloned line comment but FIRST.
                 ;; Comment should be printed.
@@ -965,22 +1035,31 @@
                 ;; To avoid unneeded newline. Especially &KEY.
                 :do (rplaca rest
                             (format nil "~A~A" first
-                                    (string-left-trim " " (car rest))))
+                                    (string-left-trim " "
+                                                      (the simple-string
+                                                           (car rest)))))
               :else :if (= (1+ (length first))
-                           (loop :for num :upfrom 0
-                                 :for char :across (car rest)
+                           (loop :for num
+                                      :of-type (mod #.array-total-size-limit)
+                                      :upfrom 0
+                                 :for char
+                                      :across (the simple-string (car rest))
                                  :while (char= #\Space char)
                                  :finally (return num)))
                 ;; To avoid unneeded newline. Especially for conditional.
                 :do (rplaca rest
                             (format nil "~A ~A" first
-                                    (string-left-trim " " (car rest))))
+                                    (string-left-trim " "
+                                                      (the simple-string
+                                                           (car rest)))))
               :else
                 :do (write-line first)))))
 
 ;;;; loop clause
 
 (defvar *print-clause* nil)
+
+(declaim (type (unsigned-byte 8) *indent*))
 
 (defvar *indent* 5)
 
@@ -993,7 +1072,8 @@
       (call-next-method)
       (let* ((into
               (let ((last2 (last (clause-forms o) 2)))
-                (when (and (symbolp (car last2)) (string= "INTO" (car last2)))
+                (when (and (symbolp (car last2))
+                           (string= "INTO" (the symbol (car last2))))
                   last2)))
              (body
               (if into
@@ -1183,7 +1263,7 @@
                             (and last
                                  (not
                                    (and (symbolp (car last))
-                                        (find (car last)
+                                        (find (the symbol (car last))
                                               '(:into :below :upto :to :downto)
                                               :test #'string=)))))))
                  ;; Make new clause.
