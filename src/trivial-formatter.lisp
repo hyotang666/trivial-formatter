@@ -342,8 +342,9 @@
   (make-line-comment :content (string-trim " " (read-line stream))))
 
 (defun |block-comment-reader| (stream number character)
-  (make-block-comment :content (funcall #'read-as-string::|#\|reader| stream
-                                        number character)))
+  (make-block-comment :content (with-output-to-string (*standard-output*)
+                                 (funcall #'read-as-string::|#\|reader| stream
+                                          number character))))
 
 (defun |#+-reader| (stream character number)
   (when number
