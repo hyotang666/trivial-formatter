@@ -515,25 +515,26 @@
           challenger))
     (cons (package-name package) (package-nicknames package))))
 
-(defun symbol-printer (stream object)
-  (let ((notation (get object 'notation)))
-    (if notation
-        (write-string notation stream)
-        (let ((default-style
-               (let ((*print-pprint-dispatch* (copy-pprint-dispatch nil)))
-                 (prin1-to-string object))))
-          (if (or (null (symbol-package object))
-                  (eq #.(find-package :keyword) (symbol-package object))
-                  (nth-value 1 (find-symbol (symbol-name object))))
-              (write-string default-style stream)
-              (progn
-               (write-string
-                 (string-downcase
-                   (shortest-package-name (symbol-package object)))
-                 stream)
-               (write-string default-style stream :start
-                             ;; Please do not ever use collon as package name!
-                             (position #\: default-style))))))))
+(let ((default-pprint-dispatch (copy-pprint-dispatch nil)))
+  (defun symbol-printer (stream object)
+    (let ((notation (get object 'notation)))
+      (if notation
+          (write-string notation stream)
+          (let ((default-style
+                 (let ((*print-pprint-dispatch* default-pprint-dispatch))
+                   (prin1-to-string object))))
+            (if (or (null (symbol-package object))
+                    (eq #.(find-package :keyword) (symbol-package object))
+                    (nth-value 1 (find-symbol (symbol-name object))))
+                (write-string default-style stream)
+                (progn
+                 (write-string
+                   (string-downcase
+                     (shortest-package-name (symbol-package object)))
+                   stream)
+                 (write-string default-style stream :start
+                               ;; Please do not ever use collon as package name!
+                               (position #\: default-style)))))))))
 
 (defun pprint-handler-case (stream exp &rest noise)
   (declare (ignore noise))
