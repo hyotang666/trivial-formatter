@@ -1016,6 +1016,21 @@
     (prin1-to-string exp)))
 
 (declaim
+ (ftype (function (function (simple-array character (*)) &optional stream)
+         (values null &optional))
+        write-string-from))
+
+(defun write-string-from
+       (pred string &optional (*standard-output* *standard-output*))
+  (let ((pos
+         (locally ; due to sbcl fails to infer.
+          (declare (optimize (speed 1)))
+          (position-if pred string))))
+    (when pos
+      (write-string string nil :start pos)))
+  nil)
+
+(declaim
  (ftype (function (t &optional (or null stream)) (values null &optional))
         print-as-code))
 
@@ -1055,24 +1070,20 @@
               :else :if (ppcre:scan "[^\\\\]\\($" first)
                 ;; To avoid unneeded newline. Especially &KEY.
                 :do (rplaca rest
-                            (format nil "~A~A" first
-                                    (string-left-trim " "
-                                                      (the simple-string
-                                                           (car rest)))))
-              :else :if (= (1+ (length first))
-                           (loop :for num
-                                      :of-type (mod #.array-total-size-limit)
-                                      :upfrom 0
-                                 :for char
-                                      :across (the simple-string (car rest))
-                                 :while (char= #\Space char)
-                                 :finally (return num)))
+                            (with-output-to-string (*standard-output*)
+                              (write-string first)
+                              (write-string-from
+                                (lambda (c) (not (char= #\Space c)))
+                                (car rest))))
+              :else :if (= (1+ (length first)) (count-indent (car rest)))
                 ;; To avoid unneeded newline. Especially for conditional.
                 :do (rplaca rest
-                            (format nil "~A ~A" first
-                                    (string-left-trim " "
-                                                      (the simple-string
-                                                           (car rest)))))
+                            (with-output-to-string (*standard-output*)
+                              (write-string first)
+                              (write-char #\Space)
+                              (write-string-from
+                                (lambda (c) (not (char= #\Space c)))
+                                (car rest))))
               :else
                 :do (write-line first)))))
 
