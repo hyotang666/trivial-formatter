@@ -204,8 +204,9 @@
         canonicalize-case))
 
 (defun canonicalize-case (string)
+  "Destructively canonicalize STRING case."
   (flet ((convert-all (converter)
-           (do ((new (copy-seq string))
+           (do ((new string)
                 (index 0))
                ((not (array-in-bounds-p string index)) new)
              (case (char string index)
