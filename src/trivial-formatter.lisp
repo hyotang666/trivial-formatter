@@ -1025,11 +1025,8 @@
         (tagbody (prin1 exp))
         (loop :for (first . rest) :of-type (simple-string . list)
                    :on (alignment (split-to-lines (string-as-code exp)))
-              :if (when rest
-                    (let ((elt (car rest)))
-                      (declare (type simple-string elt))
-                      (uiop:string-prefix-p "; " (string-left-trim " " elt))))
-                :if (uiop:string-prefix-p "; " (string-left-trim " " first))
+              :if (and rest (ppcre:scan "^ *; " (the simple-string (car rest))))
+                :if (ppcre:scan "^ *; " first)
                   ;; Both are single semicoloned line comment.
                   ;; Integrate it as one for pritty printings.
                   :do (setf (car rest) (format nil "~A ~A" first (car rest)))
@@ -1040,7 +1037,7 @@
                       (rplaca rest
                               (string-left-trim " "
                                                 (the simple-string (car rest))))
-              :else :if (uiop:string-prefix-p "; " (string-left-trim " " first))
+              :else :if (ppcre:scan "^ *; " first)
                 ;; Next is not single semicoloned line comment but FIRST.
                 ;; Comment should be printed.
                 :do (funcall (formatter "~<; ~@;~@{~A~^ ~:_~}~:>~:[~;~%~]")
@@ -1053,8 +1050,7 @@
               :else :if (null rest)
                 ;; Last line never need newline.
                 :do (write-string first)
-              :else :if (and (uiop:string-suffix-p first "(")
-                             (not (uiop:string-suffix-p first "#\\(")))
+              :else :if (ppcre:scan "[^\\\\]\\($" first)
                 ;; To avoid unneeded newline. Especially &KEY.
                 :do (rplaca rest
                             (format nil "~A~A" first
