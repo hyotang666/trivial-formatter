@@ -977,12 +977,7 @@
                  acc
                  (body (car list) (cdr list) acc)))
            (body (first rest acc)
-             (if (and rest
-                      (uiop:string-prefix-p ";;"
-                                            (string-left-trim " "
-                                                              (the
-                                                               simple-string
-                                                               (car rest)))))
+             (if (and rest (ppcre:scan "^ *;;" (the simple-string (car rest))))
                  (rec (cons (set-align first (car rest)) (cdr rest))
                       (cons first acc))
                  (rec rest (cons first acc))))
