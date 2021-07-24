@@ -738,7 +738,7 @@
        ((null list) (values pre post))
     (if (keywordp (cadr list))
         (progn (push (car list) post) (push (cadr list) post))
-        (return (values (reverse list) post)))))
+        (return (values (nreverse list) post)))))
 
 (defun pprint-when (stream exp)
   (setf stream (or stream *standard-output*))
