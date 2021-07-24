@@ -1228,15 +1228,17 @@
   (let ((*print-clause* t))
     (pprint-logical-block (nil nil) (prin1 thing))))
 
-(defun separation-keyword-p (thing)
-  (and (symbolp thing)
-       (find thing
-             '(:and :with :for :as :collect :collecting :append :appending
-               :nconc :nconcing :count :counting :sum :summing :maximize
-               :maximizing :minimize :minimizing :if :when :unless :end :while
-               :until :repeat :always :never :thereis :do :doing :initially
-               :finally :return :else :named)
-             :test #'string=)))
+(let ((ht (make-hash-table :test #'equal)))
+  (dolist
+      (key
+       '(:and :with :for :as :collect :collecting :append :appending :nconc
+         :nconcing :count :counting :sum :summing :maximize :maximizing
+         :minimize :minimizing :if :when :unless :end :while :until :repeat
+         :always :never :thereis :do :doing :initially :finally :return :else
+         :named))
+    (setf (gethash (symbol-name key) ht) key))
+  (defun separation-keyword-p (thing)
+    (and (symbolp thing) (values (gethash (symbol-name thing) ht)))))
 
 (defun non-separation-keyword-p (thing)
   (and (symbolp thing)
