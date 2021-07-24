@@ -1042,8 +1042,10 @@
                 ;; Comment should be printed.
                 :do (funcall (formatter "~<; ~@;~@{~A~^ ~:_~}~:>~:[~;~%~]")
                              *standard-output*
-                             (remove ""
-                                     (uiop:split-string first :separator "; ")
+                             (delete ""
+                                     (the list
+                                          (uiop:split-string first
+                                                             :separator "; "))
                                      :test #'equal)
                              rest) ; To avoid unneeded newline.
               ;; Both are not single semicoloned line comment.
