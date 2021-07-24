@@ -546,6 +546,10 @@
   (setf stream (or stream *standard-output*))
   (funcall (formatter "~:<~W~^ ~1I~@_~:I~^~W~^ ~_~@{~W~^ ~_~}~:>") stream exp))
 
+(declaim
+ (ftype (function (package) (values simple-string &optional))
+        shortest-package-name))
+
 (defun shortest-package-name (package)
   (flet ((compare (champion challenger)
            (if (< (length champion) (length challenger))
@@ -571,10 +575,15 @@
                     (nth-value 1 (find-symbol (symbol-name object))))
                 (write-string default-style stream)
                 (progn
-                 (write-string
-                   (string-downcase
-                     (shortest-package-name (symbol-package object)))
-                   stream)
+                 (loop :for char
+                            :across (shortest-package-name
+                                      (symbol-package object))
+                       :do (write-char
+                             (locally
+                              ;; due to uncertainty base-char or not.
+                              (declare (optimize (speed 1)))
+                              (char-downcase char))
+                             stream))
                  (write-string default-style stream :start
                                ;; Please do not ever use collon as package name!
                                (locally ; KLUDGE: could not fix style-warning.
