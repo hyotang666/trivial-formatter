@@ -971,6 +971,16 @@
             :else
               :do (write-char char line)))))
 
+(declaim
+ (ftype (function (simple-string)
+         (values (mod #.array-total-size-limit) &optional))
+        count-indent))
+
+(defun count-indent (string)
+  (loop :for char :across string
+        :while (char= #\Space char)
+        :count char))
+
 (defun alignment (list)
   (labels ((rec (list &optional acc)
              (if (endp list)
@@ -982,11 +992,15 @@
                       (cons first acc))
                  (rec rest (cons first acc))))
            (set-align (current comment)
-             (with-output-to-string (*standard-output*)
-               (loop :for char :across current
-                     :while (char= #\Space char)
-                     :do (write-char char))
-               (write-string (string-left-trim " " comment)))))
+             (let* ((indent (count-indent current))
+                    (start2 (count-indent comment))
+                    (comment-length (- (length comment) start2))
+                    (string
+                     (make-string (+ indent comment-length)
+                                  :initial-element #\Space)))
+               (declare (optimize (speed 1))) ; due to not simple-base-string.
+               (replace string comment :start1 indent :start2 start2)
+               string)))
     (declare
       (ftype (function (simple-string simple-string)
               (values simple-string &optional))
