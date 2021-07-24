@@ -167,33 +167,37 @@
                                                     (named-readtables:copy-named-readtable
                                                       'as-code))))
          (*standard-input* (or stream *standard-input*)))
-    (handler-case (peek-char t)
-      (end-of-file (c)
-        (if eof-error-p
-            (error c)
-            eof-value))
-      (:no-error (char)
-        (if (get-macro-character char)
-            (read *standard-input* eof-error-p eof-value recursive-p)
-            (let ((notation
-                   (canonicalize-case
-                     (read-as-string:read-as-string nil eof-error-p eof-value
-                                                    recursive-p))))
-              (if (every (lambda (c) (char= #\. c)) notation)
-                  (make-dot :notation notation)
-                  (handler-case (values (read-from-string notation))
-                    #+ecl
-                    (error (c)
-                      (if (search "There is no package with the name"
-                                  (princ-to-string c))
-                          (make-broken-symbol notation)
-                          (error c)))
-                    (package-error ()
-                      (make-broken-symbol notation))
-                    (:no-error (value)
-                      (unless (valid-value-p value notation)
-                        (mark-it value notation))
-                      value)))))))))
+    (%read-as-code *standard-input* eof-error-p eof-value recursive-p)))
+
+(defun %read-as-code
+       (*standard-input* &optional (eof-error-p t) eof-value recursive-p)
+  (handler-case (peek-char t)
+    (end-of-file (c)
+      (if eof-error-p
+          (error c)
+          eof-value))
+    (:no-error (char)
+      (if (get-macro-character char)
+          (read *standard-input* eof-error-p eof-value recursive-p)
+          (let ((notation
+                 (canonicalize-case
+                   (read-as-string:read-as-string nil eof-error-p eof-value
+                                                  recursive-p))))
+            (if (every (lambda (c) (char= #\. c)) notation)
+                (make-dot :notation notation)
+                (handler-case (values (read-from-string notation))
+                  #+ecl
+                  (error (c)
+                    (if (search "There is no package with the name"
+                                (princ-to-string c))
+                        (make-broken-symbol notation)
+                        (error c)))
+                  (package-error ()
+                    (make-broken-symbol notation))
+                  (:no-error (value)
+                    (unless (valid-value-p value notation)
+                      (mark-it value notation))
+                    value))))))))
 
 (declaim
  (ftype (function (simple-string) (values simple-string &optional))
@@ -350,7 +354,7 @@
               (loop-finish)
         ;; The default.
         :else
-          :collect (read-as-code stream t t t)))
+          :collect (%read-as-code stream t t t)))
 
 (defun |line-comment-reader| (stream character)
   (declare (ignore character))
@@ -378,17 +382,17 @@
 (defun |#+-reader| (stream character number)
   (when number
     (warn "A numeric argument is ignored in #~A~A." number character))
-  (make-conditional :char character :condition (read-as-code stream)))
+  (make-conditional :char character :condition (%read-as-code stream)))
 
 (defun |#.reader| (stream character number)
   (declare (ignore character))
   (when number
     (warn "A numeric argument is ignored in read time eval."))
-  (make-read-time-eval :form (read-as-code stream t t t)))
+  (make-read-time-eval :form (%read-as-code stream t t t)))
 
 (defun |#=reader| (stream character number)
   (declare (ignore character))
-  (make-shared-object :number number :exp (read-as-code stream)))
+  (make-shared-object :number number :exp (%read-as-code stream)))
 
 (defun |##reader| (stream character number)
   (declare (ignore stream character))
@@ -396,13 +400,13 @@
 
 (defun |'reader| (stream character)
   (declare (ignore character))
-  (list* 'quote (list (read-as-code stream))))
+  (list* 'quote (list (%read-as-code stream))))
 
 (defun |#'reader| (stream character number)
   (declare (ignore character))
   (when number
     (warn "Ignore numeric argument for #~D'." number))
-  (list* 'function (list (read-as-code stream))))
+  (list* 'function (list (%read-as-code stream))))
 
 (defun |radix-reader| (stream character number)
   (let ((integer
@@ -424,11 +428,11 @@
   (let ((sub-char (peek-char t stream)))
     (make-comma :sub-char (when (find sub-char '(#\. #\@))
                             (read-char stream))
-                :form (read-as-code stream))))
+                :form (%read-as-code stream))))
 
 (defun |`reader| (stream character)
   (declare (ignore character))
-  (make-backquote :form (read-as-code stream)))
+  (make-backquote :form (%read-as-code stream)))
 
 ;;;; NAMED-READTABLE
 
