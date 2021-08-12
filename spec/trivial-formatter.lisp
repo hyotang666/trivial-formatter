@@ -3,7 +3,7 @@
                 #:pprint-fun-call #:pprint-define-condition #:pprint-restart-case
                 #:pprint-with-open-file #:split-to-lines #:pprint-cond #:pprint-flet
                 #:pprint-defgeneric #:pprint-defstruct #:pprint-defclass #:pprint-handler-case
-                #:pprint-method-lambda-list #:pprint-restart-bind)
+                #:pprint-method-lambda-list #:pprint-restart-bind #:pprint-macrolet)
   (:use :cl :jingoh :trivial-formatter))
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
@@ -1270,3 +1270,43 @@
                  :TEST-FUNCTION (LAMBDA (X) (TYPEP C 'CELL-ERROR))))
   :BODY)" (let ((*print-pretty* t))
             (prin1-to-string '(lambda () :return))))
+
+(requirements-about PPRINT-MACROLET :doc-type function)
+
+;;;; Description:
+
+#+syntax (PPRINT-MACROLET stream exp &rest noise) ; => result
+
+;;;; Arguments and Values:
+
+; stream := 
+
+; exp := 
+
+; noise := 
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+
+;;;; Tests:
+#?(pprint-macrolet nil
+                   '(macrolet ((with-check ((var form) &body body)
+                                 todo))
+                        (labels ((check-first ()
+                                   (with-check (first (read-char input nil nil))
+                                               (cond ((null first) nil)))))
+                          (check-first))))
+:outputs
+"(MACROLET ((WITH-CHECK ((VAR FORM) &BODY BODY)
+             TODO))
+  (LABELS ((CHECK-FIRST ()
+             (WITH-CHECK (FIRST (READ-CHAR INPUT NIL NIL))
+               (COND ((NULL FIRST) NIL)))))
+    (CHECK-FIRST)))"
