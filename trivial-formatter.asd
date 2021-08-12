@@ -7,11 +7,13 @@
   :license "MIT"
   :depends-on
   (
-   "read-as-string" ; Read S-Expression as string.
-   "named-readtables" ; Readtable manager.
-   "cl-ppcre" ; Pearl compatible regular expression.
-   "alexandria" ; Public domain utilities.
+   "read-as-string"     ; Read S-Expression as string.
+   "named-readtables"   ; Readtable manager.
+   "cl-ppcre"           ; Pearl compatible regular expression.
+   "alexandria"         ; Public domain utilities.
    "lambda-fiddle"      ; Utilities for lambda-list processing.
+   "uiop"               ; Utilities.
+   "asdf"               ; System builder.
    )
   :pathname
   "src/"
