@@ -510,7 +510,7 @@
     (set-pprint-dispatch '(cons (member define-condition))
                          'pprint-define-condition)
     (set-pprint-dispatch '(cons (member or and values)) 'pprint-linear-elt)
-    (set-pprint-dispatch '(cons (member flet labels)) 'pprint-flet)
+    (set-pprint-dispatch '(cons (member flet labels macrolet)) 'pprint-flet)
     (set-pprint-dispatch '(cons (member when unless)) 'pprint-when)
     (set-pprint-dispatch '(cons (member restart-case)) 'pprint-restart-case)
     (set-pprint-dispatch '(cons (member restart-bind)) 'pprint-restart-bind)
@@ -525,7 +525,6 @@
     (set-pprint-dispatch '(cons (member defstruct)) 'pprint-defstruct)
     (set-pprint-dispatch '(cons (member defgeneric)) 'pprint-defgeneric)
     (set-pprint-dispatch '(cons (member pushnew)) 'pprint-fun-call)
-    (set-pprint-dispatch '(cons (member macrolet)) 'pprint-macrolet)
     *print-pprint-dispatch*))
 
 (defparameter *pprint-dispatch* *print-pprint-dispatch*)
@@ -636,76 +635,74 @@
   (setf stream (or stream *standard-output*))
   (funcall (formatter "~:<~^~W~^ ~:I~@{~W~^ ~_~}~:>") stream exp))
 
+(declaim (type list *flets* *macrolets*))
+
+(defvar *flets* nil)
+
+(defvar *macrolets* nil)
+
+(defun count-pre-body-forms (lambda-list)
+  (loop :for elt
+             :in (lambda-fiddle:remove-environment-part
+                   (lambda-fiddle:remove-whole-part
+                     (lambda-fiddle:remove-aux-part lambda-list)))
+        :for key? := (find elt lambda-list-keywords)
+        :if key?
+          :if (eq '&body key?)
+            :do (loop-finish)
+          :end
+        :else
+          :count :it))
+
 (defun pprint-flet (stream exp)
   (setf stream (or stream *standard-output*))
-  (let ((printer
-         (coerce (pprint-dispatch exp (copy-pprint-dispatch nil)) 'function))
-        (local-funs
-         (and (listp (second exp))
-              (loop :for x :in (second exp)
-                    :when (listp x)
-                      :collect (car x))))
+  (let ((impl-printer (coerce (pprint-dispatch exp nil) 'function))
+        (*flets*
+         (if (not (find (car exp) '(flet labels)))
+             *flets*
+             (append
+               (and (listp (second exp))
+                    (loop :for x :in (second exp)
+                          :if (listp x)
+                            :collect (car x)))
+               *flets*)))
+        (*macrolets*
+         (if (and (eq 'macrolet (car exp)) (listp (second exp)))
+             (append (second exp) *macrolets*)
+             *macrolets*))
+        ;; Override list printer.
         (*print-pprint-dispatch* (copy-pprint-dispatch)))
-    (declare (type list local-funs))
-    (set-pprint-dispatch 'list
-                         (lambda (stream exp &rest noise)
-                           (declare (ignore noise))
-                           (if (and (symbolp (car exp))
-                                    (not (keywordp (car exp)))
-                                    (not (special-operator-p (car exp)))
-                                    (not (macro-function (car exp)))
-                                    (or (find (the symbol (car exp))
-                                              local-funs)
-                                        (eq
-                                          (pprint-dispatch exp
-                                                           *pprint-dispatch*)
-                                          (pprint-dispatch exp nil))))
-                               (pprint-fun-call stream exp)
-                               (funcall
-                                 (coerce
-                                   (pprint-dispatch exp *pprint-dispatch*)
-                                   'function)
-                                 stream exp))))
-    (funcall printer stream exp)))
-
-(defun pprint-macrolet (stream exp &rest noise)
-  (declare (ignore noise))
-  (setf stream (or stream *standard-output*))
-  (let ((printer
-         (coerce (pprint-dispatch exp (copy-pprint-dispatch nil)) 'function))
-        (*print-pprint-dispatch* (copy-pprint-dispatch))
-        (macrolets (second exp)))
-    (declare (type list macrolets))
-    (labels ((macrolet-printer (output exp &rest noise)
+    (labels ((list-printer (stream exp &rest noise)
                (declare (ignore noise))
-               (let ((def
-                      (and (symbolp (car exp))
-                           (find (the symbol (car exp)) macrolets :key #'car))))
-                 (if def
-                     (pprint-macro output exp def)
-                     (funcall
-                       (coerce (pprint-dispatch exp *pprint-dispatch*)
-                               'function)
-                       output exp))))
-             (pre-body-forms (def)
-               (loop :for elt
-                          :in (lambda-fiddle:remove-environment-part
-                                (lambda-fiddle:remove-whole-part
-                                  (lambda-fiddle:remove-aux-part (second def))))
-                     :for key? := (find elt lambda-list-keywords)
-                     :if key?
-                       :if (eq '&body key?)
-                         :do (loop-finish)
-                       :end
-                     :else
-                       :count :it))
+               (cond
+                 ((or (not (symbolp (car exp)))
+                      (keywordp (car exp))
+                      (special-operator-p (car exp))
+                      (macro-function (car exp)))
+                  (funcall
+                    (coerce (pprint-dispatch exp *pprint-dispatch*) 'function)
+                    stream exp))
+                 ((find (the symbol (car exp)) *flets*)
+                  (pprint-fun-call stream exp))
+                 ((let ((def
+                         (find (the symbol (car exp)) *macrolets* :key #'car)))
+                    (when def
+                      (pprint-macro stream exp def)
+                      t)))
+                 ((eq (pprint-dispatch exp *pprint-dispatch*)
+                      (pprint-dispatch exp nil))
+                  (pprint-fun-call stream exp))
+                 (t
+                  (funcall
+                    (coerce (pprint-dispatch exp *pprint-dispatch*) 'function)
+                    stream exp))))
              (pprint-macro (output exp def)
                (pprint-logical-block (output exp :prefix "(" :suffix ")")
                  (write (pprint-pop) :stream output)
                  (pprint-exit-if-list-exhausted)
                  (pprint-indent :block 3 output)
                  (write-char #\Space output)
-                 (loop :repeat (pre-body-forms def)
+                 (loop :repeat (count-pre-body-forms (second def))
                        :do (pprint-newline :fill output)
                            (write (pprint-pop) :stream output)
                            (pprint-exit-if-list-exhausted)
@@ -717,8 +714,8 @@
                        (pprint-exit-if-list-exhausted)
                        (write-char #\Space output)
                        (pprint-newline :fill output)))))
-      (set-pprint-dispatch 'list #'macrolet-printer)
-      (funcall printer stream exp))))
+      (set-pprint-dispatch 'list #'list-printer)
+      (funcall impl-printer stream exp))))
 
 (defun pprint-cond (stream exp)
   (setf stream (or stream *standard-output*))
