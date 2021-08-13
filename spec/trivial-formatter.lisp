@@ -565,6 +565,24 @@
         ;; comment
         do (something))"
 
+;; Corner case. :ELSE clause with :AND clause.
+#?(pprint-extended-loop nil
+                        '(loop :for i :below 10
+                               :if (evenp i)
+                                 :collect i
+                               :else
+                                 :collect i
+                                 :and :do (print i)
+                               :and :collect (1+ i)))
+:outputs
+"(LOOP :FOR I :BELOW 10
+      :IF (EVENP I)
+        :COLLECT I
+      :ELSE
+        :COLLECT I
+        :AND :DO (PRINT I)
+        :AND :COLLECT (1+ I))"
+
 (requirements-about SPLIT-KEYWORDS :doc-type function)
 
 ;;;; Description:

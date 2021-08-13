@@ -1235,8 +1235,12 @@
             (funcall (formatter "~2:I~W ~@_~W~@[~:@_~{~W~^~:@_~}~]~5I") stream
                      (clause-keyword c) (car (clause-forms c))
                      (cdr (clause-forms c))))
-          (funcall (formatter "~2:I~W~:@_~{~W~^~:@_~}~5I") stream
-                   (clause-keyword c) (clause-forms c)))))
+          (progn
+           (funcall (formatter "~2:I~W") stream (clause-keyword c))
+           (when (clause-forms c)
+             (loop :for form :in (clause-forms c)
+                   :do (funcall (formatter "~VI~:@_~W") stream *indent* form)))
+           (pprint-indent :block 5 stream)))))
 
 ;;; END
 
