@@ -675,7 +675,8 @@
     (labels ((list-printer (stream exp &rest noise)
                (declare (ignore noise))
                (cond
-                 ((or (not (symbolp (car exp)))
+                 ((or (null exp)
+                      (not (symbolp (car exp)))
                       (keywordp (car exp))
                       (special-operator-p (car exp))
                       (macro-function (car exp)))
