@@ -1353,7 +1353,8 @@
                                  (not
                                    (and (symbolp (car last))
                                         (find (the symbol (car last))
-                                              '(:into :below :upto :to :downto)
+                                              '(:into :below :upto :to :downto
+                                                :=)
                                               :test #'string=)))))))
                  ;; Make new clause.
                  (rec rest (make-clause :keyword first)

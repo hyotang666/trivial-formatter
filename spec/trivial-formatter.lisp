@@ -583,6 +583,12 @@
         :AND :DO (PRINT I)
         :AND :COLLECT (1+ I))"
 
+;; Corner case. VAR conflicts loop macro keyword.
+#?(pprint-extended-loop nil '(loop :with last-end =
+                                   end))
+:outputs
+"(LOOP :WITH LAST-END = END)"
+
 (requirements-about SPLIT-KEYWORDS :doc-type function)
 
 ;;;; Description:
