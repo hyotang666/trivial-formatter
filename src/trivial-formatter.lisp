@@ -1388,7 +1388,9 @@
     (otherwise (values (car list) (cdr list)))))
 
 (defgeneric make-nest (nestable first rest)
-  (:method ((nestable nestable) (first null) rest) (values nestable nil))
+  (:method ((nestable nestable) (first null) rest)
+    (declare (ignore rest))
+    (values nestable nil))
   (:method ((nestable nestable) (end end) rest)
     (cond
       ((null (nestable-end nestable))
