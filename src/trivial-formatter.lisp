@@ -1062,7 +1062,10 @@
   (let* ((*print-case* :downcase)
          (*print-pprint-dispatch* (init-table))
          (*pprint-dispatch* (init-table))
-         (*print-pretty* t))
+         (*print-pretty* t)
+         (*print-level*)
+         (*print-length*)
+         (*print-lines*))
     (set-pprint-dispatch 'list 'pprint-list)
     (prin1-to-string exp)))
 
