@@ -24,11 +24,12 @@
   *local-project-directories* *external-formatters-directories*))
 
 (defvar *local-project-directories*
-  `(,@(when (find-package :ql)
-        (symbol-value (uiop:find-symbol* "*LOCAL-PROJECT-DIRECTORIES*" :ql)))
-    ,@(when (find-package :roswell)
+  `(,@(when (find-package '#:ql)
         (symbol-value
-          (uiop:find-symbol* "*LOCAL-PROJECT-DIRECTORIES*" :roswell)))))
+          (uiop:find-symbol* '#:*local-project-directories* '#:ql)))
+    ,@(when (find-package '#:roswell)
+        (symbol-value
+          (uiop:find-symbol* '#:*local-project-directories* '#:roswell)))))
 
 (defparameter *external-formatters-directories*
   (loop :for directory :in *local-project-directories*
