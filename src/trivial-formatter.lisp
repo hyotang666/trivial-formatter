@@ -560,8 +560,8 @@
       (ftype (function (simple-string simple-string)
               (values simple-string &optional))
              compare))
-    (reduce #'compare
-            (cons (package-name package) (package-nicknames package)))))
+    (reduce #'compare (package-nicknames package)
+            :initial-value (package-name package))))
 
 (let ((default-pprint-dispatch (copy-pprint-dispatch nil)))
   (defun symbol-printer (stream object)
