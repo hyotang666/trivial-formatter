@@ -11,6 +11,9 @@ This file is formatted by trivial-formatter itself.
 ### [trivial-indent](https://github.com/Shinmera/trivial-indent) for SLIME user.
 > A very simple library to allow indentation hints for SWANK. 
 
+### [cl-indentify](https://github.com/yitzchak/cl-indentify.git)
+> Library and command line utility to automatically indent Common Lisp source files.
+
 ## Usage
 
 ```lisp
