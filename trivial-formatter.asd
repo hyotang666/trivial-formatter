@@ -2,7 +2,7 @@
 (in-package :asdf)
 (defsystem "trivial-formatter"
   :version
-  "10.4.6"
+  "10.4.7"
   :description "Code formatter for common lisp."
   :license "MIT"
   :depends-on
@@ -10,7 +10,6 @@
    "read-as-string"     ; Read S-Expression as string.
    "named-readtables"   ; Readtable manager.
    "cl-ppcre"           ; Pearl compatible regular expression.
-   "alexandria"         ; Public domain utilities.
    "lambda-fiddle"      ; Utilities for lambda-list processing.
    "uiop"               ; Utilities.
    "asdf"               ; System builder.
