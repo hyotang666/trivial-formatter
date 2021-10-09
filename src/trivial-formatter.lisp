@@ -587,7 +587,10 @@
                              stream))
                  (write-string default-style stream :start
                                ;; Please do not ever use collon as package name!
-                               (or (position #\: default-style) 0)))))))))
+                               (or (position #\: default-style)
+                                   (error
+                                     "Internal logical error: Missing colon in ~S."
+                                     default-style))))))))))
 
 (defun pprint-handler-case (stream exp &rest noise)
   (declare (ignore noise))
