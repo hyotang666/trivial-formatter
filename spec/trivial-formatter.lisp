@@ -935,7 +935,9 @@
        (DO-IT)
        (FOR-OTHERS)))"
 
-(requirements-about PPRINT-FLET :doc-type function)
+(requirements-about PPRINT-FLET :doc-type function
+		    :around (let ((*print-pretty* t))
+			      (call-body)))
 
 ;;;; Description:
 
