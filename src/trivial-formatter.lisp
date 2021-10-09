@@ -587,9 +587,7 @@
                              stream))
                  (write-string default-style stream :start
                                ;; Please do not ever use collon as package name!
-                               (locally ; KLUDGE: could not fix style-warning.
-                                (declare (optimize (speed 1)))
-                                (position #\: default-style))))))))))
+                               (or (position #\: default-style) 0)))))))))
 
 (defun pprint-handler-case (stream exp &rest noise)
   (declare (ignore noise))
@@ -1060,10 +1058,7 @@
 
 (defun write-string-from
        (pred string &optional (*standard-output* *standard-output*))
-  (let ((pos
-         (locally ; due to sbcl fails to infer.
-          (declare (optimize (speed 1)))
-          (position-if pred string))))
+  (let ((pos (position-if pred string)))
     (when pos
       (write-string string nil :start pos)))
   nil)
