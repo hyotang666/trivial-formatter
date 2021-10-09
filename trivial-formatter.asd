@@ -7,11 +7,11 @@
   :license "MIT"
   :depends-on
   (
+   "uiop"               ; Utilities, implicitly depends on via asdf.
+   "lambda-fiddle"      ; Utilities for lambda-list processing.
    "read-as-string"     ; Read S-Expression as string.
    "named-readtables"   ; Readtable manager.
-   "cl-ppcre"           ; Pearl compatible regular expression.
-   "lambda-fiddle"      ; Utilities for lambda-list processing.
-   "uiop"               ; Utilities.
+   "cl-ppcre"           ; Regular expression.
    "asdf"               ; System builder.
    )
   :pathname
