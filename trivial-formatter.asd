@@ -5,6 +5,9 @@
   "10.4.10"
   :description "Code formatter for common lisp."
   :license "MIT"
+  :author "SATO Shinichi"
+  :source-control (:git "git@github.com:hyotang666/trivial-formatter")
+  :bug-tracker "https://github.com/hyotang666/trivial-formatter/issues"
   :depends-on
   (
    "uiop"               ; Utilities, implicitly depends on via asdf.
