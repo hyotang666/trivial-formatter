@@ -102,12 +102,10 @@
                ;; we need to close it beforehand.
                (with-output-to-string (*standard-output*)
                  (debug-printer component))))
-          (with-open-file (*standard-output* (asdf:component-pathname
-                                               component)
-                           :direction :output
+          (with-open-file (out (asdf:component-pathname component) :direction :output
                            :if-does-not-exist :create
                            :if-exists if-exists)
-            (write-string string))))))
+            (write-string string out))))))
 
 (declaim
  (ftype (function (asdf:component)
