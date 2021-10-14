@@ -486,6 +486,8 @@
                          'pprint-dynamic-extent)
     *print-pprint-dispatch*))
 
+(defparameter *pprint-dispatch* *print-pprint-dispatch*)
+
 (defun string-as-code (exp)
   (let* ((*print-case* :downcase)
          (*print-pprint-dispatch* (init-table))
@@ -706,8 +708,6 @@
       (setf *package* package))))
 
 ;;;; PRETTY PRINTERS
-
-(defparameter *pprint-dispatch* *print-pprint-dispatch*)
 
 (defun pprint-defclass (stream exp)
   (setf stream (or stream *standard-output*))
