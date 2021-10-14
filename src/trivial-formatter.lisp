@@ -482,6 +482,8 @@
     (set-pprint-dispatch '(cons (member defstruct)) 'pprint-defstruct)
     (set-pprint-dispatch '(cons (member defgeneric)) 'pprint-defgeneric)
     (set-pprint-dispatch '(cons (member pushnew)) 'pprint-fun-call)
+    (set-pprint-dispatch '(cons (member dynamic-extent))
+                         'pprint-dynamic-extent)
     *print-pprint-dispatch*))
 
 (defun string-as-code (exp)
@@ -723,6 +725,11 @@
 (defun pprint-ftype (stream exp)
   (setf stream (or stream *standard-output*))
   (funcall (formatter "~:<~W~^ ~1I~@_~:I~^~W~^ ~_~@{~W~^ ~_~}~:>") stream exp))
+
+(defun pprint-dynamic-extent (output exp)
+  (setf output (or output *standard-output*))
+  (funcall (formatter "~:<~W~^ ~@_~@{~:<~W~^ ~@{~W~^ ~}~:>~^ ~}~:>") output
+           exp))
 
 (declaim
  (ftype (function (package) (values simple-string &optional))
