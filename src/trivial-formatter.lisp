@@ -699,7 +699,8 @@
                       ;; In order to refer macro symbol for correct indent,
                       ;; we need to eval IN-PACKAGE.
                       (when (listp exp) ; ignore top level conditional.
-                        (let ((exp (read-from-string string nil)))
+                        (let ((exp
+                               (ignore-errors (read-from-string string nil))))
                           (when (typep exp '(cons (eql in-package)))
                             ;; Eval only top-level IN-PACKAGE.
                             ;; We believe no macro expanded into IN-PACKAGE.
