@@ -222,7 +222,7 @@
           (error c)
           eof-value))
     (:no-error (char)
-      (if (get-macro-character char)
+      (if (named-readtables::%get-macro-character char *readtable*)
           (read *standard-input* eof-error-p eof-value recursive-p)
           (let ((notation
                  (canonicalize-case
@@ -235,6 +235,11 @@
                   (error (c)
                     (if (search "There is no package with the name"
                                 (princ-to-string c))
+                        (make-broken-symbol notation)
+                        (error c)))
+                  #+allegro
+                  (reader-error (c)
+                    (if (search "Package " (princ-to-string c))
                         (make-broken-symbol notation)
                         (error c)))
                   (package-error ()
@@ -514,6 +519,12 @@
       (cond ((char= #\\ char) (incf index))
             ((char= delimiter char) (return index))))))
 
+(eval-when (:compile-toplevel :load-toplevel)
+  (define-symbol-macro can-declare-fixnum
+                       (if (< array-total-size-limit most-positive-fixnum)
+                           '(and)
+                           '(or))))
+
 (let ((line (make-string-output-stream)) temp)
   (defun split-to-lines (string)
     (declare (optimize speed)
@@ -528,8 +539,11 @@
                  (list line)))))
       (declare
         (ftype (function (simple-string) (values list &optional)) sieve))
-      (loop :for index :of-type (integer 0 #.most-positive-fixnum) = 0
-                 :then (1+ index)
+      (loop :for index
+                 #+#.trivial-formatter::can-declare-fixnum :of-type
+                 #+#.trivial-formatter::can-declare-fixnum (integer 0
+                                                                    #.most-positive-fixnum)
+                 = 0 :then (1+ index)
             :for char
                  := (when (array-in-bounds-p string index)
                       (aref string index))
@@ -1037,6 +1051,8 @@
 
 (defun pprint-restart-bind (stream exp)
   (setf stream (or stream *standard-output*))
+  #+allegro
+  (check-type stream stream)
   (funcall
     (formatter
      #.(concatenate 'string "~:<" ; pprint-logical-block

@@ -127,11 +127,11 @@
 
 ; * If specified package name is different actual package name, such symbol is marked.
 ; This prevents e.g. closer-mop symbols becomes underlying implementation dependent symbol.
-#?(with-input-from-string(s "asdf:find-system")
+#?(with-input-from-string(s "ppcre:regex-replace")
     (read-as-code s))
 :satisfies (lambda(result)
-             (&(eq result 'asdf:find-system)
-               (equal "asdf:find-system" (get result 'trivial-formatter::notation))))
+             (&(eq result 'ppcre:regex-replace)
+               (equal "ppcre:regex-replace" (get result 'trivial-formatter::notation))))
 
 ; * If explicitly specify it is internal symbol (i.e. p::s), such symbol is marked
 ; because there may a reason.
