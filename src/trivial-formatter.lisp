@@ -522,8 +522,8 @@
 (eval-when (:compile-toplevel :load-toplevel)
   (define-symbol-macro can-declare-fixnum
                        (if (< array-total-size-limit most-positive-fixnum)
-                           '(and)
-                           '(or))))
+                           '(:and)
+                           '(:or))))
 
 (let ((line (make-string-output-stream)) temp)
   (defun split-to-lines (string)
