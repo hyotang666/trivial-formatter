@@ -242,6 +242,9 @@
                     (if (search "Package " (princ-to-string c))
                         (make-broken-symbol notation)
                         (error c)))
+                  #+cmucl
+                  (lisp::reader-package-error ()
+                    (make-broken-symbol notation))
                   (package-error ()
                     (make-broken-symbol notation))
                   (:no-error (value)
@@ -491,7 +494,7 @@
                          'pprint-dynamic-extent)
     *print-pprint-dispatch*))
 
-(defparameter *pprint-dispatch* *print-pprint-dispatch*)
+(defparameter *pprint-dispatch* (init-table))
 
 (defun string-as-code (exp)
   (let* ((*print-case* :downcase)
