@@ -163,12 +163,18 @@ When you want to set pretty-printing functions temporarily, you need to bind `*P
 MIT
 
 ### Developed with
-SBCL/2.1.4
+SBCL
 
 ### Tested with
-* SBCL/2.1.4
-* CCL/1.12.1
+* SBCL/2.1.10
 * ECL/20.4.24
+* CMUCL/21D
+
+* CCL/1.12.1 ; Failed but pprit portability issue.
+* Allegro/10.1 ; Failed but pprit portability issue.
+
+* CLISP/2.49 ; Failed, not supported. For details see below.
+* ABCL/1.8.0 ; Failed, not supported. For details see below.
 
 #### Note
 Trivial-formatter works portable at least implementations above.
@@ -191,6 +197,10 @@ CLISP is not supported.
 [CLISP say](https://clisp.sourceforge.io/impnotes.html#clpp)
 
 > The Lisp Pretty Printer implementation is not perfect yet.
+
+#### ABCL
+ABCL is not supported due to its issues.
+Related issues are [this](https://github.com/armedbear/abcl/issues/406) and [this](https://github.com/armedbear/abcl/issues/408).
 
 #### Reader.
 When the reader macro conflicts, such reader macros are ignored silently.
