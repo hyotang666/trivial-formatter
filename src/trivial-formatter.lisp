@@ -228,6 +228,9 @@
                  (canonicalize-case
                    (read-as-string:read-as-string nil eof-error-p eof-value
                                                   recursive-p))))
+            #+abcl
+            (when (uiop:string-prefix-p "::" notation)
+              (setq notation (subseq notation 1)))
             (if (every (lambda (c) (char= #\. c)) notation)
                 (make-dot :notation notation)
                 (handler-case (values (read-from-string notation))
@@ -245,6 +248,12 @@
                   #+cmucl
                   (lisp::reader-package-error ()
                     (make-broken-symbol notation))
+                  #+abck
+                  (reader-error (c)
+                    (if (search "can't be found." (princ-to-string c)
+                                :from-end t)
+                        (make-broken-symbol notation)
+                        (error c)))
                   (package-error ()
                     (make-broken-symbol notation))
                   (:no-error (value)
@@ -259,6 +268,8 @@
 
 (defun read-as-code
        (&optional stream (eof-error-p t) (eof-value nil) (recursive-p nil))
+  #+abcl
+  (check-type eof-error-p boolean)
   (let* ((*readtable*
           (handler-bind ((named-readtables:reader-macro-conflict #'continue))
             (named-readtables:merge-readtables-into (copy-readtable)
