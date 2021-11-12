@@ -852,6 +852,25 @@
         :else
           :count :it))
 
+(defun pprint-macro (output exp def)
+  (pprint-logical-block (output exp :prefix "(" :suffix ")")
+    (write (pprint-pop) :stream output)
+    (pprint-exit-if-list-exhausted)
+    (pprint-indent :block 3 output)
+    (write-char #\Space output)
+    (loop :repeat (count-pre-body-forms (second def))
+          :do (pprint-newline :fill output)
+              (write (pprint-pop) :stream output)
+              (pprint-exit-if-list-exhausted)
+              (write-char #\Space output)
+          :finally (pprint-indent :block 1 output)
+                   (pprint-newline :fill output))
+    ;; body
+    (loop (write (pprint-pop) :stream output)
+          (pprint-exit-if-list-exhausted)
+          (write-char #\Space output)
+          (pprint-newline :fill output))))
+
 (defun pprint-flet (stream exp)
   (setf stream (or stream *standard-output*))
   (let ((impl-printer (coerce (pprint-dispatch exp nil) 'function))
@@ -884,7 +903,10 @@
                  ((find (the symbol (car exp)) *flets*)
                   (pprint-fun-call stream exp))
                  ((let ((def
-                         (find (the symbol (car exp)) *macrolets* :key #'car)))
+                         (find (the symbol (car exp)) *macrolets*
+                               :test (lambda (sym def)
+                                       (when (consp def)
+                                         (eq sym (car def)))))))
                     (when def
                       (pprint-macro stream exp def)
                       t)))
@@ -894,25 +916,7 @@
                  (t
                   (funcall
                     (coerce (pprint-dispatch exp *pprint-dispatch*) 'function)
-                    stream exp))))
-             (pprint-macro (output exp def)
-               (pprint-logical-block (output exp :prefix "(" :suffix ")")
-                 (write (pprint-pop) :stream output)
-                 (pprint-exit-if-list-exhausted)
-                 (pprint-indent :block 3 output)
-                 (write-char #\Space output)
-                 (loop :repeat (count-pre-body-forms (second def))
-                       :do (pprint-newline :fill output)
-                           (write (pprint-pop) :stream output)
-                           (pprint-exit-if-list-exhausted)
-                           (write-char #\Space output)
-                       :finally (pprint-indent :block 1 output)
-                                (pprint-newline :fill output))
-                 ;; body
-                 (loop (write (pprint-pop) :stream output)
-                       (pprint-exit-if-list-exhausted)
-                       (write-char #\Space output)
-                       (pprint-newline :fill output)))))
+                    stream exp)))))
       (set-pprint-dispatch 'list #'list-printer)
       (funcall impl-printer stream exp))))
 

@@ -985,6 +985,13 @@
                (COND ((NULL FIRST) NIL)))))
     (CHECK-FIRST)))"
 
+#?(pprint-flet nil
+	       '(macrolet (works if atom)
+		  dummy))
+:outputs
+"(MACROLET (WORKS IF ATOM)
+  DUMMY)"
+
 (requirements-about PPRINT-DEFGENERIC :doc-type function
                     :around (let ((*print-pretty* t))
                               (call-body)))

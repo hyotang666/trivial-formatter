@@ -2,7 +2,7 @@
 (in-package :asdf)
 (defsystem "trivial-formatter"
   :version
-  "10.5.4"
+  "10.6.0"
   :description "Code formatter for common lisp."
   :license "MIT"
   :author "SATO Shinichi"
