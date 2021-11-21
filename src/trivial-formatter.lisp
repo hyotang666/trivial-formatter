@@ -177,7 +177,9 @@
                (otherwise
                 (setf (aref new index)
                         (locally ; due to not know base-char.
-                         (declare (optimize (speed 1)))
+                         #+sbcl
+                         (declare
+                           (sb-ext:muffle-conditions sb-ext:compiler-note))
                          (funcall converter (char string index))))
                 (incf index))))))
     (ecase (readtable-case *readtable*)
@@ -210,7 +212,8 @@
            (or (not (find #\: notation)) ; Please do not use #\: as package or
                                          ; symbol name!
                (locally ; due to not known base-char
-                (declare (optimize (speed 1)))
+                #+sbcl
+                (declare (sb-ext:muffle-conditions sb-ext:compiler-note))
                 (every #'char-equal (package-name (symbol-package thing))
                        notation))))))
 
@@ -795,7 +798,9 @@
                        :do (write-char
                              (locally
                               ;; due to uncertainty base-char or not.
-                              (declare (optimize (speed 1)))
+                              #+sbcl
+                              (declare
+                               (sb-ext:muffle-conditions sb-ext:compiler-note))
                               (char-downcase char))
                              stream))
                  (write-string default-style stream :start
@@ -1056,16 +1061,14 @@
       (pprint-logical-block (stream exp :prefix "(" :suffix ")")
         (pprint-exit-if-list-exhausted)
         (apply
-          (locally ; due to formatter, out of scope.
-           (declare (optimize (speed 1)))
-           (formatter
-            #.(concatenate 'string "~{~W~^ ~@_~:<~@{~W~^ ~@_~}~:>~}" ; pre.
-                           (concatenate 'string "~@[" ; if exists.
-                                        " ~3I~_~{~W~^ ~@_~W~^ ~_~}" ; keys
-                                        "~]")
-                           "~^ ~1I" ; if exists body.
-                           "~:*~:[~_~;~:@_~]" ; mandatory newline when keys.
-                           "~@{~W~^ ~:@_~}"))) ; body.
+          (formatter
+           #.(concatenate 'string "~{~W~^ ~@_~:<~@{~W~^ ~@_~}~:>~}" ; pre.
+                          (concatenate 'string "~@[" ; if exists.
+                                       " ~3I~_~{~W~^ ~@_~W~^ ~_~}" ; keys
+                                       "~]")
+                          "~^ ~1I" ; if exists body.
+                          "~:*~:[~_~;~:@_~]" ; mandatory newline when keys.
+                          "~@{~W~^ ~:@_~}")) ; body.
           stream (parse-restart-clause exp)))))
 
 (defun pprint-restart-bind (stream exp)
