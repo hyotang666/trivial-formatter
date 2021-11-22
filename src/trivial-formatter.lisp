@@ -135,11 +135,11 @@
          (values null &optional))
         fmt))
 
-(defun fmt (system &optional (if-exists nil supplied-p))
+(defun fmt (system &optional (if-exists nil))
   (asdf:load-system system)
   (load-external-formatters)
   (dolist (component (component-children (asdf:find-system system)))
-    (if (not supplied-p)
+    (if (null if-exists)
         (debug-printer component)
         (let ((string
                ;; In order to open file for superseding,
