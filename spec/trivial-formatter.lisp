@@ -11,7 +11,7 @@
 (requirements-about FMT :doc-type function)
 
 ;;;; Description:
-; Format every source codes of asdf:system.
+; Format every source code of asdf:system.
 
 #+syntax
 (FMT system &optional (if-exists nil supplied-p)) ; => result
@@ -19,11 +19,11 @@
 ;;;; Arguments and Values:
 
 ; system := (or symbol (vector character) (vector nil) base-string asdf/system:system)
-; otherwise condition depending on implementation.
+; otherwise, the condition depending on implementation is signaled.
 #?(fmt '(invalid type)) :signals condition
 
 ; if-exists := (member nil :append :supersede :rename :error :new-version :rename-and-delete :overwrite)
-; otherwise condition depending on implementation.
+; otherwise, the condition depending on implementation is signaled.
 #?(fmt :dummy :not-member) :signals condition
 
 ; If specified, depending on its value source file is modified.
@@ -34,7 +34,7 @@
 
 ;;;; Affected By:
 ; `*readtable*` `*print-pprint-dispatch*`
-; `*strict-loop-keyword-p*`, when t loop macro keywrods are force to be keyword symbol.
+; `*strict-loop-keyword-p*`, when t, loop macro keywords are forced to be keyword symbols.
 
 ;;;; Side-Effects:
 ; Load asdf:system to lisp environment.
@@ -44,32 +44,32 @@
 ;;;; Notes:
 
 ;;;; Exceptional-Situations:
-; When specified system is not found, an error of asdf:missing-component is signaled.
+; When the specified system is not found, an error of asdf:missing-component is signaled.
 #?(fmt :no-such-system) :signals asdf:missing-component
 
 (requirements-about READ-AS-CODE :doc-type function)
 
 ;;;; Description:
-; Almost same with `CL:READ` but
-; * Can handle symbol which missing package.
-; * Can handle comment.
-; * Treat dot list as proper list.
+; Almost the same with `CL:READ` but
+; * Can handle the symbols which have the unknown package prefix.
+; * Can handle the comment.
+; * Treat dot list as a proper list.
 
 #+syntax
 (READ-AS-CODE &optional stream (eof-error-p t) (eof-value nil) (recursive-p nil)) ; => result
 
 ;;;; Arguments and Values:
 
-; stream := (or null stream), otherwise condition depending on implementation.
+; stream := (or null stream), otherwise, the condition depending on implementation is signaled.
 #?(read-as-code :not-stream) :signals condition
 ; When NIL is specified, it means `*STANDARD-INPUT*`.
 #?(with-input-from-string(*standard-input* "nil")
     (read-as-code nil))
 => NIL
 
-; eof-error-p := boolean, otherwise condition depending on implementation.
+; eof-error-p := boolean, otherwise the condition depending on implementation is signaled.
 #?(read-as-code nil :not-boolean) :signals condition
-; When NIL is specified and get end-of-file, never signals end-of-file.
+; When NIL is specified and gets an end-of-file, never signals end-of-file.
 #?(with-input-from-string(*standard-input* "")
     (read-as-code nil nil :returned))
 :invokes-debugger not
@@ -98,11 +98,11 @@
 #?(with-input-from-string(s ":keyword")
     (read-as-code s))
 => :KEYWORD
-; Double colloned keyword symbol will be canonicalized to single colloned keyword symbol.
+; Double colon keyword symbol will be canonicalized to a single colon keyword symbol.
 #?(with-input-from-string(s "::double-colloned")
     (read-as-code s))
 => :DOUBLE-COLLONED
-; Without package prefix, symbol is interned to current package.
+; Without package prefix, the symbol is interned to the current package.
 #?(with-input-from-string(s "without-prefix")
     (read-as-code s))
 :satisfies (lambda(result)
@@ -110,7 +110,7 @@
                (eq *package* (symbol-package result))
                (equal "WITHOUT-PREFIX" (symbol-name result))))
 ; When prefixed,
-; * If package does not exists current lisp image, uninterned symbol will be made.
+; * If the package does not exist in the current lisp image, uninterned symbol will be made as an intermediate expression.
 #?(with-input-from-string(s "no-such-package:symbol")
     (read-as-code s))
 :satisfies (lambda(result)
@@ -125,15 +125,15 @@
     'package-error)
 => NIL
 
-; * If specified package name is different actual package name, such symbol is marked.
-; This prevents e.g. closer-mop symbols becomes underlying implementation dependent symbol.
+; * If the specified package name is different from the actual package name, such a symbol will have a mark.
+; This prevents e.g. closer-mop symbols become underlying implementation-dependent symbols.
 #?(with-input-from-string(s "ppcre:regex-replace")
     (read-as-code s))
 :satisfies (lambda(result)
              (&(eq result 'ppcre:regex-replace)
                (equal "ppcre:regex-replace" (get result 'trivial-formatter::notation))))
 
-; * If explicitly specify it is internal symbol (i.e. p::s), such symbol is marked
+; * If explicitly specify it is an internal symbol (i.e. p::s), such symbol is marked
 ; because there may a reason.
 ; E.g. It is external after compile but internal in compile time.
 #?(with-input-from-string (s "asdf::defsystem")
@@ -181,7 +181,7 @@
 ; * Not support comment in #S, #A, reader macros.
 ; Comment will be discarded.
 
-; Comment in vector is supported.
+; Comment in the vector is supported.
 #?(with-input-from-string (s "#(;comment
 )")
     (print-as-code (read-as-code s)))
@@ -202,27 +202,27 @@
 
 ; exp := t
 
-; stream := (or null stream) otherwise condition depending on implementation.
+; stream := (or null stream) otherwise the condition depending on implementation is signaled.
 #?(print-as-code :dummy :not-stream) :signals condition
 
 ; result := null
 
 ;;;; Affected By:
 ; `*print-pprint-dispatch*`
-; `*strict-loop-keyword-p*`, when t loop macro keywrods are force to be keyword symbol.
+; `*strict-loop-keyword-p*`, when t, loop macro keywords are forced to be keyword symbols.
 
 ;;;; Side-Effects:
 ; Output to `STREAM`.
 
 ;;;; Notes:
-; This printings are heavily depending on implementations pretty printing feature.
-; It means defferent output in defferent implementation.
+; These printings are heavily dependent on the implementation pretty-printing feature.
+; It means different outputs in a different implementation.
 
 ;;;; Exceptional-Situations:
 
 ;;;; Tests.
-; 1. After line comment, newline is required.
-; 2. Space may put if needed.
+; 1. After line comment, a line break is required.
+; 2. Space may be put if needed.
 #?(with-input-from-string(s #.(format nil "(dummy; comment~%)"))
     (print-as-code (read-as-code s)))
 :outputs
@@ -254,7 +254,7 @@
 #?(print-as-code '|"|)
 :outputs #.(prin1-to-string '|"|)
 
-; Corner case of declare with comma. Especially for SBCL.
+; Corner case of declaration with comma. Especially for SBCL.
 #?(with-input-from-string (s "`(declare ,'nil)")
     (print-as-code (read-as-code s)))
 :outputs "`(declare ,'nil)"
@@ -287,7 +287,7 @@
 ; result := 
 
 ;;;; Affected By:
-; `*strict-loop-keyword-p*` when t loop macro keywords are force to be keyword symbol.
+; `*strict-loop-keyword-p*` when t, loop macro keywords are forced to be keyword symbols.
 
 ;;;; Side-Effects:
 
@@ -1223,7 +1223,7 @@
                               (call-body)))
 
 ;;;; Description:
-; Control forcing to loop macro keyword to keyword symbol.
+; Control forcing to the loop macro keywords to be the keyword symbol.
 
 ;;;; Value type is BOOLEAN
 #? *STRICT-LOOP-KEYWORD-P* :be-the boolean
@@ -1301,7 +1301,7 @@
 ;;;; Exceptional-Situations:
 
 #?(PPRINT-RESTART-BIND "not stream" NIL) :signals TYPE-ERROR
-; NOTE: nullary lambda form print differently depending on implementation.
+; NOTE: nullary lambda forms print differently depending on implementation.
 ; e.g. (lambda ()), (lambda nil).
 #?(PPRINT-RESTART-BIND NIL
                        '(RESTART-BIND ((NAME (LAMBDA () :RETURN)))
