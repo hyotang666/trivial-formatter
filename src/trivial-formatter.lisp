@@ -119,8 +119,9 @@
                (asdf:module
                 (rec (append (asdf:component-children first) rest) acc
                      primary-system-name))
-               (asdf:static-file (rec rest acc primary-system-name))
-               (otherwise (rec rest (cons first acc) primary-system-name)))))
+               (asdf:cl-source-file
+                (rec rest (cons first acc) primary-system-name))
+               (otherwise (rec rest acc primary-system-name)))))
     (rec (list component) nil
          (when (typep component 'asdf:package-inferred-system)
            (asdf:primary-system-name component)))))
