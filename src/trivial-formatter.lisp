@@ -252,7 +252,7 @@
                   #+cmucl
                   (lisp::reader-package-error ()
                     (make-broken-symbol notation))
-                  #+abck
+                  #+abcl
                   (reader-error (c)
                     (if (search "can't be found." (princ-to-string c)
                                 :from-end t)
