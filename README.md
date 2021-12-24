@@ -166,7 +166,7 @@ MIT
 SBCL
 
 ### Tested with
-* SBCL/2.1.10
+* SBCL/2.1.11
 * ECL/20.4.24
 * CMUCL/21D
 
@@ -200,7 +200,8 @@ CLISP is not supported.
 
 #### ABCL
 ABCL is not supported due to its issues.
-Related issues are [this](https://github.com/armedbear/abcl/issues/406) and [this](https://github.com/armedbear/abcl/issues/408).
+Related issues are [this](https://github.com/armedbear/abcl/issues/406).
+And [this](https://github.com/armedbear/abcl/issues/408). (Already fixed but not released yet.)
 
 #### Reader.
 When the reader macro conflicts, such reader macros are ignored silently.
