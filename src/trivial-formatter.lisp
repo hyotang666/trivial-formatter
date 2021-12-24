@@ -24,19 +24,23 @@
   *local-project-directories* *external-formatters-directories*))
 
 (defvar *local-project-directories*
+  ;; QUICKLISP and ROSWELL may not exist in the user environment.
   `(,@(when (find-package '#:ql)
         (symbol-value
           (uiop:find-symbol* '#:*local-project-directories* '#:ql)))
     ,@(when (find-package '#:roswell)
         (symbol-value
-          (uiop:find-symbol* '#:*local-project-directories* '#:roswell)))))
+          (uiop:find-symbol* '#:*local-project-directories* '#:roswell))))
+  "List of local project directory pathnames. Used to search external formatters.")
 
 (defparameter *external-formatters-directories*
   (loop :for directory :in *local-project-directories*
-        :collect directory
-        :collect (merge-pathnames "external-formatter/" directory)))
+        :collect directory ; For backward complatibility.
+        :collect (merge-pathnames "external-formatter/" directory))
+  "List of external-formatter directory pathnames. Used to search external formatter.")
 
 (defun check-deprecated (directory)
+  "Signal warning when formatter.lisp exists directly under local-project-directory."
   (let ((local-project-directory
          (find (pathname-directory directory) *local-project-directories*
                :test #'equal
@@ -49,9 +53,15 @@
                         "~:@_Move it to ~S is recommended."))
         local-project-directory
         (merge-pathnames "external-formatter/" local-project-directory))
+      ;; As penalty. May be increased in the future.
       (sleep 1))))
 
 (defun load-external-formatters ()
+  "Load all external formatters."
+  ;; FIXME: Should we compile it?
+  ;;      : Should we check file hash or timestamp to skip?
+  ;;      : Should we bind *load-verbose* and/or *load-print*?
+  ;;      : Should we search formatters.lisp recursively?
   (loop :for directory :in *external-formatters-directories*
         :for pathname := (merge-pathnames "formatters.lisp" directory)
         :when (probe-file pathname)
