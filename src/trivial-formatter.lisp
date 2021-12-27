@@ -62,6 +62,7 @@
   ;;      : Should we check file hash or timestamp to skip?
   ;;      : Should we bind *load-verbose* and/or *load-print*?
   ;;      : Should we search formatters.lisp recursively?
+  ;; FIXME: 3rd slow profile report.
   (loop :for directory :in *external-formatters-directories*
         :for pathname := (merge-pathnames "formatters.lisp" directory)
         :when (probe-file pathname)
@@ -71,6 +72,8 @@
 ;;;; DEFORMTTER
 
 (defmacro deformatter (package symbol &body body)
+  "(deformatter package symbol (stream-var exp-var) &body body)
+Define formatter function."
   (declare (type symbol package symbol))
   (let ((pprinter (gensym (format nil "PPRINT-~A" symbol))))
     `(when (find-package ,(string package))
@@ -98,6 +101,7 @@
         component-children))
 
 (defun component-children (component)
+  "List up all cl-source-file components of the COMPONENT."
   (labels ((rec (list acc primary-system-name)
              (if (endp list)
                  acc
@@ -147,6 +151,13 @@
         fmt))
 
 (defun fmt (system &optional (if-exists nil))
+  "Format every source code of the SYSTEM.
+IF-EXISTS is a same value of the same parameter of CL:OPEN."
+  ;; In order to know function/macro definitions of the dependencies.
+  ;; FIXME: To load only dependencies.
+  ;; ISSUE: How about package infered systems?
+  ;; FIXME: 2nd slot profile report, especially consing.
+  ;; Can we pooling the objects?
   (asdf:load-system system)
   (load-external-formatters)
   (dolist (component (component-children (asdf:find-system system)))
@@ -197,14 +208,16 @@
       ((:upcase :downcase) (convert-all #'char-downcase))
       ((:preserve :invert) string))))
 
-(defvar *brokens* nil)
+(defvar *brokens* nil "List of marked symbols.")
 
 (defun mark-it (symbol notation)
+  "Mark symbol as broken notation."
   (setf (get symbol 'notation) notation)
   (push symbol *brokens*)
   symbol)
 
 (defun make-broken-symbol (notation)
+  "Make symbol that is used placeholder for broken symbol notation."
   (let ((symbol (gensym)))
     (setf (symbol-function symbol) #'make-broken-symbol) ; as dummy.
     (mark-it symbol notation)))
@@ -213,6 +226,7 @@
  (ftype (function (t simple-string) (values boolean &optional)) valid-value-p))
 
 (defun valid-value-p (thing notation)
+  "Is not NOTATION broken?"
   (or (not (symbolp thing))
       (keywordp thing)
       (null (symbol-package thing))
@@ -282,6 +296,7 @@
 
 (defun read-as-code
        (&optional stream (eof-error-p t) (eof-value nil) (recursive-p nil))
+  "Same with CL:READ but return intermediate S-Expression as lisp source code."
   #+abcl
   (check-type eof-error-p boolean)
   (let* ((*readtable*
@@ -315,6 +330,7 @@
       (funcall (formatter "~:@_;~A") stream (comment-content c))
       (funcall (formatter "~:@_; ~A") stream (comment-content c)))
   (pprint-newline :mandatory stream)
+  ;; Placeholder for end of line comment.
   (write-char #\Nul stream))
 
 (defstruct (block-comment (:include comment)))
@@ -471,7 +487,8 @@
 
 (locally
  ;; due to named-readtables, out of scope.
- (declare (optimize (speed 1)))
+ #+sbcl
+ (declare (sb-ext:muffle-conditions sb-ext:compiler-note))
  (named-readtables:defreadtable as-code
    (:merge :common-lisp)
    (:macro-char #\( '|paren-reader|)
@@ -492,6 +509,8 @@
    (:dispatch-macro-char #\# #\R '|radix-reader|)))
 
 (defun init-table ()
+  ;; FIXME: 1st slot profile report.
+  ;; Can we pooling the pprint-dispatch?
   (let ((*print-pprint-dispatch* (copy-pprint-dispatch)))
     (set-pprint-dispatch '(eql #\Space) (formatter "#\\~:C"))
     (set-pprint-dispatch 'symbol 'symbol-printer)
@@ -522,6 +541,7 @@
 (defparameter *pprint-dispatch* (init-table))
 
 (defun string-as-code (exp)
+  "Return lisp source code string of the EXP."
   (let* ((*print-case* :downcase)
          (*print-pprint-dispatch* (init-table))
          (*pprint-dispatch* (init-table))
@@ -539,6 +559,7 @@
         delimited-position))
 
 (defun delimited-position (delimiter string &key (start 0))
+  "Position of the next DELIMITER. Unlike CL:POSITION, skip escaped one."
   (do ((index start (1+ index)))
       ((not (array-in-bounds-p string index))
        (error "Missing delimiter ~S in ~S" delimiter string))
@@ -555,14 +576,17 @@
 
 (let ((line (make-string-output-stream)) temp)
   (defun split-to-lines (string)
+    "List of lines with handling escaped newline."
     (declare (optimize speed)
              (type simple-string string))
     (flet ((sieve (line)
              (let ((line
+                    ;; Cleanup placeholder for end of line comment.
                     (delete #\Nul
                             (the simple-string
                                  (ppcre:regex-replace
                                    #.(format nil "~C " #\Nul) line "")))))
+               ;; Skip empty line.
                (unless (every (lambda (char) (char= #\Space char)) line)
                  (list line)))))
       (declare
@@ -608,11 +632,13 @@
         count-indent))
 
 (defun count-indent (string)
+  "Count indent speces."
   (loop :for char :across string
         :while (char= #\Space char)
         :count char))
 
 (defun alignment (list)
+  "Align indent especially for comment."
   (labels ((rec (list &optional acc)
              (if (endp list)
                  acc
@@ -629,7 +655,9 @@
                     (string
                      (make-string (+ indent comment-length)
                                   :initial-element #\Space)))
-               (declare (optimize (speed 1))) ; due to not simple-base-string.
+               ;; due to not simple-base-string.
+               #+sbcl
+               (declare (sb-ext:muffle-conditions sb-ext:compiler-note))
                (replace string comment :start1 indent :start2 start2)
                string)))
     (declare
@@ -657,6 +685,7 @@
         print-as-code))
 
 (defun print-as-code (exp &optional stream)
+  "Print EXP as lisp source code to STREAM."
   (let ((*standard-output* (or stream *standard-output*)) (*print-circle*))
     (if (typep exp '(or block-comment string))
         (tagbody (prin1 exp))
@@ -712,6 +741,7 @@
 ;;;; DEBUG-PRINTER
 
 (defun debug-printer (component)
+  "Print formatted lisp source code of the COMPONENT."
   (let ((package *package*))
     (unwind-protect
         (with-open-file (input (asdf:component-pathname component))
