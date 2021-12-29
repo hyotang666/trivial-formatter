@@ -1318,3 +1318,24 @@
                  :TEST-FUNCTION (LAMBDA (X) (TYPEP C 'CELL-ERROR))))
   :BODY)" (let ((*print-pretty* t))
             (prin1-to-string '(lambda () :return))))
+(requirements-about IMPLEMENTATION-DEPENDENT-CONDITION :doc-type function)
+
+;;;; Description:
+#+(or ecl allegro cmucl abcl) ; as guard.
+#?(subtypep (trivial-formatter::implementation-dependent-condition) 'package-error)
+=> NIL
+
+#+syntax (IMPLEMENTATION-DEPENDENT-CONDITION) ; => result
+
+;;;; Arguments and Values:
+
+; result := 
+
+;;;; Affected By:
+
+;;;; Side-Effects:
+
+;;;; Notes:
+
+;;;; Exceptional-Situations:
+

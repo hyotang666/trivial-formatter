@@ -242,8 +242,49 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
                 (every #'char-equal (package-name (symbol-package thing))
                        notation))))))
 
+(eval-when (:compile-toplevel :load-toplevel)
+  ;; This is used read-time evaluation so eval-when is needed.
+  (defun implementation-dependent-condition ()
+    ;; Implementation dependent condition may change in the future.
+    ;; We choose to use dynamic value rather than static symbol.
+    (loop :for i :of-type fixnum :upfrom 1
+          :do (handler-case
+                  (values (read-from-string (format nil "~@R:symbol" i)))
+                (condition (c)
+                  (return (type-of c)))))))
+
+(defun read-from-notation (notation)
+  (handler-case (values (read-from-string notation))
+    #+ecl
+    (#.(implementation-dependent-condition) (c)
+      (if (search "There is no package with the name" (princ-to-string c))
+          (make-broken-symbol notation)
+          (error c)))
+    #+allegro
+    (#.(implementation-dependent-condition) (c)
+      (if (search "Package " (princ-to-string c))
+          (make-broken-symbol notation)
+          (error c)))
+    #+cmucl
+    (#.(implementation-dependent-condition) ()
+      (make-broken-symbol notation))
+    #+abcl
+    (#.(implementation-dependent-condition) (c)
+      (if (search "can't be found." (princ-to-string c) :from-end t)
+          (make-broken-symbol notation)
+          (error c)))
+    ;; The default.
+    (package-error ()
+      (make-broken-symbol notation))
+    (:no-error (value)
+      (unless (valid-value-p value notation)
+        (mark-it value notation))
+      value)))
+
 (defun %read-as-code
        (*standard-input* &optional (eof-error-p t) eof-value recursive-p)
+  ;; The body of READ-AS-CODE.
+  ;; For efficiency, strip away the environment achieving part.
   (handler-case (peek-char t)
     (end-of-file (c)
       (if eof-error-p
@@ -261,33 +302,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
               (setq notation (subseq notation 1)))
             (if (every (lambda (c) (char= #\. c)) notation)
                 (make-dot :notation notation)
-                (handler-case (values (read-from-string notation))
-                  #+ecl
-                  (error (c)
-                    (if (search "There is no package with the name"
-                                (princ-to-string c))
-                        (make-broken-symbol notation)
-                        (error c)))
-                  #+allegro
-                  (reader-error (c)
-                    (if (search "Package " (princ-to-string c))
-                        (make-broken-symbol notation)
-                        (error c)))
-                  #+cmucl
-                  (lisp::reader-package-error ()
-                    (make-broken-symbol notation))
-                  #+abcl
-                  (reader-error (c)
-                    (if (search "can't be found." (princ-to-string c)
-                                :from-end t)
-                        (make-broken-symbol notation)
-                        (error c)))
-                  (package-error ()
-                    (make-broken-symbol notation))
-                  (:no-error (value)
-                    (unless (valid-value-p value notation)
-                      (mark-it value notation))
-                    value))))))))
+                (read-from-notation notation)))))))
 
 (declaim
  (ftype (function (&optional (or null stream) boolean t boolean)
