@@ -204,7 +204,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
   ;; In order to know function/macro definitions of the dependencies.
   ;; FIXME: To load only dependencies.
   ;; ISSUE: How about package infered systems?
-  ;; FIXME: 2nd slot profile report, especially consing.
+  ;; FIXME: 2nd slow profile report, especially consing.
   ;; Can we pooling the objects?
   (asdf:load-system system)
   (load-external-formatters)
@@ -359,6 +359,8 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
 
 (defun read-as-code
        (&optional stream (eof-error-p t) (eof-value nil) (recursive-p nil))
+  ;; FIXME: 3rd slow profile report.
+  ;; Cas we pool readtable?
   "Same with CL:READ but return intermediate S-Expression as lisp source code."
   #+abcl
   (check-type eof-error-p boolean)
@@ -572,7 +574,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
    (:dispatch-macro-char #\# #\R '|radix-reader|)))
 
 (defun init-table ()
-  ;; FIXME: 1st slot profile report.
+  ;; FIXME: 1st slow profile report.
   ;; Can we pooling the pprint-dispatch?
   (let ((*print-pprint-dispatch* (copy-pprint-dispatch)))
     (set-pprint-dispatch '(eql #\Space) (formatter "#\\~:C"))
