@@ -56,18 +56,66 @@
       ;; As penalty. May be increased in the future.
       (sleep 1))))
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  ;; Compiler claims as undefined variable unless this eval-when.
+  (unless (boundp '+last-updates+)
+    (defconstant +last-updates+
+      (merge-pathnames ".last-updates"
+                       (asdf:system-source-directory
+                         (asdf:find-system :trivial-formatter))))))
+
+(defvar *last-updates* nil)
+
+(defun save-last-updates-table (&optional (*last-updates* *last-updates*))
+  (cl-store:store *last-updates* +last-updates+))
+
+(defun load-last-updates-table (&optional (path +last-updates+))
+  (cl-store:restore path))
+
+(defmacro with-updates-last-updates ((var <data-file-path>) &body body)
+  `(let ((,var
+          (or *last-updates*
+              (setq *last-updates*
+                      (load-last-updates-table ,<data-file-path>)))))
+     (unwind-protect (progn ,@body) (save-last-updates-table ,var))))
+
+(defun should-load-p
+       (external-formatter &optional (*last-updates* *last-updates*))
+  (let ((last-update-cache (gethash external-formatter *last-updates*))
+        last-update)
+    (cond ;; Does not exists in cache table.
+          ((not last-update-cache)
+           (setf (gethash external-formatter *last-updates*)
+                   (or (uiop:safe-file-write-date external-formatter)
+                       (error "Missing external-formatter ~S."
+                              external-formatter)))
+           t)
+          ;; External-formatter is updated.
+          ((uiop:timestamp< last-update-cache
+                            (or (setq last-update
+                                        (uiop:safe-file-write-date
+                                          external-formatter))
+                                (error "Missing external-formatter ~S."
+                                       external-formatter)))
+           (setf (gethash external-formatter *last-updates*) last-update)
+           t)
+          ;; External-formatter is newest.
+          (t nil))))
+
 (defun load-external-formatters ()
   "Load all external formatters."
   ;; FIXME: Should we compile it?
-  ;;      : Should we check file hash or timestamp to skip?
+  ;;      : [DONE!] Should we check file hash or timestamp to skip?
   ;;      : Should we bind *load-verbose* and/or *load-print*?
   ;;      : Should we search formatters.lisp recursively?
-  ;; FIXME: 3rd slow profile report.
-  (loop :for directory :in *external-formatters-directories*
-        :for pathname := (merge-pathnames "formatters.lisp" directory)
-        :when (probe-file pathname)
-          :do (check-deprecated pathname)
-              (load pathname)))
+  ;; FIXME: <del>3rd</del>18st slow profile report.
+  (with-updates-last-updates (table +last-updates+)
+    (loop :for directory :in *external-formatters-directories*
+          :for pathname := (merge-pathnames "formatters.lisp" directory)
+          :when (probe-file pathname)
+            :do (check-deprecated pathname)
+                (when (should-load-p pathname table)
+                  (load pathname)))))
 
 ;;;; DEFORMTTER
 

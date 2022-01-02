@@ -2,7 +2,7 @@
 (in-package :asdf)
 (defsystem "trivial-formatter"
   :version
-  "10.7.0"
+  "10.8.0"
   :description "Code formatter for common lisp."
   :license "MIT"
   :author "SATO Shinichi"
@@ -16,6 +16,7 @@
    "named-readtables"   ; Readtable manager.
    "cl-ppcre"           ; Regular expression.
    "asdf"               ; System builder.
+   "cl-store"           ; Serializer.
    )
   :pathname
   "src/"
