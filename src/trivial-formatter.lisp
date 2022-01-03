@@ -69,6 +69,11 @@
 (defun save-last-updates-table (&optional (*last-updates* *last-updates*))
   (cl-store:store *last-updates* +last-updates+))
 
+(eval-when (:load-toplevel)
+  ;; Initialize .last-updates table file.
+  (unless (probe-file +last-updates+)
+    (save-last-updates-table (make-hash-table :test #'equal))))
+
 (defun load-last-updates-table (&optional (path +last-updates+))
   (cl-store:restore path))
 
