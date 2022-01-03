@@ -80,6 +80,14 @@
           :do (load external-formatter))
     table))
 
+(defun time-last-updated (external-formatter)
+  ;; As abstract barrier.
+  (gethash external-formatter *last-updates*))
+
+(defun (setf time-last-updated) (time external-formatter)
+  ;; As abstract barrier.
+  (setf (gethash external-formatter *last-updates*) time))
+
 (defmacro with-updates-last-updates ((var <data-file-path>) &body body)
   `(let ((,var
           (or *last-updates*
@@ -89,26 +97,22 @@
 
 (defun should-load-p
        (external-formatter &optional (*last-updates* *last-updates*))
-  (let ((last-update-cache (gethash external-formatter *last-updates*))
-        last-update)
-    (cond ;; Does not exists in cache table.
-          ((not last-update-cache)
-           (setf (gethash external-formatter *last-updates*)
-                   (or (uiop:safe-file-write-date external-formatter)
-                       (error "Missing external-formatter ~S."
-                              external-formatter)))
-           t)
-          ;; External-formatter is updated.
-          ((uiop:timestamp< last-update-cache
-                            (or (setq last-update
-                                        (uiop:safe-file-write-date
-                                          external-formatter))
-                                (error "Missing external-formatter ~S."
-                                       external-formatter)))
-           (setf (gethash external-formatter *last-updates*) last-update)
-           t)
-          ;; External-formatter is newest.
-          (t nil))))
+  (let ((last-update-cache (time-last-updated external-formatter)) last-update)
+    (flet ((time-file-wrote (external-formatter)
+             (uiop:safe-file-write-date (truename external-formatter))))
+      (cond ;; Does not exists in cache table.
+            ((not last-update-cache)
+             (setf (time-last-updated external-formatter)
+                     (time-file-wrote external-formatter))
+             t)
+            ;; External-formatter is updated.
+            ((uiop:timestamp< last-update-cache
+                              (setq last-update
+                                      (time-file-wrote external-formatter)))
+             (setf (time-last-updated external-formatter) last-update)
+             t)
+            ;; External-formatter is newest.
+            (t nil)))))
 
 (defun load-external-formatters ()
   "Load all external formatters."
