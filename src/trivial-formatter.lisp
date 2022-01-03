@@ -64,7 +64,9 @@
                        (asdf:system-source-directory
                          (asdf:find-system :trivial-formatter))))))
 
-(defvar *last-updates* nil)
+(defvar *last-updates*
+  nil
+  "Hash-table of { pathname:finxum } as external-formatter file path: last update timestamp.")
 
 (defun save-last-updates-table (&optional (*last-updates* *last-updates*))
   (cl-store:store *last-updates* +last-updates+))
