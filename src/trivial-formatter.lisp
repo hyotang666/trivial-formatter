@@ -75,7 +75,10 @@
     (save-last-updates-table (make-hash-table :test #'equal))))
 
 (defun load-last-updates-table (&optional (path +last-updates+))
-  (cl-store:restore path))
+  (let ((table (cl-store:restore path)))
+    (loop :for external-formatter :being :each :hash-key :of table
+          :do (load external-formatter))
+    table))
 
 (defmacro with-updates-last-updates ((var <data-file-path>) &body body)
   `(let ((,var
