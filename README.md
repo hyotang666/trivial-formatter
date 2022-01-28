@@ -203,6 +203,26 @@ ABCL is not supported due to its issues.
 Related issues are [this](https://github.com/armedbear/abcl/issues/406).
 And [this](https://github.com/armedbear/abcl/issues/408). (Already fixed but not released yet.)
 
+Trivial formatter formats double coloned keyword symbol to single coloned keyword symbol as canonicalization.
+
+[CLHS says][valid patterns for tokens]
+
+> ::aaaaa            undefined     
+
+Many implementations canonicalize it, but [abcl] does not canonicalize.
+
+```lisp
+#+(or sbcl ccl ecl clisp cmucl acl)
+* ::double-coloned
+:DOUBLE-COLONED
+
+#+abcl
+* ::double-coloned
+:|:DOUBLE-COLONED|
+```
+
+If you depend on this behavior, trivial-formatter does not fit you.
+
 #### Reader.
 When the reader macro conflicts, such reader macros are ignored silently.
 You can add new reader macros, but can not modify already existing reader macros.
@@ -222,3 +242,8 @@ To load trivial-formatter to running lisp environment, evaluate below in the REP
 ```lisp
 * (ql:quickload :trivial-formatter)
 ```
+
+<!-- Links -->
+
+[valid patterns for tokens]:http://www.lispworks.com/documentation/HyperSpec/Body/02_ce.htm
+[abcl]:https://github.com/armedbear/abcl
