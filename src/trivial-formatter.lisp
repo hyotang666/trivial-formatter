@@ -116,9 +116,14 @@
             ;; External-formatter is newest.
             (t nil)))))
 
+(defclass external-formatter (asdf:cl-source-file) ())
+
+(defmethod asdf:input-files ((o asdf:compile-op) (c external-formatter))
+  (list (asdf:component-pathname c)))
+
 (defun load-external-formatters ()
   "Load all external formatters."
-  ;; FIXME: Should we compile it?
+  ;; FIXME: [DONE!] Should we compile it?
   ;;      : [DONE!] Should we check file hash or timestamp to skip?
   ;;      : Should we bind *load-verbose* and/or *load-print*?
   ;;      : Should we search formatters.lisp recursively?
@@ -129,7 +134,17 @@
           :when (probe-file pathname)
             :do (check-deprecated pathname)
                 (when (should-load-p pathname table)
-                  (load pathname)))))
+                  (let ((external-formatter
+                         (make-instance 'external-formatter :name "dummy")))
+                    (setf (slot-value external-formatter
+                                      'asdf::absolute-pathname)
+                            pathname)
+                    (asdf::perform-lisp-compilation
+                      (asdf:make-operation 'asdf:compile-op)
+                      external-formatter)
+                    (asdf::perform-lisp-load-fasl
+                      (asdf:make-operation 'asdf:load-op)
+                      external-formatter))))))
 
 ;;;; DEFORMTTER
 

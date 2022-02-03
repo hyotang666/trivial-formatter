@@ -2,7 +2,7 @@
 (in-package :asdf)
 (defsystem "trivial-formatter"
   :version
-  "10.9.1"
+  "10.10.0"
   :description "Code formatter for common lisp."
   :license "MIT"
   :author "SATO Shinichi"
@@ -15,7 +15,7 @@
    "read-as-string"     ; Read S-Expression as string.
    "named-readtables"   ; Readtable manager.
    "cl-ppcre"           ; Regular expression.
-   "asdf"               ; System builder.
+   "asdf"               ; System builder & compile/load external-formatter.
    "cl-store"           ; Serializer.
    )
   :pathname
