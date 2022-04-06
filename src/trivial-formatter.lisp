@@ -300,6 +300,21 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
     (mark-it symbol notation)))
 
 (declaim
+ (ftype (function (character simple-string)
+         (values (or boolean (mod #.array-total-size-limit)) &optional))
+        index-of))
+
+(defun index-of (char string)
+  "Almost same cl:position but ignore escaped one."
+  (do ((index 0 (1+ index)))
+      ((not (array-in-bounds-p string index)) nil)
+    (declare (type (mod #.array-total-size-limit) index))
+    (let ((c (char string index)))
+      (cond ((char= #\\ c) (incf index))
+            ((char= char c) (return index))
+            (t #|Do nothing, next loop.|#)))))
+
+(declaim
  (ftype (function (t simple-string) (values boolean &optional)) valid-value-p))
 
 (defun valid-value-p (thing notation)
@@ -311,8 +326,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
            ;; If programmer specify :: explicity, there may a reason.
            ;; We should keep it.
            (not (search "::" notation))
-           (or (not (find #\: notation)) ; Please do not use #\: as package or
-                                         ; symbol name!
+           (or (not (index-of #\: notation))
                (locally ; due to not known base-char
                 #+sbcl
                 (declare (sb-ext:muffle-conditions sb-ext:compiler-note))
@@ -938,12 +952,11 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
                                (sb-ext:muffle-conditions sb-ext:compiler-note))
                               (char-downcase char))
                              stream))
-                 (write-string default-style stream :start
-                               ;; Please do not ever use collon as package name!
-                               (or (position #\: default-style)
-                                   (error
-                                     "Internal logical error: Missing colon in ~S."
-                                     default-style))))))))))
+                 (write-string default-style stream
+                               :start (or (index-of #\: default-style)
+                                          (error
+                                            "Internal logical error: Missing colon in ~S."
+                                            default-style))))))))))
 
 (defun pprint-handler-case (stream exp &rest noise)
   (declare (ignore noise))
