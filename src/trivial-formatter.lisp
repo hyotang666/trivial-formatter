@@ -1119,18 +1119,18 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
   (pprint-logical-block (stream exp :prefix "(" :suffix ")")
     (pprint-exit-if-list-exhausted)
     (multiple-value-bind (pre post)
-        (split-keywords exp)
-      (funcall (formatter "~W~1I") stream (car pre))
-      (when (or (cdr pre) post)
+        (split-keywords (cdr exp))
+      (funcall (formatter "~W~1I") stream (car exp))
+      (when (or pre post)
         (if colon?
             (funcall (formatter " ~:@_") stream)
             (funcall (formatter " ~:_") stream))
-        (funcall (formatter "~@[~:I~{~W~^ ~:_~}~]") stream (cdr pre)))
+        (funcall (formatter "~@[~:I~{~W~^ ~:_~}~]") stream pre))
       (when post
         (when at?
           (funcall (formatter "~1I") stream))
         (funcall (formatter "~:[~:_~:I~; ~_~]~{~^~W ~@_~W~^ ~_~}") stream
-                 (cdr pre) post)))))
+                 pre post)))))
 
 (defun pprint-list (stream exp)
   (setf stream (or stream *standard-output*))
