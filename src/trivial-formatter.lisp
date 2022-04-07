@@ -91,11 +91,15 @@
   (setf (gethash external-formatter *last-updates*) time))
 
 (defmacro with-updates-last-updates ((var <data-file-path>) &body body)
-  `(let ((,var
-          (or *last-updates*
-              (setq *last-updates*
-                      (load-last-updates-table ,<data-file-path>)))))
-     (unwind-protect (progn ,@body) (save-last-updates-table ,var))))
+  (let ((?toplevelp (gensym "TOPLEVELP")))
+    `(let* ((,?toplevelp)
+            (,var
+             (or *last-updates*
+                 (setq *last-updates*
+                         (load-last-updates-table ,<data-file-path>)
+                       ,?toplevelp t))))
+       (unwind-protect (progn ,@body)
+         (and ,?toplevelp (save-last-updates-table ,var))))))
 
 (defun should-load-p
        (external-formatter &optional (*last-updates* *last-updates*))
