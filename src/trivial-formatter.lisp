@@ -304,13 +304,14 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
     (mark-it symbol notation)))
 
 (declaim
- (ftype (function (character simple-string)
+ (ftype (function
+         (character simple-string &key (:start (mod #.array-total-size-limit)))
          (values (or boolean (mod #.array-total-size-limit)) &optional))
         index-of))
 
-(defun index-of (char string)
+(defun index-of (char string &key (start 0))
   "Almost same cl:position but ignore escaped one."
-  (do ((index 0 (1+ index))
+  (do ((index start (1+ index))
        (length (length string)))
       ((not (< index length)) nil)
     (declare (type (mod #.array-total-size-limit) index))
@@ -682,13 +683,8 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
 
 (defun delimited-position (delimiter string &key (start 0))
   "Position of the next DELIMITER. Unlike CL:POSITION, skip escaped one."
-  (do ((index start (1+ index)))
-      ((not (array-in-bounds-p string index))
-       (error "Missing delimiter ~S in ~S" delimiter string))
-    (declare (type (mod #.array-total-size-limit) index))
-    (let ((char (aref string index)))
-      (cond ((char= #\\ char) (incf index))
-            ((char= delimiter char) (return index))))))
+  (or (index-of delimiter string :start start)
+      (error "Missing delimiter ~S in ~S" delimiter string)))
 
 (eval-when (:compile-toplevel :load-toplevel)
   (define-symbol-macro can-declare-fixnum
