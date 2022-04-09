@@ -344,10 +344,19 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
     ;; Implementation dependent condition may change in the future.
     ;; We choose to use dynamic value rather than static symbol.
     (loop :for i :of-type fixnum :upfrom 1
-          :do (handler-case
-                  (values (read-from-string (format nil "~@R:symbol" i)))
-                (condition (c)
-                  (return (type-of c)))))))
+          :for package-name = (format nil "~@R" i)
+          :unless (find-package package-name)
+            :return (handler-case
+                        (read-from-string (format nil "~@R:symbol" i))
+                      (condition (c)
+                        (let ((type (type-of c)))
+                          (when (subtypep type 'package-error)
+                            (warn "~S should be fixed to use default clause."
+                                  'read-from-notation))
+                          type))
+                      (:no-error (&rest results)
+                        (error "Internal error: Must never reached here. ~S"
+                               results))))))
 
 (defun read-from-notation (notation)
   (handler-case (values (read-from-string notation))
