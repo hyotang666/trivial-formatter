@@ -798,13 +798,21 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
 
 ;;;; PRINT-AS-CODE
 
+(deftype stream-designator () '(or (eql t) null stream))
+
+(defun output-stream (stream-designator)
+  (etypecase stream-designator
+    (null *standard-output*)
+    ((eql t) *terminal-io*)
+    (stream stream-designator)))
+
 (declaim
- (ftype (function (t &optional (or null stream)) (values null &optional))
+ (ftype (function (t &optional stream-designator) (values null &optional))
         print-as-code))
 
 (defun print-as-code (exp &optional stream)
   "Print EXP as lisp source code to STREAM."
-  (let ((*standard-output* (or stream *standard-output*)) (*print-circle*))
+  (let ((*standard-output* (output-stream stream)) (*print-circle*))
     (if (typep exp '(or block-comment string))
         (tagbody (prin1 exp))
         (loop :for (first . rest) :of-type (simple-string . list)
@@ -901,7 +909,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
 ;;;; PRETTY PRINTERS
 
 (defun pprint-defclass (stream exp)
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (funcall
     (formatter
      #.(concatenate 'string "~:<" ; pprint-block.
@@ -914,11 +922,11 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
     stream exp))
 
 (defun pprint-ftype (stream exp)
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (funcall (formatter "~:<~W~^ ~1I~@_~:I~^~W~^ ~_~@{~W~^ ~_~}~:>") stream exp))
 
 (defun pprint-dynamic-extent (output exp)
-  (setf output (or output *standard-output*))
+  (setf output (output-stream output))
   (funcall (formatter "~:<~W~^ ~@_~@{~:<~W~^ ~@{~W~^ ~}~:>~^ ~}~:>") output
            exp))
 
@@ -970,7 +978,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
 
 (defun pprint-handler-case (stream exp &rest noise)
   (declare (ignore noise))
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (funcall
     (formatter
      #.(concatenate 'string "~:<" ; pprint-logical-block
@@ -989,7 +997,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
 
 (defun pprint-define-condition (stream exp &rest noise)
   (declare (ignore noise))
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (funcall
     (formatter
      #.(concatenate 'string "~:<" ; pprint-logical-block.
@@ -1007,7 +1015,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
 
 (defun pprint-linear-elt (stream exp &rest noise)
   (declare (ignore noise))
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (funcall (formatter "~:<~^~W~^ ~:I~@{~W~^ ~_~}~:>") stream exp))
 
 (declaim (type list *flets* *macrolets*))
@@ -1049,7 +1057,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
           (pprint-newline :fill output))))
 
 (defun pprint-flet (stream exp)
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (let ((impl-printer (coerce (pprint-dispatch exp nil) 'function))
         (*flets*
          (if (not (find (car exp) '(flet labels)))
@@ -1098,7 +1106,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
       (funcall impl-printer stream exp))))
 
 (defun pprint-cond (stream exp)
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (funcall
     (formatter
      #.(concatenate 'string "~:<" ; pprint-logical-block.
@@ -1115,7 +1123,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
     stream exp))
 
 (defun pprint-with-open-file (stream exp)
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (funcall
     (formatter
      #.(concatenate 'string "~:<" "~W~^ ~3I~@_" ; operator
@@ -1138,7 +1146,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
         (return (values (nreverse list) post)))))
 
 (defun pprint-fun-call (stream exp &optional colon? at?)
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (pprint-logical-block (stream exp :prefix "(" :suffix ")")
     (pprint-exit-if-list-exhausted)
     (multiple-value-bind (pre post)
@@ -1152,11 +1160,11 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
       (when post
         (when at?
           (funcall (formatter "~1I") stream))
-        (funcall (formatter "~:[~:_~:I~; ~_~]~{~^~W ~@_~W~^ ~_~}") stream
-                 pre post)))))
+        (funcall (formatter "~:[~:_~:I~; ~_~]~{~^~W ~@_~W~^ ~_~}") stream pre
+                 post)))))
 
 (defun pprint-list (stream exp)
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (if (and (symbolp (car exp))
            (fboundp (car exp))
            (not (special-operator-p (car exp)))
@@ -1168,12 +1176,12 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
                stream exp)))
 
 (defun pprint-when (stream exp)
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (funcall (formatter "~:<~W~^ ~3I~@_~W~^ ~1I~:@_~@{~^~W~^ ~_~}~:>") stream
            exp))
 
 (defun pprint-assert (stream exp)
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (funcall
     (formatter
      #.(concatenate 'string "~:<" ; pprint-logical-block.
@@ -1188,7 +1196,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
     stream (multiple-value-list (split-keywords exp))))
 
 (defun pprint-restart-case (stream exp)
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (funcall
     (formatter
      #.(concatenate 'string "~:<" ; pprint-logical-block.
@@ -1213,7 +1221,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
 
 (defun pprint-restart-case-clause (stream exp &rest noise)
   (declare (ignore noise))
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (if (atom exp)
       (write exp :stream stream)
       (pprint-logical-block (stream exp :prefix "(" :suffix ")")
@@ -1230,7 +1238,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
           stream (parse-restart-clause exp)))))
 
 (defun pprint-restart-bind (stream exp)
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   #+allegro
   (check-type stream stream)
   (funcall
@@ -1247,7 +1255,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
     stream exp))
 
 (defun pprint-defstruct (stream exp)
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (funcall
     (formatter
      #.(concatenate 'string "~:<" ; pprint-logical-block.
@@ -1261,7 +1269,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
     stream exp))
 
 (defun pprint-defgeneric (stream exp)
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (pprint-logical-block (stream exp :prefix "(" :suffix ")")
     ;; DEFGENERIC
     (write (pprint-pop) :stream stream)
@@ -1306,7 +1314,7 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
               (pprint-newline :linear stream))))
 
 (defun pprint-method-lambda-list (stream exp)
-  (setf stream (or stream *standard-output*))
+  (setf stream (output-stream stream))
   (pprint-logical-block (stream exp :prefix "(" :suffix ")")
     (loop :for elt := (pprint-pop)
           :if (find elt lambda-list-keywords)
