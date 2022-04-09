@@ -310,8 +310,9 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
 
 (defun index-of (char string)
   "Almost same cl:position but ignore escaped one."
-  (do ((index 0 (1+ index)))
-      ((not (array-in-bounds-p string index)) nil)
+  (do ((index 0 (1+ index))
+       (length (length string)))
+      ((not (< index length)) nil)
     (declare (type (mod #.array-total-size-limit) index))
     (let ((c (char string index)))
       (cond ((char= #\\ c) (incf index))
