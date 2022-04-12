@@ -234,11 +234,11 @@ Define formatter function."
 (defun fmt (system &optional (if-exists nil))
   "Format every source code of the SYSTEM.
 IF-EXISTS is a same value of the same parameter of CL:OPEN."
-  ;; In order to know function/macro definitions of the dependencies.
-  ;; FIXME: To load only dependencies.
-  ;; ISSUE: How about package infered systems?
   ;; FIXME: 2nd slow profile report, especially consing.
   ;; Can we pooling the objects?
+  ;;;
+  ;; In order to know function/macro definitions of the dependencies.
+  ;; Additionally, in order to ignore component order, we need to load the whole SYSTEM beforehand.
   (asdf:load-system system)
   (load-external-formatters)
   (dolist (component (component-children (asdf:find-system system)))
