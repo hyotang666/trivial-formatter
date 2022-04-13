@@ -95,9 +95,9 @@
     `(let* ((,?toplevelp)
             (,var
              (or *last-updates*
-                 (setq *last-updates*
-                         (load-last-updates-table ,<data-file-path>)
-                       ,?toplevelp t))))
+                 (setq ,?toplevelp t
+                       *last-updates*
+                         (load-last-updates-table ,<data-file-path>)))))
        (unwind-protect (progn ,@body)
          (and ,?toplevelp (save-last-updates-table ,var))))))
 
