@@ -8,6 +8,14 @@
 (in-package :trivial-formatter.spec)
 (setup :trivial-formatter)
 
+(requirements-about impl-specific-guards :doc-type nil)
+
+#+abcl
+#?(pprint-logical-block (*standard-output* nil)
+    (prin1 (streamp *standard-output*)))
+:outputs "NIL"
+,:comment "When this test is failed, fix stream-designator and output-stream."
+
 (requirements-about FMT :doc-type function)
 
 ;;;; Description:

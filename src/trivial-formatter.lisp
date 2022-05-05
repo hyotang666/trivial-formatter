@@ -798,13 +798,15 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
 
 ;;;; PRINT-AS-CODE
 
-(deftype stream-designator () '(or (eql t) null stream))
+(deftype stream-designator () '(or (eql t) null stream #+abcl xp::xp-structure))
 
 (defun output-stream (stream-designator)
   (etypecase stream-designator
     (null *standard-output*)
     ((eql t) *terminal-io*)
-    (stream stream-designator)))
+    (stream stream-designator)
+    #+abcl
+    (xp::xp-structure stream-designator)))
 
 (declaim
  (ftype (function (t &optional stream-designator) (values null &optional))
