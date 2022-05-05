@@ -157,16 +157,16 @@ When you want to set pretty-printing functions temporarily, you need to bind `*P
     (pprint-fun-call stream exp)))
 ```
 
-### Product's goal
+## Product's goal
 
-### License
+## License
 MIT
 
-### Developed with
+## Developed with
 SBCL
 
-### Tested with
-* SBCL/2.1.11
+## Tested with
+* SBCL/2.2.4
 * ECL/20.4.24
 * CMUCL/21D
 
@@ -174,9 +174,9 @@ SBCL
 * Allegro/10.1 ; Failed but pprit portability issue.
 
 * CLISP/2.49 ; Failed, not supported. For details see below.
-* ABCL/1.8.0 ; Failed, not supported. For details see below.
+* ABCL/1.9.0 ; Failed, not supported. For details see below.
 
-#### Note
+### Note
 Trivial-formatter works portable at least implementations above.
 But it never means works samely.
 For example, the `IF` format is different.
@@ -191,19 +191,20 @@ SBCL prints a newline even if elements are short, but other implementations may 
 #+(or ecl ccl)
 (if a b c)
 ```
-### Known issue.
-#### CLISP
+## Known issue.
+### CLISP
 CLISP is not supported.
 [CLISP say](https://clisp.sourceforge.io/impnotes.html#clpp)
 
 > The Lisp Pretty Printer implementation is not perfect yet.
 
-#### ABCL
+### ABCL
+#### PPRINT-NEWLINE issue.
 ABCL is not supported due to its issues.
 Related issues are [this](https://github.com/armedbear/abcl/issues/406).
-And [this](https://github.com/armedbear/abcl/issues/408). (Already fixed but not released yet.)
 
-Trivial formatter formats double coloned keyword symbol to single coloned keyword symbol as canonicalization.
+#### Reading behavior for double colon keyword symbol.
+Trivial formatter formats double colon keyword symbol to single colon keyword symbol as canonicalization.
 
 [CLHS says][valid patterns for tokens]
 
@@ -223,11 +224,11 @@ Many implementations canonicalize it, but [abcl] does not canonicalize.
 
 If you depend on this behavior, trivial-formatter does not fit you.
 
-#### Reader.
+### Reader.
 When the reader macro conflicts, such reader macros are ignored silently.
 You can add new reader macros, but can not modify already existing reader macros.
 
-#### FORMAT-CONTROL
+### FORMAT-CONTROL
 Trivial-formatter can not adjust ~newline format control indentation.
 
 ## Installation
