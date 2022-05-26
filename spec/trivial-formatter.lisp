@@ -978,6 +978,14 @@
   )"
 ,:test equal
 
+#?(pprint-flet NIL
+	       '(flet ((a nil) (b nil))
+		  (+ (a) (b))))
+:outputs
+"(FLET ((A ())
+       (B ()))
+  (+ (A) (B)))"
+
 #?(pprint-flet nil
                '(macrolet ((with-check ((var form) &body body)
                              todo))
@@ -997,8 +1005,16 @@
 	       '(macrolet (works if atom)
 		  dummy))
 :outputs
-"(MACROLET (WORKS IF ATOM)
+"(MACROLET (WORKS
+           IF
+           ATOM)
   DUMMY)"
+
+#?(pprint-flet nil '(flet ((name () (when pred (+))))))
+:outputs
+"(FLET ((NAME ()
+         (WHEN PRED
+           (+)))))"
 
 (requirements-about PPRINT-DEFGENERIC :doc-type function
                     :around (let ((*print-pretty* t))

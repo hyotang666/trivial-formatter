@@ -1058,10 +1058,25 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
           (write-char #\Space output)
           (pprint-newline :fill output))))
 
+(defun pprint-flet-bind (stream exp &rest noise)
+  (declare (ignore noise))
+  (setf stream (output-stream stream))
+  (funcall
+    (formatter
+     #.(concatenate 'string "~:<" ; binds.
+                    (concatenate 'string "~@{" ; iter binds.
+                                 (concatenate 'string "~:<" ; each bind.
+                                              "~W~^ ~@_" ; fun name.
+                                              "~:<~@{~W~^ ~:_~}~:>~^ ~1I~:@_" ; lambda-list
+                                              "~@{~W~^ ~_~}" ; body.
+                                              "~:>~^ ~:@_")
+                                 "~}~^ ~_")
+                    "~:>"))
+    stream exp))
+
 (defun pprint-flet (stream exp)
   (setf stream (output-stream stream))
-  (let ((impl-printer (coerce (pprint-dispatch exp nil) 'function))
-        (*flets*
+  (let ((*flets*
          (if (not (find (car exp) '(flet labels)))
              *flets*
              (append
@@ -1078,34 +1093,47 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
         (*print-pprint-dispatch* (copy-pprint-dispatch)))
     (labels ((list-printer (stream exp &rest noise)
                (declare (ignore noise))
-               (cond
-                 ((or (null exp)
-                      (not (symbolp (car exp)))
-                      (keywordp (car exp))
-                      (special-operator-p (car exp))
-                      (macro-function (car exp)))
-                  (funcall
-                    (coerce (pprint-dispatch exp *pprint-dispatch*) 'function)
-                    stream exp))
-                 ((find (the symbol (car exp)) *flets*)
-                  (pprint-fun-call stream exp))
-                 ((let ((def
-                         (find (the symbol (car exp)) *macrolets*
-                               :test (lambda (sym def)
-                                       (when (consp def)
-                                         (eq sym (car def)))))))
-                    (when def
-                      (pprint-macro stream exp def)
-                      t)))
-                 ((eq (pprint-dispatch exp *pprint-dispatch*)
-                      (pprint-dispatch exp nil))
-                  (pprint-fun-call stream exp))
-                 (t
-                  (funcall
-                    (coerce (pprint-dispatch exp *pprint-dispatch*) 'function)
-                    stream exp)))))
+               (cond ;; Not function call form.
+                     ((or (null exp) ; NIL
+                          (not (symbolp (car exp))) ; data, binds, or lambda
+                                                    ; call.
+                          (keywordp (car exp)) ; clause.
+                          (special-operator-p (car exp))
+                          (macro-function (car exp)))
+                      (funcall
+                        (coerce (pprint-dispatch exp *pprint-dispatch*)
+                                'function)
+                        stream exp))
+                     ;; Local function callings.
+                     ((find (the symbol (car exp)) *flets*)
+                      (pprint-fun-call stream exp))
+                     ;; Local macros.
+                     ((let ((def
+                             (find (the symbol (car exp)) *macrolets*
+                                   :test (lambda (sym def)
+                                           (when (consp def)
+                                             (eq sym (car def)))))))
+                        (when def
+                          (pprint-macro stream exp def)
+                          t)))
+                     ;; Impl defaults.
+                     ((eq (pprint-dispatch exp *pprint-dispatch*)
+                          (pprint-dispatch exp nil))
+                      (pprint-fun-call stream exp))
+                     (t
+                      (funcall
+                        (coerce (pprint-dispatch exp *pprint-dispatch*)
+                                'function)
+                        stream exp)))))
       (set-pprint-dispatch 'list #'list-printer)
-      (funcall impl-printer stream exp))))
+      (funcall
+        (formatter
+         #.(concatenate 'string "~:<" ; pprint-logical-block.
+                        "~W~^~1I ~@_" ; operator.
+                        "~/trivial-formatter:pprint-flet-bind/~^ ~:@_"
+                        "~@{~W~^ ~_~}" ; body of flet.
+                        "~:>"))
+        stream exp))))
 
 (defun pprint-cond (stream exp)
   (setf stream (output-stream stream))
