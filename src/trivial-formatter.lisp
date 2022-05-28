@@ -808,6 +808,9 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
     #+abcl
     (xp::xp-structure stream-designator)))
 
+(defun single-semicoloned-line-comment-line-p (line)
+  (ppcre:scan "^ *(; |;$)" line))
+
 (declaim
  (ftype (function (t &optional stream-designator) (values null &optional))
         print-as-code))
@@ -819,8 +822,10 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
         (tagbody (prin1 exp))
         (loop :for (first . rest) :of-type (simple-string . list)
                    :on (alignment (split-to-lines (string-as-code exp)))
-              :if (and rest (ppcre:scan "^ *; " (the simple-string (car rest))))
-                :if (ppcre:scan "^ *; " first)
+              :if (and rest
+                       (single-semicoloned-line-comment-line-p
+                         (the simple-string (car rest))))
+                :if (single-semicoloned-line-comment-line-p first)
                   ;; Both are single semicoloned line comment.
                   ;; Integrate it as one for pritty printings.
                   :do (setf (car rest) (format nil "~A ~A" first (car rest)))
@@ -831,15 +836,12 @@ IF-EXISTS is a same value of the same parameter of CL:OPEN."
                       (rplaca rest
                               (string-left-trim " "
                                                 (the simple-string (car rest))))
-              :else :if (ppcre:scan "^ *; " first)
+              :else :if (single-semicoloned-line-comment-line-p first)
                 ;; Next is not single semicoloned line comment but FIRST.
                 ;; Comment should be printed.
-                :do (funcall (formatter "~<; ~@;~@{~A~^ ~:_~}~:>~:[~;~%~]")
+                :do (funcall (formatter "~<;~@;~@{~^ ~A~^ ~:_~}~:>~:[~;~%~]")
                              *standard-output*
-                             (delete ""
-                                     (the list
-                                          (uiop:split-string first
-                                                             :separator "; "))
+                             (delete "" (the list (ppcre:split "; ?" first))
                                      :test #'equal)
                              rest) ; To avoid unneeded newline.
               ;; Both are not single semicoloned line comment.

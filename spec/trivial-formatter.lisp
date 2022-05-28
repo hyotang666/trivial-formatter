@@ -196,6 +196,13 @@
 :outputs "#( ; comment
   )"
 
+#?(with-input-from-string (s (format nil "#(a;~%b;~%c;~%)"))
+    (print-as-code (read-as-code s)))
+:outputs "#(a ;
+  b ;
+  c ;
+  )"
+
 ;;;; Exceptional-Situations:
 
 (requirements-about PRINT-AS-CODE :doc-type function)
